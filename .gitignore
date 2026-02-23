@@ -1,0 +1,21 @@
+# Personal files - not for GitHub
+Books/
+Portfolio/
+AWS/
+*.pdf
+Form13.pdf
+
+# Reader UIs (generated, use local server)
+index.html
+*/index.html
+
+# IDE and build artifacts
+.idea/
+*.iml
+*.class
+target/
+out/
+
+# OS generated
+.DS_Store
+Thumbs.db

@@ -1,547 +1,370 @@
-# Sliding Window
+# Sliding Window — Interview Execution Playbook
 
-> Maintain a "window" over a sequence and efficiently update it as you slide—avoiding redundant recomputation by leveraging what changed at the boundaries.
+> **Pattern Mastery Level:** The second most common pattern in FAANG interviews (~20% of problems). If Two Pointers is about pairs, Sliding Window is about subarrays/substrings. Master both and you cover ~35% of coding interviews.
 
-## What Is This Pattern?
+---
 
-The sliding window pattern operates on arrays or strings by maintaining a **window** (a contiguous subrange) with two pointers—usually `left` and `right`. As you advance `right` to expand the window, you may shrink it from `left` to satisfy constraints or optimize the result. The key insight: instead of recomputing the window's properties from scratch each time, you **incrementally update** based on what entered (right boundary) and what left (left boundary).
+## 1. Pattern Recognition Signals
 
-Think of it as a physical pane sliding along a track. You don't rebuild the entire pane when it moves—you only account for the new element that came in and the old one that left. This incremental update is what gives sliding window its O(n) efficiency where brute-force would be O(n²) or worse.
-
-There are two main flavors: **fixed-size** windows (e.g., "max sum of every k consecutive elements") where the window width is constant, and **variable-size** windows (e.g., "longest subarray with sum ≤ x") where you grow and shrink the window to meet a condition. Both share the same philosophy: avoid redundant work by tracking only what changes.
-
-## When to Use This Pattern
-
-- The problem asks for a **contiguous subarray** or **substring** (not subsequence).
-- You need to compute something over **every** or **optimal** window of elements.
-- There's a **constraint** on the window (size, sum, distinct count, character frequencies).
-- A brute-force approach would iterate over all O(n²) subarrays—sliding window can often reduce to O(n).
-- The problem involves **"at most k"**, **"exactly k"**, or **"minimum/maximum length satisfying X"**.
-- You see phrases like "substring with", "subarray sum", "longest/shortest contiguous", "without repeating characters".
-
-## How to Identify This Pattern
+### When to Use Sliding Window
 
 ```
-Is the input a 1D array or string?
-    NO → Consider other patterns (graph, tree, 2D DP)
-    YES ↓
-
-Are we looking for a contiguous subarray/substring?
-    NO → (subsequence → different pattern)
-    YES ↓
-
-Do we need to consider many/all windows of a certain type?
-    NO → Maybe simple scan or greedy
-    YES ↓
-
-Can we update the answer incrementally when the window shifts?
-    (add right element, remove left element, update aggregate)
-    YES → SLIDING WINDOW
+INSTANT TRIGGERS (say "sliding window" within 5 seconds):
+  ✓ "Longest/shortest CONTIGUOUS subarray/substring satisfying X"
+  ✓ "Maximum sum of K consecutive elements"
+  ✓ "Subarray/substring with at most K distinct characters"
+  ✓ "Minimum window containing all characters of T"
+  ✓ "Count of subarrays with exactly K something"
+  ✓ Any constraint on a CONTIGUOUS range that can be maintained incrementally
 ```
 
-## Core Template (Pseudocode)
-
-### Fixed-Size Window
+### Keywords in Problem Statements
 
 ```
-FUNCTION solve(arr, k):
-    windowSum = sum of first k elements
-    result = windowSum  // or appropriate initial value
-
-    FOR right FROM k TO n-1:
-        windowSum += arr[right] - arr[right - k]  // add new, drop old
-        result = UPDATE(result, windowSum)
-
-    RETURN result
+DIRECT SIGNALS:              INDIRECT SIGNALS:
+  "contiguous subarray"        "without repeating"
+  "substring"                  "at most K"
+  "consecutive elements"       "exactly K" (= atMost(K) - atMost(K-1))
+  "window of size K"           "minimum length"
+  "longest/shortest"           "maximum sum"
 ```
 
-### Variable-Size Window
+### When NOT to Use
 
 ```
-FUNCTION solve(arr):
-    left = 0
-    result = INITIAL_VALUE  // 0, INF, or -INF depending on problem
-
-    FOR right FROM 0 TO n-1:
-        ADD arr[right] to window (update frequency/map/sum)
-        WHILE window violates constraint:
-            REMOVE arr[left] from window
-            left++
-        result = UPDATE(result, window)  // candidate is now valid
-
-    RETURN result
+✗ SUBSEQUENCE (not contiguous) → use DP or two pointers
+✗ Need ALL subarrays enumerated → brute force O(n²) may be unavoidable
+✗ Elements can be skipped/reordered → not a sliding window
+✗ Condition involves non-adjacent elements → different pattern
+✗ Array is not 1D → may need 2D DP
 ```
 
-## Core Template (Java)
+### Two Flavors — Fixed vs Variable
 
-### Fixed-Size Window
+```
+FIXED-SIZE WINDOW:
+  "Maximum average of any subarray of size k"
+  "Find all anagrams of pattern in string"
+  Window size is GIVEN. Slide by adding right, removing left.
+
+VARIABLE-SIZE WINDOW:
+  "Longest substring without repeating characters"
+  "Minimum window substring"
+  Window size changes. EXPAND right to explore, SHRINK left to satisfy constraint.
+```
+
+---
+
+## 2. Thinking Framework
+
+### The 60-Second Decision Process
+
+```
+Step 1: "Is this about a CONTIGUOUS subarray or substring?"
+  YES → sliding window candidate
+  NO  → try DP, hashing, or other patterns
+
+Step 2: "Is the window size fixed or variable?"
+  FIXED  → simpler: add right element, remove left element, slide
+  VARIABLE → expand right to explore, shrink left when constraint violated
+
+Step 3: "What do I track inside the window?"
+  Sum problems: running sum (add right, subtract left)
+  Character problems: frequency map (increment right, decrement left)
+  Distinct count: count of non-zero entries in frequency map
+  Max/min in window: monotonic deque (separate pattern, covered in 07)
+
+Step 4: "When do I shrink the window?"
+  FIXED: always (maintain size k)
+  VARIABLE: when the window VIOLATES the constraint
+    "at most K distinct" → shrink when distinct > K
+    "sum ≤ target" → shrink when sum > target
+
+Step 5: "When do I record the answer?"
+  FIXED: after every slide (window always valid)
+  VARIABLE: every time the window is VALID (after potential shrink)
+    For "longest": update answer when window is valid
+    For "shortest": update answer when constraint is first satisfied
+```
+
+### The Core Insight
+
+```
+SLIDING WINDOW WORKS BECAUSE:
+  Adding an element to the right ONLY expands the window.
+  Removing an element from the left ONLY shrinks it.
+  The window's properties can be UPDATED incrementally (O(1) per step)
+  instead of RECOMPUTED from scratch (O(k) per step).
+  
+  Total: n expansions + at most n contractions = O(n) total work.
+  Each element enters the window once (right pointer) and leaves once (left pointer).
+```
+
+---
+
+## 3. Java Templates (Production-Quality)
+
+### Template 1: Fixed-Size Window
 
 ```java
-public int fixedWindow(int[] nums, int k) {
-    int windowSum = 0;
-    for (int i = 0; i < k; i++) {
-        windowSum += nums[i];
+// USE FOR: Max sum of k elements, find anagrams, averages
+// TIME: O(n) | SPACE: O(1) or O(k)
+public int fixedWindow(int[] arr, int k) {
+    int windowSum = 0, maxSum = Integer.MIN_VALUE;
+    for (int i = 0; i < arr.length; i++) {
+        windowSum += arr[i];                    // expand: add right
+        if (i >= k) windowSum -= arr[i - k];    // shrink: remove left
+        if (i >= k - 1) maxSum = Math.max(maxSum, windowSum); // record
     }
-    int result = windowSum;
-
-    for (int right = k; right < nums.length; right++) {
-        windowSum += nums[right] - nums[right - k];
-        result = Math.max(result, windowSum); // or min, depending
-    }
-    return result;
+    return maxSum;
 }
 ```
 
-### Variable-Size Window
+### Template 2: Variable-Size — Longest Valid Window
 
 ```java
-public int variableWindow(int[] nums, int target) {
-    int left = 0;
-    int sum = 0;
-    int result = Integer.MAX_VALUE; // or 0, -1, etc.
-
-    for (int right = 0; right < nums.length; right++) {
-        sum += nums[right];
-
-        while (sum >= target) {  // constraint: e.g., sum >= target
-            result = Math.min(result, right - left + 1);
-            sum -= nums[left];
+// USE FOR: Longest substring without repeating, longest subarray with sum ≤ k
+// TIME: O(n) | SPACE: O(k) for map
+public int longestWindow(String s) {
+    Map<Character, Integer> freq = new HashMap<>();
+    int left = 0, maxLen = 0;
+    for (int right = 0; right < s.length(); right++) {
+        char c = s.charAt(right);
+        freq.merge(c, 1, Integer::sum);         // expand: add right
+        
+        while (/* window is INVALID */) {       // shrink from left
+            char lc = s.charAt(left);
+            freq.merge(lc, -1, Integer::sum);
+            if (freq.get(lc) == 0) freq.remove(lc);
             left++;
         }
+        maxLen = Math.max(maxLen, right - left + 1); // window is valid → record
     }
-    return result == Integer.MAX_VALUE ? 0 : result;
+    return maxLen;
 }
 ```
 
-## Complexity Cheat Sheet
-
-| Type         | Time     | Space  | Notes                                             |
-|--------------|----------|--------|---------------------------------------------------|
-| Fixed        | O(n)     | O(1)   | Single pass, constant extra space                  |
-| Variable     | O(n)     | O(1)   | When using primitive variables only               |
-| Variable     | O(n)     | O(k)   | When using map for k distinct elements/freq       |
-| Deque-based  | O(n)     | O(k)   | Sliding window max/min with monotonic deque       |
-
-## Problems (Progressive Difficulty)
-
-### Easy (2 problems)
-
-#### Problem: [Best Time to Buy and Sell Stock](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/) (LeetCode #121)
-
-- **Intuition:** Track the minimum price seen so far; at each day, the best profit is selling today minus that minimum. This is a "one-way" sliding window where we only expand right and conceptually compare with a left-bound min.
-- **Brute Force:** Try every pair (i, j) where i < j; compute prices[j] - prices[i] and track the maximum. Time O(n²), Space O(1)
-- **Optimized Approach:** 1) Initialize minPrice = prices[0], maxProfit = 0. 2) For each price from index 1: update maxProfit = max(maxProfit, price - minPrice), then minPrice = min(minPrice, price). 3) Return maxProfit.
-- **Java Solution:**
+### Template 3: Variable-Size — Shortest Valid Window
 
 ```java
-class Solution {
-    public int maxProfit(int[] prices) {
-        if (prices == null || prices.length < 2) return 0;
-        int minPrice = prices[0];
-        int maxProfit = 0;
-        for (int i = 1; i < prices.length; i++) {
-            maxProfit = Math.max(maxProfit, prices[i] - minPrice);
-            minPrice = Math.min(minPrice, prices[i]);
+// USE FOR: Minimum window substring, shortest subarray with sum ≥ k
+// TIME: O(n) | SPACE: O(k)
+public int shortestWindow(int[] arr, int target) {
+    int left = 0, sum = 0, minLen = Integer.MAX_VALUE;
+    for (int right = 0; right < arr.length; right++) {
+        sum += arr[right];                       // expand
+        
+        while (sum >= target) {                  // window SATISFIES constraint
+            minLen = Math.min(minLen, right - left + 1); // record BEFORE shrink
+            sum -= arr[left++];                  // shrink to find shorter
         }
-        return maxProfit;
     }
+    return minLen == Integer.MAX_VALUE ? 0 : minLen;
 }
 ```
 
-- **Complexity:** Time O(n), Space O(1)
+### Template 4: Exactly K = atMost(K) - atMost(K-1)
+
+```java
+// USE FOR: Subarrays with Exactly K Distinct Integers
+// TRICK: exactly(K) = atMost(K) - atMost(K-1)
+public int subarraysWithExactlyK(int[] arr, int k) {
+    return atMostK(arr, k) - atMostK(arr, k - 1);
+}
+
+private int atMostK(int[] arr, int k) {
+    Map<Integer, Integer> freq = new HashMap<>();
+    int left = 0, count = 0;
+    for (int right = 0; right < arr.length; right++) {
+        freq.merge(arr[right], 1, Integer::sum);
+        while (freq.size() > k) {
+            freq.merge(arr[left], -1, Integer::sum);
+            if (freq.get(arr[left]) == 0) freq.remove(arr[left]);
+            left++;
+        }
+        count += right - left + 1; // all subarrays ending at right with ≤ k distinct
+    }
+    return count;
+}
+```
 
 ---
 
-#### Problem: [Maximum Average Subarray I](https://leetcode.com/problems/maximum-average-subarray-i/) (LeetCode #643)
+## 4. Edge Case Checklist
 
-- **Intuition:** Fixed-size window of k elements. Compute sum of first k, then slide by adding the next and subtracting the first; track max sum (or max average = maxSum/k).
-- **Brute Force:** For each starting index i, compute the sum of the k elements nums[i..i+k-1] from scratch; track the maximum sum. Time O(n·k), Space O(1)
-- **Optimized Approach:** 1) Sum first k elements. 2) Slide right from k to n-1: windowSum += nums[right] - nums[right-k]. 3) Track max window sum. 4) Return maxSum / k.
-- **Java Solution:**
-
-```java
-class Solution {
-    public double findMaxAverage(int[] nums, int k) {
-        int windowSum = 0;
-        for (int i = 0; i < k; i++) {
-            windowSum += nums[i];
-        }
-        int maxSum = windowSum;
-        for (int right = k; right < nums.length; right++) {
-            windowSum += nums[right] - nums[right - k];
-            maxSum = Math.max(maxSum, windowSum);
-        }
-        return (double) maxSum / k;
-    }
-}
 ```
-
-- **Complexity:** Time O(n), Space O(1)
+□ Empty string/array → return 0
+□ k > array length (fixed window) → return -1 or handle
+□ k = 0 → "at most 0 distinct" = 0 or empty window
+□ All same characters → entire string is one window
+□ All unique characters → may need to shrink to size 1
+□ Negative numbers in sum problems → can't shrink greedily! Use prefix sum instead
+□ Single character string → valid palindrome, valid window
+□ k = 1 → longest substring of same character
+□ Window becomes empty (left > right) → reset, don't go negative
+```
 
 ---
 
-### Medium (6 problems)
+## 5. Problem Progression (LeetCode)
 
-#### Problem: [Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/) (LeetCode #3)
+### Level 1: Easy — Fixed Window
 
-- **Intuition:** Variable window. Expand right, add chars to a set/map; when a repeat appears, shrink left until the duplicate is removed.
-- **Brute Force:** Check every substring for uniqueness; for each starting index, expand and add chars until a duplicate is found. Time O(n²), Space O(min(n, charset))
-- **Optimized Approach:** 1) Use a Set (or freq map) to track chars in window. 2) For each right: while s[right] is in set, remove s[left] and advance left. 3) Add s[right], update maxLen = max(maxLen, right - left + 1). 4) Return maxLen.
-- **Java Solution:**
+| # | Problem | Key Insight | Time |
+|---|---------|------------|------|
+| 643 | [Max Average Subarray I](https://leetcode.com/problems/maximum-average-subarray-i/) | Fixed window, track sum | O(n) |
+| 219 | [Contains Duplicate II](https://leetcode.com/problems/contains-duplicate-ii/) | Fixed window with HashSet | O(n) |
 
-```java
-class Solution {
-    public int lengthOfLongestSubstring(String s) {
-        if (s == null || s.isEmpty()) return 0;
-        var seen = new java.util.HashSet<Character>();
-        int left = 0;
-        int maxLen = 0;
-        for (int right = 0; right < s.length(); right++) {
-            char c = s.charAt(right);
-            while (seen.contains(c)) {
-                seen.remove(s.charAt(left++));
-            }
-            seen.add(c);
-            maxLen = Math.max(maxLen, right - left + 1);
-        }
-        return maxLen;
-    }
-}
+### Level 2: Standard Medium
+
+| # | Problem | Key Insight | Time |
+|---|---------|------------|------|
+| 3 | [Longest Substring Without Repeating](https://leetcode.com/problems/longest-substring-without-repeating-characters/) | Variable window + freq map, shrink when duplicate | O(n) |
+| 209 | [Minimum Size Subarray Sum](https://leetcode.com/problems/minimum-size-subarray-sum/) | Variable window, shrink when sum ≥ target | O(n) |
+| 424 | [Longest Repeating Character Replacement](https://leetcode.com/problems/longest-repeating-character-replacement/) | Window valid when len - maxFreq ≤ k | O(n) |
+
+### Level 3: Tricky Medium
+
+| # | Problem | Key Insight | Time |
+|---|---------|------------|------|
+| 438 | [Find All Anagrams](https://leetcode.com/problems/find-all-anagrams-in-a-string/) | Fixed window, compare freq arrays | O(n) |
+| 567 | [Permutation in String](https://leetcode.com/problems/permutation-in-string/) | Same as anagrams with boolean return | O(n) |
+| 904 | [Fruit Into Baskets](https://leetcode.com/problems/fruit-into-baskets/) | Longest subarray with ≤ 2 distinct | O(n) |
+| 992 | [Subarrays with K Distinct](https://leetcode.com/problems/subarrays-with-k-different-integers/) | exactly(K) = atMost(K) - atMost(K-1) | O(n) |
+
+### Level 4: Hard — FAANG Level
+
+| # | Problem | Key Insight | Time |
+|---|---------|------------|------|
+| 76 | [Minimum Window Substring](https://leetcode.com/problems/minimum-window-substring/) | Variable window, track "formed" vs "required" characters | O(n) |
+| 239 | [Sliding Window Maximum](https://leetcode.com/problems/sliding-window-maximum/) | Monotonic deque (decreasing) for O(1) max in window | O(n) |
+| 30 | [Substring with Concatenation](https://leetcode.com/problems/substring-with-concatenation-of-all-words/) | Fixed window with word-level hashing | O(n*m) |
+
+### Solving Order
+
 ```
-
-- **Complexity:** Time O(n), Space O(min(n, charset))
+Day 1: 643 → 3 → 209 (fixed then variable, build intuition)
+Day 2: 424 → 438 → 567 (character frequency problems)
+Day 3: 76 → 904 → 992 (hard variable window + the atMost trick)
+Day 4: 239 (monotonic deque — crossover with Pattern 07)
+Day 5: Re-solve 3, 76, 992 without notes
+```
 
 ---
 
-#### Problem: [Longest Repeating Character Replacement](https://leetcode.com/problems/longest-repeating-character-replacement/) (LeetCode #424)
+## 6. Common Mistakes & Interview Traps
 
-- **Intuition:** Variable window. We can replace at most k chars; the window is valid if (windowSize - maxFreq) ≤ k. Track freq of each char; window size minus the dominant char's count gives replacements needed.
-- **Brute Force:** Try every substring; for each, count char frequencies, compute replacements needed (windowSize - maxFreq), and keep it if ≤ k. Time O(n²·26), Space O(26)
-- **Optimized Approach:** 1) Freq map for chars in window. 2) Expand right, update freq. 3) While (right-left+1 - maxFreq) > k, shrink left and decrement freq. 4) maxLen = max(maxLen, right-left+1). Note: we don't shrink when valid—we only need the longest valid window.
-- **Java Solution:**
+### Mistake 1: Using Sliding Window with Negative Numbers
 
-```java
-class Solution {
-    public int characterReplacement(String s, int k) {
-        int[] freq = new int[26];
-        int left = 0;
-        int maxFreq = 0;
-        int maxLen = 0;
-        for (int right = 0; right < s.length(); right++) {
-            int idx = s.charAt(right) - 'A';
-            freq[idx]++;
-            maxFreq = Math.max(maxFreq, freq[idx]);
-            int windowLen = right - left + 1;
-            if (windowLen - maxFreq > k) {
-                freq[s.charAt(left) - 'A']--;
-                left++;
-            }
-            maxLen = Math.max(maxLen, right - left + 1);
-        }
-        return maxLen;
-    }
-}
+```
+WRONG: "Find shortest subarray with sum ≥ target" with negatives
+  Sliding window assumes: adding elements INCREASES sum, removing DECREASES.
+  With negatives: adding might decrease! Shrinking might increase!
+  The monotonic property BREAKS → window won't converge.
+
+CORRECT: Use prefix sum + monotonic deque for negatives.
 ```
 
-- **Complexity:** Time O(n), Space O(1)
+### Mistake 2: Shrinking Too Late or Too Early
+
+```
+LONGEST: shrink when window is INVALID → record AFTER shrinking (window is valid)
+SHORTEST: shrink when window is VALID → record BEFORE shrinking (capture smallest)
+
+Getting this wrong gives wrong answers that PASS most test cases but fail edge cases.
+```
+
+### Mistake 3: Off-by-One in Window Size
+
+```
+Window [left, right] has size (right - left + 1), NOT (right - left).
+Fixed window of size k: process when (i >= k - 1), NOT (i >= k).
+```
+
+### Mistake 4: Not Knowing the "Exactly K" Trick
+
+```
+"Count subarrays with exactly K distinct integers"
+  Can't do this with a single sliding window!
+  TRICK: exactly(K) = atMost(K) - atMost(K-1)
+  
+  Interviewers LOVE this. If you don't know the trick, you'll waste 20 minutes.
+```
 
 ---
 
-#### Problem: [Permutation in String](https://leetcode.com/problems/permutation-in-string/) (LeetCode #567)
+## 7. Interview Strategy
 
-- **Intuition:** Fixed window of len(s1). Check if any window in s2 has the same character frequencies as s1—i.e., is a permutation.
-- **Brute Force:** Slide a window of size len(s1) over s2; for each window, build a freq map and compare with s1's freq map. Time O(n·m·26), Space O(26)
-- **Optimized Approach:** 1) Build freq map of s1. 2) Slide a window of size len(s1) over s2. 3) For each window, maintain freq of chars in window; when window size equals len(s1), compare with s1's map (or use a "matches" count). 4) Return true if any window matches.
-- **Java Solution:**
+### Target Solving Times
 
-```java
-class Solution {
-    public boolean checkInclusion(String s1, String s2) {
-        if (s1.length() > s2.length()) return false;
-        int[] s1Freq = new int[26];
-        int[] winFreq = new int[26];
-        for (int i = 0; i < s1.length(); i++) {
-            s1Freq[s1.charAt(i) - 'a']++;
-            winFreq[s2.charAt(i) - 'a']++;
-        }
-        int matches = 0;
-        for (int i = 0; i < 26; i++) {
-            if (s1Freq[i] == winFreq[i]) matches++;
-        }
-        if (matches == 26) return true;
-        for (int right = s1.length(); right < s2.length(); right++) {
-            if (matches == 26) return true;
-            int add = s2.charAt(right) - 'a';
-            winFreq[add]++;
-            if (winFreq[add] == s1Freq[add]) matches++;
-            else if (winFreq[add] == s1Freq[add] + 1) matches--;
-            int remove = s2.charAt(right - s1.length()) - 'a';
-            winFreq[remove]--;
-            if (winFreq[remove] == s1Freq[remove]) matches++;
-            else if (winFreq[remove] == s1Freq[remove] - 1) matches--;
-        }
-        return matches == 26;
-    }
-}
+```
+Easy (fixed window):               5-7 minutes
+Medium (variable window):          8-12 minutes
+Hard (min window substring):       12-18 minutes
 ```
 
-- **Complexity:** Time O(n + m), Space O(1)
+### How to Explain
+
+```
+"This is a sliding window problem because we need the [longest/shortest] CONTIGUOUS
+[subarray/substring] satisfying [constraint]. I'll maintain a window with left and
+right pointers. I expand right to explore, and shrink left when [constraint violated].
+I track [sum/freq map/count] incrementally. Time is O(n) because each element enters
+and leaves the window at most once."
+```
+
+### Follow-Up Questions
+
+```
+Q: "What if the array has negative numbers?"
+A: "Sliding window won't work because adding elements can decrease the sum.
+    I'd use prefix sum + monotonic deque instead."
+
+Q: "Can you do it in O(1) space?"
+A: "For character problems: yes, use int[128] array instead of HashMap.
+    For general cases: the frequency map is bounded by the alphabet size."
+
+Q: "What about exactly K distinct?"
+A: "I'd decompose it: exactly(K) = atMost(K) - atMost(K-1).
+    Each atMost is a standard sliding window. Total: O(n)."
+```
 
 ---
 
-#### Problem: [Minimum Size Subarray Sum](https://leetcode.com/problems/minimum-size-subarray-sum/) (LeetCode #209)
+## 8. Revision Strategy
 
-- **Intuition:** Variable window. Expand right, add to sum; when sum ≥ target, shrink left while sum ≥ target, track min window length.
-- **Brute Force:** Try every subarray; for each starting index, extend right until sum ≥ target and record the length. Time O(n²), Space O(1)
-- **Optimized Approach:** 1) left=0, sum=0, minLen=∞. 2) For each right: sum += nums[right]. 3) While sum ≥ target: minLen = min(minLen, right-left+1); sum -= nums[left]; left++. 4) Return minLen or 0.
-- **Java Solution:**
+### What to Memorize
 
-```java
-class Solution {
-    public int minSubArrayLen(int target, int[] nums) {
-        int left = 0;
-        int sum = 0;
-        int minLen = Integer.MAX_VALUE;
-        for (int right = 0; right < nums.length; right++) {
-            sum += nums[right];
-            while (sum >= target) {
-                minLen = Math.min(minLen, right - left + 1);
-                sum -= nums[left++];
-            }
-        }
-        return minLen == Integer.MAX_VALUE ? 0 : minLen;
-    }
-}
+```
+✓ The 4 templates (fixed, longest, shortest, exactly-K)
+✓ "Longest = shrink when INVALID, record after shrink"
+✓ "Shortest = shrink when VALID, record before shrink"
+✓ "exactly(K) = atMost(K) - atMost(K-1)"
+✓ "Negative numbers break sliding window → use prefix sum"
 ```
 
-- **Complexity:** Time O(n), Space O(1)
+### Mastery Signals
+
+```
+□ You write Minimum Window Substring in 12 minutes, correct on first run
+□ You immediately say "exactly K = atMost trick" when you see the problem
+□ You know when to use sliding window vs prefix sum vs two pointers
+□ You can explain why each element enters/leaves at most once → O(n)
+```
 
 ---
 
-#### Problem: [Fruit Into Baskets](https://leetcode.com/problems/fruit-into-baskets/) (LeetCode #904)
+## Quick Reference Card
 
-- **Intuition:** Variable window with at most 2 distinct types. Expand right; when a third type appears, shrink left until we're back to 2 types.
-- **Brute Force:** Try every subarray; for each, count distinct fruit types and keep the longest with ≤ 2 types. Time O(n²), Space O(1)
-- **Optimized Approach:** 1) Map from fruit type to count (or last index). 2) Expand right, add fruit. 3) While distinct count > 2: remove left fruit, advance left. 4) Track max window size.
-- **Java Solution:**
-
-```java
-class Solution {
-    public int totalFruit(int[] fruits) {
-        var count = new java.util.HashMap<Integer, Integer>();
-        int left = 0;
-        int maxLen = 0;
-        for (int right = 0; right < fruits.length; right++) {
-            count.merge(fruits[right], 1, Integer::sum);
-            while (count.size() > 2) {
-                int f = fruits[left];
-                count.put(f, count.get(f) - 1);
-                if (count.get(f) == 0) count.remove(f);
-                left++;
-            }
-            maxLen = Math.max(maxLen, right - left + 1);
-        }
-        return maxLen;
-    }
-}
 ```
+TYPE              TEMPLATE SHAPE                         RECORD WHEN
+────────────────────────────────────────────────────────────────────────
+Fixed-size        for r: add right, if r≥k: remove left  every step after k
+Longest valid     for r: add right, while INVALID: shrink  after while (valid)
+Shortest valid    for r: add right, while VALID: record+shrink  inside while
+Count exactly K   atMost(K) - atMost(K-1)                 sum of (r-l+1)
 
-- **Complexity:** Time O(n), Space O(1) (at most 3 keys)
-
----
-
-#### Problem: [Max Consecutive Ones III](https://leetcode.com/problems/max-consecutive-ones-iii/) (LeetCode #1004)
-
-- **Intuition:** Variable window. We can flip at most k zeros to ones. Track zeros in window; when zeros > k, shrink left until zeros ≤ k.
-- **Brute Force:** Try every subarray; for each, count zeros and keep the longest with ≤ k zeros. Time O(n²), Space O(1)
-- **Optimized Approach:** 1) left=0, zeros=0. 2) For each right: if nums[right]==0, zeros++. 3) While zeros>k: if nums[left]==0, zeros--; left++. 4) maxLen = max(maxLen, right-left+1).
-- **Java Solution:**
-
-```java
-class Solution {
-    public int longestOnes(int[] nums, int k) {
-        int left = 0;
-        int zeros = 0;
-        int maxLen = 0;
-        for (int right = 0; right < nums.length; right++) {
-            if (nums[right] == 0) zeros++;
-            while (zeros > k) {
-                if (nums[left] == 0) zeros--;
-                left++;
-            }
-            maxLen = Math.max(maxLen, right - left + 1);
-        }
-        return maxLen;
-    }
-}
+DECISION: contiguous + constraint → SLIDING WINDOW
+          contiguous + negatives → PREFIX SUM
+          pairs in sorted → TWO POINTERS
 ```
-
-- **Complexity:** Time O(n), Space O(1)
-
----
-
-### Hard (3 problems)
-
-#### Problem: [Minimum Window Substring](https://leetcode.com/problems/minimum-window-substring/) (LeetCode #76)
-
-- **Intuition:** Variable window. Expand right until we have all chars of t; then shrink left while still valid; track the minimum valid window.
-- **Brute Force:** Try every substring of s; for each, check if it contains all chars of t (with correct frequencies); keep the shortest valid one. Time O(n²·m), Space O(m)
-- **Optimized Approach:** 1) Build freq map of t. 2) Expand right: add s[right], decrement required count when we satisfy a char. 3) When all required chars present: shrink left until invalid, then back up by one. 4) Track min window start/length.
-- **Java Solution:**
-
-```java
-class Solution {
-    public String minWindow(String s, String t) {
-        if (s.isEmpty() || t.isEmpty()) return "";
-        var tFreq = new java.util.HashMap<Character, Integer>();
-        for (char c : t.toCharArray()) {
-            tFreq.merge(c, 1, Integer::sum);
-        }
-        int required = tFreq.size();
-        int formed = 0;
-        var winFreq = new java.util.HashMap<Character, Integer>();
-        int left = 0;
-        int minLen = Integer.MAX_VALUE;
-        int minStart = 0;
-        for (int right = 0; right < s.length(); right++) {
-            char c = s.charAt(right);
-            winFreq.merge(c, 1, Integer::sum);
-            if (tFreq.containsKey(c) && winFreq.get(c).equals(tFreq.get(c))) {
-                formed++;
-            }
-            while (formed == required) {
-                if (right - left + 1 < minLen) {
-                    minLen = right - left + 1;
-                    minStart = left;
-                }
-                char d = s.charAt(left);
-                winFreq.put(d, winFreq.get(d) - 1);
-                if (tFreq.containsKey(d) && winFreq.get(d) < tFreq.get(d)) {
-                    formed--;
-                }
-                left++;
-            }
-        }
-        return minLen == Integer.MAX_VALUE ? "" : s.substring(minStart, minStart + minLen);
-    }
-}
-```
-
-- **Complexity:** Time O(m + n), Space O(m + n)
-
----
-
-#### Problem: [Sliding Window Maximum](https://leetcode.com/problems/sliding-window-maximum/) (LeetCode #239)
-
-- **Intuition:** Fixed-size window. Use a monotonically decreasing deque: elements that can never be the max (smaller than newer elements) are discarded. Front of deque is always the max for current window.
-- **Brute Force:** For each window position, scan all k elements to find the maximum. Time O(n·k), Space O(1)
-- **Optimized Approach:** 1) Deque stores indices (by value, decreasing). 2) For each right: remove from back while nums[back] < nums[right]. Add right. 3) Remove front if it's outside window (index < left). 4) When window has k elements, record nums[deque.front()].
-- **Java Solution:**
-
-```java
-class Solution {
-    public int[] maxSlidingWindow(int[] nums, int k) {
-        var deque = new java.util.ArrayDeque<Integer>();
-        int[] result = new int[nums.length - k + 1];
-        for (int right = 0; right < nums.length; right++) {
-            while (!deque.isEmpty() && nums[deque.peekLast()] < nums[right]) {
-                deque.pollLast();
-            }
-            deque.offerLast(right);
-            int left = right - k + 1;
-            if (left >= 0) {
-                while (deque.peekFirst() < left) {
-                    deque.pollFirst();
-                }
-                result[left] = nums[deque.peekFirst()];
-            }
-        }
-        return result;
-    }
-}
-```
-
-- **Complexity:** Time O(n), Space O(k)
-
----
-
-#### Problem: [Substring with Concatenation of All Words](https://leetcode.com/problems/substring-with-concatenation-of-all-words/) (LeetCode #30)
-
-- **Intuition:** We need to find substrings that are a concatenation of all words in `words` (each exactly once, any order). Word length is fixed (wLen), so we can try starting positions 0, 1, ..., wLen-1 and slide by wLen.
-- **Brute Force:** Try every substring of length totalLen; for each, split into words and check if it's a permutation of the words array. Time O(n·totalLen·m), Space O(m)
-- **Optimized Approach:** 1) Build freq map of words. 2) For each start in [0, wLen): slide a window that advances by wLen. 3) For each step, add the next word to window map; when we have more than expected of any word, shrink left by wLen until valid. 4) When window has exactly all words, record start index.
-- **Java Solution:**
-
-```java
-class Solution {
-    public java.util.List<Integer> findSubstring(String s, String[] words) {
-        var result = new java.util.ArrayList<Integer>();
-        if (words.length == 0 || s.length() < words.length * words[0].length()) return result;
-        int wLen = words[0].length();
-        int totalLen = words.length * wLen;
-        var wordCount = new java.util.HashMap<String, Integer>();
-        for (String w : words) {
-            wordCount.merge(w, 1, Integer::sum);
-        }
-        for (int start = 0; start < wLen; start++) {
-            var seen = new java.util.HashMap<String, Integer>();
-            int left = start;
-            int count = 0;
-            for (int right = start; right + wLen <= s.length(); right += wLen) {
-                String word = s.substring(right, right + wLen);
-                if (wordCount.containsKey(word)) {
-                    seen.merge(word, 1, Integer::sum);
-                    count++;
-                    while (seen.get(word) > wordCount.get(word)) {
-                        String leftWord = s.substring(left, left + wLen);
-                        seen.put(leftWord, seen.get(leftWord) - 1);
-                        count--;
-                        left += wLen;
-                    }
-                    if (count == words.length) {
-                        result.add(left);
-                        String leftWord = s.substring(left, left + wLen);
-                        seen.put(leftWord, seen.get(leftWord) - 1);
-                        count--;
-                        left += wLen;
-                    }
-                } else {
-                    seen.clear();
-                    count = 0;
-                    left = right + wLen;
-                }
-            }
-        }
-        return result;
-    }
-}
-```
-
-- **Complexity:** Time O(n * wLen), Space O(m) where m = words.length
-
----
-
-## Common Mistakes & Edge Cases
-
-- **Forgetting to shrink:** In variable window, you must shrink when the constraint is violated; otherwise the window grows unbounded and the result is wrong.
-- **Off-by-one in window size:** `right - left + 1` is the window length when both are inclusive.
-- **Equality in "while" condition:** Use `while (invalid)` not `if`—sometimes you need to shrink multiple steps.
-- **Empty or single-element inputs:** Handle `nums.length < k`, `s.isEmpty()`, `t.length() > s.length()`.
-- **Integer overflow:** For sum-based problems with large numbers, consider long.
-- **CharacterReplacement (#424):** You don't need to shrink when valid—`maxFreq` might be stale but the window length only increases when we have a valid window, and we only care about the longest.
-- **MinWindow (#76):** Use `equals()` for Integer comparison (map values), not `==`.
-- **SlidingWindowMax (#239):** Store indices in the deque, not values, to detect when the front is out of window.
-
-## Pattern Variations
-
-| Variation               | Example                            | Key Technique                         |
-|-------------------------|------------------------------------|--------------------------------------|
-| Fixed window sum/avg    | Max Average Subarray I             | Slide by one, update sum              |
-| Variable window (sum)   | Min Size Subarray Sum              | Shrink when sum ≥ target              |
-| At most k distinct      | Fruit Into Baskets, Longest Substr | Map + shrink when size > k            |
-| No repeating chars      | Longest Substring No Repeat        | Set + shrink on duplicate             |
-| Replacement budget      | Longest Repeating Char Replacement | (windowSize - maxFreq) ≤ k            |
-| Window contains all     | Min Window Substring               | Freq maps, "formed" count             |
-| Permutation / anagram   | Permutation in String              | Fixed window + freq match             |
-| Sliding max/min         | Sliding Window Maximum             | Monotonic deque                       |
-| Multi-word concatenation| Substring with Concat All Words    | Multiple start offsets, word-sized steps |

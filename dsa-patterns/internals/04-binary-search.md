@@ -1,259 +1,337 @@
-# Binary Search
+# Binary Search — Interview Execution Playbook
 
-> Halve the search space at each step—turning O(n) linear scans into O(log n) lookups when the space has structure.
+## 1. Pattern Recognition Signals
 
-## What Is This Pattern?
+### When to Use Binary Search
 
-Binary search is a divide-and-conquer technique that repeatedly narrows a **search space** by comparing a probe value to the target and discarding half of the remaining candidates. The critical requirement: the search space must have a **monotonic structure**—elements that let you deterministically decide whether the answer lies in the left or right half based on a simple comparison.
+| Signal | Example |
+|--------|---------|
+| Input is **sorted** or has monotonic structure | Sorted array, rotated sorted array, mountain array |
+| Problem asks for **first/last occurrence** | "Find first position of element" |
+| Problem asks for **minimum/maximum value satisfying a condition** | "Minimum speed to finish in h hours" |
+| A **yes/no predicate** flips exactly once across the search space | `canFinish(speed)` goes from false→true |
+| **O(log n)** is required or hinted | Constraints say n ≤ 10^9 but time limit is tight |
 
-**Visual intuition:** Imagine searching for a word in a dictionary. You don't scan page by page. You open to the middle: if your word comes before that page, you discard the right half; otherwise, you discard the left. Each step halves the remaining pages. The same logic applies to sorted arrays: comparing `arr[mid]` to `target` tells you which half to explore next.
+### Keywords That Scream Binary Search
 
-The pattern extends beyond "find X in sorted array." You can binary search on **indices** (classic lookup), on **boundaries** (find leftmost/rightmost occurrence), or on the **answer itself** when the problem asks "what is the minimum X such that condition holds?"—and checking the condition is feasible in O(n) or O(1). In all cases, the key is identifying what to binary search on and what invariant to maintain.
+`sorted`, `ascending`, `descending`, `rotated`, `minimum rate`, `maximum minimum`, `capacity`, `split into k`, `search`, `insert position`, `peak`, `feasible`
 
-## When to Use This Pattern
+### When NOT to Use
 
-- Input is **sorted** (or can be logically treated as sorted—e.g., rotated array, mountain).
-- Problem asks for **"find target"**, **"first/last occurrence"**, **"insert position"**, **"minimum X such that..."**.
-- A **monotonic predicate** exists: for some value `x`, if `f(x)` is true then `f(x+1)` is true (or vice versa).
-- Linear scan would be O(n) but you need O(log n)—binary search on answer can achieve that.
-- Problem mentions **"sorted"**, **"ascending/descending"**, **"rotated"**, **"peak"**, **"minimum rate"**, **"split into k parts"**.
+- Input is **unsorted** and there's no monotonic predicate on the answer space
+- Problem requires visiting **all elements** (e.g., sum of array)
+- The search space doesn't have a clear **partition property** (left side all false, right side all true, or vice versa)
+- You need to find **all occurrences**, not just one boundary
 
-## How to Identify This Pattern
+---
 
-```
-Is the input sorted (or has monotonic structure)?
-    NO → Can we binary search on the ANSWER?
-         YES → Do we have a check function f(x) that is monotonic?
-               YES → BINARY SEARCH ON ANSWER
-         NO  → Consider other patterns
-    YES ↓
+## 2. Thinking Framework
 
-Are we finding the exact target or a boundary?
-    Exact target → CLASSIC BINARY SEARCH
-    First occurrence / left boundary → LEFT-BOUNDARY BINARY SEARCH
-    Last occurrence / right boundary → RIGHT-BOUNDARY BINARY SEARCH
-    Peak / rotated structure → ADAPT CLASSIC (different comparison logic)
-```
-
-## Core Template (Pseudocode)
-
-### Classic (Exact Match)
+### 60-Second Decision Process
 
 ```
-FUNCTION classicBinarySearch(arr, target):
-    left = 0, right = length(arr) - 1
-    WHILE left <= right:
-        mid = left + (right - left) / 2
-        IF arr[mid] == target:
-            RETURN mid
-        IF arr[mid] < target:
-            left = mid + 1
-        ELSE:
-            right = mid - 1
-    RETURN -1
+1. Is input sorted / does a monotonic property exist?
+   → YES: Binary search directly on indices
+   → NO: Can I binary search on the ANSWER itself?
+         → Define predicate: "Can we achieve X?"
+         → If predicate is monotonic → Binary search on answer space
+
+2. What am I searching for?
+   → Exact value         → Classic (lo <= hi)
+   → First true / lower bound → Left boundary (lo < hi, hi = mid)
+   → Last true / upper bound  → Right boundary (lo < hi, lo = mid + 1)
+   → Min answer that works    → Search on answer (lo < hi, hi = mid)
+   → Max answer that works    → Search on answer (lo < hi, lo = mid)
+
+3. Define the invariant:
+   → What is ALWAYS true about lo? About hi?
+   → Example: "lo is always too small" and "hi is always feasible"
 ```
 
-### Left Boundary (First Occurrence / Insert Position)
+### Brute → Optimal Progression
 
-```
-FUNCTION leftBoundary(arr, target):
-    left = 0, right = length(arr)   // right is EXCLUSIVE
-    WHILE left < right:
-        mid = left + (right - left) / 2
-        IF arr[mid] < target:
-            left = mid + 1
-        ELSE:
-            right = mid
-    RETURN left
-```
+| Stage | Approach | Complexity |
+|-------|----------|------------|
+| Brute | Linear scan / try all values | O(n) or O(n × range) |
+| Optimal | Binary search | O(log n) or O(n × log range) |
 
-### Right Boundary (Last Occurrence)
+### Core Insight
 
-```
-FUNCTION rightBoundary(arr, target):
-    left = 0, right = length(arr)   // right is EXCLUSIVE
-    WHILE left < right:
-        mid = left + (right - left) / 2
-        IF arr[mid] <= target:
-            left = mid + 1
-        ELSE:
-            right = mid
-    RETURN left - 1   // last index where arr[i] == target
-```
+> **Eliminate half the search space with each comparison.** This works whenever a **monotonic property** exists: some condition that is `false` for all values below a threshold and `true` for all values above it (or vice versa). Your job is to find that boundary.
 
-### Binary Search on Answer
+### Invariant-Based Thinking
 
-```
-FUNCTION binarySearchOnAnswer():
-    low = MIN_POSSIBLE_ANSWER
-    high = MAX_POSSIBLE_ANSWER
-    WHILE low < high:
-        mid = low + (high - low) / 2
-        IF feasible(mid):
-            high = mid   // or low = mid, depending on minimize vs maximize
-        ELSE:
-            low = mid + 1
-    RETURN low
-```
+Instead of memorizing templates, think in terms of **loop invariants**:
+- `lo` is always in the "not yet good enough" region (or last known good)
+- `hi` is always in the "still a candidate" region (or first known bad)
+- The answer lives at the boundary where the invariant flips
 
-## Core Template (Java)
+This mental model prevents off-by-one errors and tells you exactly how to update `lo` and `hi`.
 
-### Classic (Exact Match)
+---
+
+## 3. Java Templates
+
+### Template 1: Standard Binary Search (Exact Match)
 
 ```java
-public int classicBinarySearch(int[] nums, int target) {
-    int left = 0;
-    int right = nums.length - 1;
-    while (left <= right) {
-        int mid = left + (right - left) / 2;
+// Find exact target in sorted array. Returns index or -1.
+// TIME: O(log n) | SPACE: O(1)
+public int binarySearch(int[] nums, int target) {
+    int lo = 0, hi = nums.length - 1;
+    while (lo <= hi) {
+        int mid = lo + (hi - lo) / 2;  // avoids integer overflow
         if (nums[mid] == target) return mid;
-        if (nums[mid] < target) left = mid + 1;
-        else right = mid - 1;
+        else if (nums[mid] < target) lo = mid + 1;
+        else hi = mid - 1;
     }
     return -1;
 }
 ```
 
-### Left Boundary (First Occurrence / Insert Position)
+**Key points:**
+- `lo <= hi` because when `lo == hi` there's still one unchecked element
+- Both `lo` and `hi` move past `mid` → no infinite loop risk
+- Terminates with `lo = hi + 1` (search space empty)
+
+---
+
+### Template 2: Lower Bound / First Occurrence
 
 ```java
-public int leftBoundary(int[] nums, int target) {
-    int left = 0;
-    int right = nums.length;
-    while (left < right) {
-        int mid = left + (right - left) / 2;
-        if (nums[mid] < target) left = mid + 1;
-        else right = mid;
+// Find first index where nums[i] >= target (insert position).
+// If target exists, returns index of first occurrence.
+// TIME: O(log n) | SPACE: O(1)
+public int lowerBound(int[] nums, int target) {
+    int lo = 0, hi = nums.length;  // hi is EXCLUSIVE (can be the insert-at-end position)
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;  // left-biased mid
+        if (nums[mid] < target) lo = mid + 1;
+        else hi = mid;  // mid is a candidate, don't skip it
     }
-    return left;
+    return lo;  // lo == hi == first index where nums[i] >= target
 }
 ```
 
-### Right Boundary (Last Occurrence)
+**Key points:**
+- `lo < hi` (not `<=`) because `lo == hi` means we've converged
+- `hi = mid` (not `mid - 1`) because `mid` might be the answer
+- Left-biased mid: `lo + (hi - lo) / 2` rounds down → guarantees `mid < hi` → no infinite loop
+
+---
+
+### Template 3: Upper Bound / Last Occurrence
 
 ```java
-public int rightBoundary(int[] nums, int target) {
-    int left = 0;
-    int right = nums.length;
-    while (left < right) {
-        int mid = left + (right - left) / 2;
-        if (nums[mid] <= target) left = mid + 1;
-        else right = mid;
+// Find last index where nums[i] <= target.
+// Returns -1 if all elements > target.
+// TIME: O(log n) | SPACE: O(1)
+public int upperBound(int[] nums, int target) {
+    int lo = 0, hi = nums.length;
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (nums[mid] <= target) lo = mid + 1;
+        else hi = mid;
     }
-    return left - 1;
+    return lo - 1;  // lo is first index where nums[i] > target; lo-1 is last <=
 }
 ```
 
-### Binary Search on Answer (Minimize)
+**Key points:**
+- This finds the first index where `nums[i] > target`, then subtracts 1
+- Equivalent to C++ `upper_bound() - 1`
+- Check `lo - 1 >= 0` and `nums[lo-1] == target` if you need exact match confirmation
+
+---
+
+### Template 4: Binary Search on Answer Space
 
 ```java
-public int binarySearchOnAnswer(int[] nums, int threshold) {
-    int low = 1;
-    int high = Integer.MAX_VALUE;
-    while (low < high) {
-        int mid = low + (high - low) / 2;
-        if (feasible(nums, mid, threshold)) high = mid;
-        else low = mid + 1;
+// Find minimum value in [lo, hi] such that feasible(value) is true.
+// Predicate must be monotonic: false,false,...,false,true,true,...,true
+// TIME: O(n × log(range)) | SPACE: O(1)
+public int binarySearchOnAnswer(int[] data, int constraint) {
+    int lo = MIN_POSSIBLE;   // smallest candidate answer
+    int hi = MAX_POSSIBLE;   // largest candidate answer
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (feasible(data, mid, constraint)) {
+            hi = mid;        // mid works, but maybe something smaller works too
+        } else {
+            lo = mid + 1;    // mid doesn't work, need bigger
+        }
     }
-    return low;
+    return lo;  // smallest feasible answer
+}
+
+private boolean feasible(int[] data, int candidateAnswer, int constraint) {
+    // Problem-specific: can we satisfy constraint with this candidate?
+    // e.g., "can Koko finish with speed=candidateAnswer in h hours?"
+    return true; // placeholder
 }
 ```
 
-## Complexity Cheat Sheet
+**Key points:**
+- Answer space must have **monotonic feasibility** (once feasible, always feasible for larger values)
+- For "maximize answer": flip the predicate or use `lo = mid` with right-biased mid
+- `lo` and `hi` are answer bounds, NOT array indices
 
-| Variant                | Time       | Space  | Notes                                          |
-|------------------------|------------|--------|------------------------------------------------|
-| Classic exact          | O(log n)   | O(1)   | `while (left <= right)`                         |
-| Left/right boundary    | O(log n)   | O(1)   | `while (left < right)`, right exclusive         |
-| Binary search on answer| O(log R)   | O(1)   | R = answer range; each step calls O(n) checker  |
-| 2D matrix              | O(log(mn)) | O(1)   | Flatten to 1D index or binary search row+col    |
-| Rotated array          | O(log n)   | O(1)   | Compare mid with left/right to find sorted half |
-| Mountain array         | O(log n)   | O(1)   | Find peak first, then two searches              |
+---
 
-## Problems (Progressive Difficulty)
+### Template 5: Search in Rotated Sorted Array
 
-### Easy (2 problems)
+```java
+// Find target in rotated sorted array (no duplicates). Returns index or -1.
+// TIME: O(log n) | SPACE: O(1)
+public int searchRotated(int[] nums, int target) {
+    int lo = 0, hi = nums.length - 1;
+    while (lo <= hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (nums[mid] == target) return mid;
 
-#### Problem: [Binary Search](https://leetcode.com/problems/binary-search/) (LeetCode #704)
+        if (nums[lo] <= nums[mid]) {
+            // Left half [lo..mid] is sorted
+            if (nums[lo] <= target && target < nums[mid]) {
+                hi = mid - 1;  // target is in sorted left half
+            } else {
+                lo = mid + 1;  // target is in right half
+            }
+        } else {
+            // Right half [mid..hi] is sorted
+            if (nums[mid] < target && target <= nums[hi]) {
+                lo = mid + 1;  // target is in sorted right half
+            } else {
+                hi = mid - 1;  // target is in left half
+            }
+        }
+    }
+    return -1;
+}
+```
 
-- **Intuition:** Sorted array, find exact target. Classic template: compare `nums[mid]` to `target` and narrow the search space.
-- **Brute Force:** Linear scan through the array, comparing each element to the target until a match is found or the end is reached. Time O(n), Space O(1)
-- **Optimized Approach:** 1) `left=0`, `right=length-1`. 2) While `left <= right`: compute mid, return mid if match. 3) If `nums[mid] < target`, search right; else search left. 4) Return -1 if not found.
-- **Java Solution:**
+**Key points:**
+- At least one half is always sorted — identify which one
+- `nums[lo] <= nums[mid]` uses `<=` to handle the case where `lo == mid`
+- Once you identify the sorted half, check if target falls in its range
+- With duplicates (LC #81): when `nums[lo] == nums[mid]`, do `lo++` (degrades to O(n) worst case)
 
+---
+
+## 4. Edge Case Checklist
+
+| Edge Case | How to Handle |
+|-----------|---------------|
+| **Empty array** | Return -1 or 0 before entering loop |
+| **Single element** | Loop handles it if bounds are correct |
+| **Target smaller than all elements** | Lower bound returns 0; classic returns -1 |
+| **Target larger than all elements** | Lower bound returns `nums.length`; classic returns -1 |
+| **All elements identical** | Lower bound finds leftmost; upper bound finds rightmost |
+| **Integer overflow in mid** | ALWAYS use `lo + (hi - lo) / 2`, never `(lo + hi) / 2` |
+| **Answer space includes 0** | Ensure `lo` starts at 0, not 1 |
+| **Answer space is very large** | Use `long` for `lo`, `hi`, and `mid` |
+| **Rotated array not actually rotated** | `nums[lo] <= nums[mid]` still works (entire array is "left sorted half") |
+| **Feasibility check with large sums** | Use `long` inside feasible() to avoid overflow |
+| **Off-by-one at boundaries** | Test with array of size 1, target at first/last position |
+
+---
+
+## 5. Problem Progression
+
+### Solving Order
+
+> Level 1 → Level 2 → Level 3 → Level 4. Within each level, solve in listed order.
+
+---
+
+### Level 1: Easy (Foundation)
+
+| # | Problem | Key Insight | Target Time |
+|---|---------|-------------|-------------|
+| 704 | [Binary Search](https://leetcode.com/problems/binary-search/) | Pure classic template; `lo <= hi`, return mid on match | 3 min |
+| 35 | [Search Insert Position](https://leetcode.com/problems/search-insert-position/) | Lower bound template; first index where `nums[i] >= target` | 5 min |
+
+**LC 704 — Binary Search:**
 ```java
 class Solution {
+    // TIME: O(log n) | SPACE: O(1)
     public int search(int[] nums, int target) {
-        int left = 0;
-        int right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
+        int lo = 0, hi = nums.length - 1;
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
             if (nums[mid] == target) return mid;
-            if (nums[mid] < target) left = mid + 1;
-            else right = mid - 1;
+            else if (nums[mid] < target) lo = mid + 1;
+            else hi = mid - 1;
         }
         return -1;
     }
 }
 ```
 
-- **Complexity:** Time O(log n), Space O(1)
-
----
-
-#### Problem: [Search Insert Position](https://leetcode.com/problems/search-insert-position/) (LeetCode #35)
-
-- **Brute Force:** Linear scan from left to right, returning the first index where `nums[i] >= target`, or `nums.length` if all elements are smaller. Time O(n), Space O(1)
-- **Optimized Approach:** Use left-boundary template: find first index where element is >= target. If all elements are smaller, left ends at `nums.length`.
-- **Intuition:** Find the position where we would insert target to keep sorted order—i.e., the leftmost index where `nums[i] >= target`.
-- **Java Solution:**
-
+**LC 35 — Search Insert Position:**
 ```java
 class Solution {
+    // TIME: O(log n) | SPACE: O(1)
     public int searchInsert(int[] nums, int target) {
-        int left = 0;
-        int right = nums.length;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] < target) left = mid + 1;
-            else right = mid;
+        int lo = 0, hi = nums.length;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (nums[mid] < target) lo = mid + 1;
+            else hi = mid;
         }
-        return left;
+        return lo;
     }
 }
 ```
 
-- **Complexity:** Time O(log n), Space O(1)
-
 ---
 
-### Medium (6 problems)
+### Level 2: Medium (Core Patterns)
 
-#### Problem: [Search in Rotated Sorted Array](https://leetcode.com/problems/search-in-rotated-sorted-array/) (LeetCode #33)
+| # | Problem | Key Insight | Target Time |
+|---|---------|-------------|-------------|
+| 34 | [Find First and Last Position](https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/) | Run lower bound + upper bound separately | 8 min |
+| 33 | [Search in Rotated Sorted Array](https://leetcode.com/problems/search-in-rotated-sorted-array/) | Identify which half is sorted, check if target is in that range | 10 min |
+| 153 | [Find Minimum in Rotated Sorted Array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/) | Compare `nums[mid]` with `nums[hi]`; min is where sorted order breaks | 8 min |
+| 875 | [Koko Eating Bananas](https://leetcode.com/problems/koko-eating-bananas/) | Binary search on answer; feasible = total hours ≤ h | 12 min |
 
-- **Intuition:** Array is sorted but rotated. At least one half (left or right of mid) is always sorted. Compare target with the sorted half to decide where to search.
-- **Brute Force:** Linear scan through the rotated array until the target is found or the end is reached. Time O(n), Space O(1)
-- **Optimized Approach:** 1) If `nums[mid] == target`, return mid. 2) If `nums[left] <= nums[mid]`, left half is sorted: search there if target in range, else right. 3) Else right half is sorted: search there if target in range, else left.
-- **Java Solution:**
-
+**LC 34 — Find First and Last Position:**
 ```java
 class Solution {
+    // TIME: O(log n) | SPACE: O(1)
+    public int[] searchRange(int[] nums, int target) {
+        int first = lowerBound(nums, target);
+        if (first == nums.length || nums[first] != target) return new int[]{-1, -1};
+        int last = lowerBound(nums, target + 1) - 1;
+        return new int[]{first, last};
+    }
+
+    private int lowerBound(int[] nums, int target) {
+        int lo = 0, hi = nums.length;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (nums[mid] < target) lo = mid + 1;
+            else hi = mid;
+        }
+        return lo;
+    }
+}
+```
+
+**LC 33 — Search in Rotated Sorted Array:**
+```java
+class Solution {
+    // TIME: O(log n) | SPACE: O(1)
     public int search(int[] nums, int target) {
-        int left = 0;
-        int right = nums.length - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
+        int lo = 0, hi = nums.length - 1;
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
             if (nums[mid] == target) return mid;
-            if (nums[left] <= nums[mid]) {
-                if (nums[left] <= target && target < nums[mid])
-                    right = mid - 1;
-                else
-                    left = mid + 1;
+            if (nums[lo] <= nums[mid]) {
+                if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;
+                else lo = mid + 1;
             } else {
-                if (nums[mid] < target && target <= nums[right])
-                    left = mid + 1;
-                else
-                    right = mid - 1;
+                if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;
+                else hi = mid - 1;
             }
         }
         return -1;
@@ -261,120 +339,42 @@ class Solution {
 }
 ```
 
-- **Complexity:** Time O(log n), Space O(1)
-
----
-
-#### Problem: [Find Minimum in Rotated Sorted Array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/) (LeetCode #153)
-
-- **Intuition:** Minimum is the pivot point. Compare `nums[mid]` with `nums[right]`: if `nums[mid] > nums[right]`, minimum is in right half; else in left half (including mid).
-- **Brute Force:** Linear scan to find the first element smaller than its predecessor (the pivot), or return the first element if array is not rotated. Time O(n), Space O(1)
-- **Optimized Approach:** 1) While `left < right`: compare mid with right. 2) If mid > right, min is right of mid → `left = mid + 1`. 3) Else min is at mid or left → `right = mid`. 4) Return `nums[left]`.
-- **Java Solution:**
-
+**LC 153 — Find Minimum in Rotated Sorted Array:**
 ```java
 class Solution {
+    // TIME: O(log n) | SPACE: O(1)
     public int findMin(int[] nums) {
-        int left = 0;
-        int right = nums.length - 1;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] > nums[right]) left = mid + 1;
-            else right = mid;
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (nums[mid] > nums[hi]) lo = mid + 1;  // min is in right half
+            else hi = mid;                            // mid could be the min
         }
-        return nums[left];
+        return nums[lo];
     }
 }
 ```
 
-- **Complexity:** Time O(log n), Space O(1)
-
----
-
-#### Problem: [Find Peak Element](https://leetcode.com/problems/find-peak-element/) (LeetCode #162)
-
-- **Intuition:** Peak: element greater than both neighbors. Binary search: if `nums[mid] < nums[mid+1]`, there's a peak in the right half (climb right); else in the left half (including mid).
-- **Brute Force:** Linear scan checking each index to see if it is greater than both neighbors; return the first peak found. Time O(n), Space O(1)
-- **Optimized Approach:** 1) While `left < right`: compute mid. 2) If `nums[mid] < nums[mid+1]`, peak is right → `left = mid + 1`. 3) Else peak is at mid or left → `right = mid`. 4) Return left.
-- **Java Solution:**
-
+**LC 875 — Koko Eating Bananas:**
 ```java
 class Solution {
-    public int findPeakElement(int[] nums) {
-        int left = 0;
-        int right = nums.length - 1;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] < nums[mid + 1]) left = mid + 1;
-            else right = mid;
-        }
-        return left;
-    }
-}
-```
-
-- **Complexity:** Time O(log n), Space O(1)
-
----
-
-#### Problem: [Search a 2D Matrix](https://leetcode.com/problems/search-a-2d-matrix/) (LeetCode #74)
-
-- **Intuition:** Rows and columns are sorted; treat as 1D sorted array via `index → row = index/cols, col = index%cols`.
-- **Brute Force:** Scan every cell in the matrix row by row until the target is found or the end is reached. Time O(mn), Space O(1)
-- **Optimized Approach:** 1) Flatten to `[0, m*n-1]`. 2) Classic binary search. 3) Map mid to (row, col) and compare with target.
-- **Java Solution:**
-
-```java
-class Solution {
-    public boolean searchMatrix(int[][] matrix, int target) {
-        int m = matrix.length;
-        int n = matrix[0].length;
-        int left = 0;
-        int right = m * n - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            int row = mid / n;
-            int col = mid % n;
-            int val = matrix[row][col];
-            if (val == target) return true;
-            if (val < target) left = mid + 1;
-            else right = mid - 1;
-        }
-        return false;
-    }
-}
-```
-
-- **Complexity:** Time O(log(mn)), Space O(1)
-
----
-
-#### Problem: [Koko Eating Bananas](https://leetcode.com/problems/koko-eating-bananas/) (LeetCode #875)
-
-- **Intuition:** Binary search on answer: try speed k. For each k, compute hours needed. If feasible (hours ≤ h), try lower k; else try higher.
-- **Brute Force:** Try k from 1 to max(piles) in order, compute hours for each k, and return the first k for which hours ≤ h. Time O(max(piles) * n), Space O(1)
-- **Optimized Approach:** 1) low=1, high=max(piles). 2) While low < high: mid=k. 3) Sum ceiling(p/mid) for each pile. 4) If hours ≤ h, high=mid; else low=mid+1. 5) Return low.
-- **Java Solution:**
-
-```java
-class Solution {
+    // TIME: O(n × log(max(piles))) | SPACE: O(1)
     public int minEatingSpeed(int[] piles, int h) {
-        int low = 1;
-        int high = 0;
-        for (int p : piles) high = Math.max(high, p);
+        int lo = 1, hi = 0;
+        for (int p : piles) hi = Math.max(hi, p);
 
-        while (low < high) {
-            int mid = low + (high - low) / 2;
-            if (feasible(piles, mid, h)) high = mid;
-            else low = mid + 1;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (canFinish(piles, mid, h)) hi = mid;
+            else lo = mid + 1;
         }
-        return low;
+        return lo;
     }
 
-    private boolean feasible(int[] piles, int k, int h) {
+    private boolean canFinish(int[] piles, int speed, int h) {
         long hours = 0;
         for (int p : piles) {
-            hours += (p + k - 1) / k;
+            hours += (p + speed - 1) / speed;  // ceiling division
             if (hours > h) return false;
         }
         return true;
@@ -382,223 +382,365 @@ class Solution {
 }
 ```
 
-- **Complexity:** Time O(n log(max(piles))), Space O(1)
-
 ---
 
-#### Problem: [Time Based Key-Value Store](https://leetcode.com/problems/time-based-key-value-store/) (LeetCode #981)
+### Level 3: Tricky (Pattern Combinations)
 
-- **Intuition:** Store `(timestamp, value)` pairs per key. `get` needs the largest timestamp ≤ given timestamp—binary search on the sorted list of timestamps for that key.
-- **Brute Force:** For `get`, linear scan the list of (timestamp, value) pairs from the end backward until finding the largest timestamp ≤ target. Time O(k) per get where k = number of values for key; Space O(n)
-- **Optimized Approach:** 1) Map<String, List<Pair>> where Pair = (timestamp, value). 2) set: append to list (timestamps are strictly increasing). 3) get: binary search right-boundary style for largest timestamp ≤ target.
-- **Java Solution:**
+| # | Problem | Key Insight | Target Time |
+|---|---------|-------------|-------------|
+| 1011 | [Capacity to Ship Packages](https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/) | Binary search on answer; lo = max(weights), hi = sum(weights); greedy feasibility | 15 min |
+| 162 | [Find Peak Element](https://leetcode.com/problems/find-peak-element/) | Gradient ascent via binary search; move toward the higher neighbor | 10 min |
+| 410 | [Split Array Largest Sum](https://leetcode.com/problems/split-array-largest-sum/) | Same framework as 1011; binary search on max-sum, greedy split check | 15 min |
 
+**LC 1011 — Capacity to Ship Packages:**
 ```java
-class TimeMap {
-    private final Map<String, List<Pair>> store = new HashMap<>();
+class Solution {
+    // TIME: O(n × log(sum - max)) | SPACE: O(1)
+    public int shipWithinDays(int[] weights, int days) {
+        int lo = 0, hi = 0;
+        for (int w : weights) {
+            lo = Math.max(lo, w);  // must carry heaviest single package
+            hi += w;               // carry everything in one day
+        }
 
-    record Pair(int timestamp, String value) {}
-
-    public TimeMap() {}
-
-    public void set(String key, String value, int timestamp) {
-        store.computeIfAbsent(key, k -> new ArrayList<>()).add(new Pair(timestamp, value));
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (canShip(weights, mid, days)) hi = mid;
+            else lo = mid + 1;
+        }
+        return lo;
     }
 
-    public String get(String key, int timestamp) {
-        List<Pair> pairs = store.get(key);
-        if (pairs == null || pairs.isEmpty()) return "";
-        int left = 0;
-        int right = pairs.size();
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (pairs.get(mid).timestamp() <= timestamp)
-                left = mid + 1;
-            else
-                right = mid;
+    private boolean canShip(int[] weights, int capacity, int days) {
+        int daysNeeded = 1, currentLoad = 0;
+        for (int w : weights) {
+            if (currentLoad + w > capacity) {
+                daysNeeded++;
+                currentLoad = w;
+                if (daysNeeded > days) return false;
+            } else {
+                currentLoad += w;
+            }
         }
-        if (left == 0) return "";
-        return pairs.get(left - 1).value();
+        return true;
     }
 }
 ```
 
-- **Complexity:** Time O(1) set, O(log k) get per key with k values; Space O(n)
+**LC 162 — Find Peak Element:**
+```java
+class Solution {
+    // TIME: O(log n) | SPACE: O(1)
+    public int findPeakElement(int[] nums) {
+        int lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (nums[mid] < nums[mid + 1]) lo = mid + 1;  // peak is to the right
+            else hi = mid;                                  // mid could be peak
+        }
+        return lo;
+    }
+}
+```
+
+**LC 410 — Split Array Largest Sum:**
+```java
+class Solution {
+    // TIME: O(n × log(sum - max)) | SPACE: O(1)
+    public int splitArray(int[] nums, int k) {
+        int lo = 0, hi = 0;
+        for (int x : nums) {
+            lo = Math.max(lo, x);
+            hi += x;
+        }
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (canSplit(nums, mid, k)) hi = mid;
+            else lo = mid + 1;
+        }
+        return lo;
+    }
+
+    private boolean canSplit(int[] nums, int maxSum, int k) {
+        int parts = 1, currentSum = 0;
+        for (int x : nums) {
+            if (currentSum + x > maxSum) {
+                parts++;
+                currentSum = x;
+                if (parts > k) return false;
+            } else {
+                currentSum += x;
+            }
+        }
+        return true;
+    }
+}
+```
 
 ---
 
-### Hard (3 problems)
+### Level 4: Hard (Interview Differentiators)
 
-#### Problem: [Median of Two Sorted Arrays](https://leetcode.com/problems/median-of-two-sorted-arrays/) (LeetCode #4)
+| # | Problem | Key Insight | Target Time |
+|---|---------|-------------|-------------|
+| 4 | [Median of Two Sorted Arrays](https://leetcode.com/problems/median-of-two-sorted-arrays/) | Binary search on partition of smaller array; balance left/right halves | 20 min |
+| 1095 | [Find in Mountain Array](https://leetcode.com/problems/find-in-mountain-array/) | Find peak, then binary search ascending half, then descending half | 18 min |
 
-- **Intuition:** Binary search on the smaller array's partition. Partition both arrays so all left elements ≤ all right elements; median is derived from the partition boundaries.
-- **Brute Force:** Merge both arrays into one sorted array (linear merge), then return the median of the merged array. Time O(m+n), Space O(m+n)
-- **Optimized Approach:** 1) Ensure nums1 is smaller. 2) Binary search partition in nums1; derive nums2 partition so total left size = (m+n+1)/2. 3) Check maxLeft1 ≤ minRight2 and maxLeft2 ≤ minRight1. 4) If odd: maxLeft; if even: avg of maxLeft and minRight.
-- **Java Solution:**
-
+**LC 4 — Median of Two Sorted Arrays:**
 ```java
 class Solution {
+    // TIME: O(log(min(m, n))) | SPACE: O(1)
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
         if (nums1.length > nums2.length) {
-            int[] t = nums1; nums1 = nums2; nums2 = t;
+            int[] tmp = nums1; nums1 = nums2; nums2 = tmp;
         }
         int m = nums1.length, n = nums2.length;
-        int half = (m + n + 1) / 2;
-        int left = 0, right = m;
-        while (left <= right) {
-            int i = left + (right - left) / 2;
-            int j = half - i;
-            int maxLeft1 = i == 0 ? Integer.MIN_VALUE : nums1[i - 1];
-            int minRight1 = i == m ? Integer.MAX_VALUE : nums1[i];
-            int maxLeft2 = j == 0 ? Integer.MIN_VALUE : nums2[j - 1];
-            int minRight2 = j == n ? Integer.MAX_VALUE : nums2[j];
+        int halfLen = (m + n + 1) / 2;
+
+        int lo = 0, hi = m;
+        while (lo <= hi) {
+            int i = lo + (hi - lo) / 2;  // partition in nums1
+            int j = halfLen - i;          // partition in nums2
+
+            int maxLeft1  = (i == 0) ? Integer.MIN_VALUE : nums1[i - 1];
+            int minRight1 = (i == m) ? Integer.MAX_VALUE : nums1[i];
+            int maxLeft2  = (j == 0) ? Integer.MIN_VALUE : nums2[j - 1];
+            int minRight2 = (j == n) ? Integer.MAX_VALUE : nums2[j];
+
             if (maxLeft1 <= minRight2 && maxLeft2 <= minRight1) {
                 int maxLeft = Math.max(maxLeft1, maxLeft2);
                 if ((m + n) % 2 == 1) return maxLeft;
                 int minRight = Math.min(minRight1, minRight2);
                 return (maxLeft + minRight) / 2.0;
-            }
-            if (maxLeft1 > minRight2) right = i - 1;
-            else left = i + 1;
-        }
-        return 0;
-    }
-}
-```
-
-- **Complexity:** Time O(log(min(m,n))), Space O(1)
-
----
-
-#### Problem: [Split Array Largest Sum](https://leetcode.com/problems/split-array-largest-sum/) (LeetCode #410)
-
-- **Intuition:** Binary search on the answer (max subarray sum). For a given max sum, greedy: pack elements until adding the next would exceed max, then start new subarray. Count splits. If splits ≤ k-1, feasible.
-- **Brute Force:** Try all possible partition points (dynamic programming or recursive enumeration) to find the minimum possible largest sum. Time O(n²) or exponential; Space O(n)
-- **Optimized Approach:** 1) low = max(nums), high = sum(nums). 2) While low < high: mid = max sum. 3) Greedy count subarrays. 4) If count ≤ k, high = mid; else low = mid + 1. 5) Return low.
-- **Java Solution:**
-
-```java
-class Solution {
-    public int splitArray(int[] nums, int k) {
-        int low = 0, high = 0;
-        for (int x : nums) {
-            low = Math.max(low, x);
-            high += x;
-        }
-        while (low < high) {
-            int mid = low + (high - low) / 2;
-            if (feasible(nums, mid, k)) high = mid;
-            else low = mid + 1;
-        }
-        return low;
-    }
-
-    private boolean feasible(int[] nums, int maxSum, int k) {
-        int count = 1;
-        int sum = 0;
-        for (int x : nums) {
-            if (sum + x > maxSum) {
-                count++;
-                sum = x;
+            } else if (maxLeft1 > minRight2) {
+                hi = i - 1;
             } else {
-                sum += x;
+                lo = i + 1;
             }
         }
-        return count <= k;
+        return 0.0;
     }
 }
 ```
 
-- **Complexity:** Time O(n log(sum)), Space O(1)
-
----
-
-#### Problem: [Find in Mountain Array](https://leetcode.com/problems/find-in-mountain-array/) (LeetCode #1095)
-
-- **Intuition:** Mountain: strictly increasing then strictly decreasing. Find peak with binary search; then binary search left half (ascending), then right half (descending) if not found. Return minimum index.
-- **Brute Force:** Linear scan through the mountain array, calling `get(i)` for each index until the target is found. Time O(n), Space O(1)
-- **Optimized Approach:** 1) Binary search for peak: nums[i] < nums[i+1] → search right. 2) Binary search left [0, peak] ascending. 3) If found, return. 4) Binary search right [peak, n) descending. 5) Return -1 if not found.
-- **Java Solution:**
-
+**LC 1095 — Find in Mountain Array:**
 ```java
-/**
- * // This is MountainArray's API interface.
- * // You should not implement it, or speculate about its implementation
- * interface MountainArray {
- *     public int get(int index) {}
- *     public int length() {}
- * }
- */
 class Solution {
-    public int findInMountainArray(int target, MountainArray mountainArr) {
-        int n = mountainArr.length();
-        int peak = findPeak(mountainArr, n);
-        int left = binarySearchLeft(mountainArr, target, 0, peak);
-        if (left != -1) return left;
-        return binarySearchRight(mountainArr, target, peak, n - 1);
+    // TIME: O(log n) | SPACE: O(1)
+    public int findInMountainArray(int target, MountainArray arr) {
+        int n = arr.length();
+        int peak = findPeak(arr, n);
+
+        int result = searchAscending(arr, target, 0, peak);
+        if (result != -1) return result;
+        return searchDescending(arr, target, peak + 1, n - 1);
     }
 
     private int findPeak(MountainArray arr, int n) {
-        int left = 0, right = n - 1;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            if (arr.get(mid) < arr.get(mid + 1)) left = mid + 1;
-            else right = mid;
+        int lo = 0, hi = n - 1;
+        while (lo < hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (arr.get(mid) < arr.get(mid + 1)) lo = mid + 1;
+            else hi = mid;
         }
-        return left;
+        return lo;
     }
 
-    private int binarySearchLeft(MountainArray arr, int target, int left, int right) {
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
+    private int searchAscending(MountainArray arr, int target, int lo, int hi) {
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
             int val = arr.get(mid);
             if (val == target) return mid;
-            if (val < target) left = mid + 1;
-            else right = mid - 1;
+            else if (val < target) lo = mid + 1;
+            else hi = mid - 1;
         }
         return -1;
     }
 
-    private int binarySearchRight(MountainArray arr, int target, int left, int right) {
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
+    private int searchDescending(MountainArray arr, int target, int lo, int hi) {
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
             int val = arr.get(mid);
             if (val == target) return mid;
-            if (val > target) left = mid + 1;
-            else right = mid - 1;
+            else if (val > target) lo = mid + 1;  // descending: bigger values on left
+            else hi = mid - 1;
         }
         return -1;
     }
 }
 ```
 
-- **Complexity:** Time O(log n), Space O(1). Note: Limit 100 `get()` calls—three binary searches use ~3*log(n) ≈ 27 for n=10^4.
+---
+
+## 6. Common Mistakes & Interview Traps
+
+### Off-by-One Errors
+
+| Mistake | Consequence | Fix |
+|---------|-------------|-----|
+| Using `lo <= hi` with `hi = mid` | **Infinite loop** when `lo == hi == mid` | Use `lo < hi` with `hi = mid` |
+| Using `lo < hi` with `hi = mid - 1` | **Skips valid candidates** | Use `hi = mid` when mid could be the answer |
+| Returning `lo` when you need `lo - 1` | Wrong answer for "last occurrence" | Think about what `lo` represents at termination |
+
+### Infinite Loop Pitfalls
+
+```
+DANGER: lo < hi with lo = mid (when mid rounds DOWN to lo)
+```
+
+If `lo + 1 == hi` and you set `lo = mid`, then `mid = lo` → no progress → infinite loop.
+
+**Fix:** Use right-biased mid: `mid = lo + (hi - lo + 1) / 2` when updating `lo = mid`.
+
+### `lo <= hi` vs `lo < hi` — When Each Is Correct
+
+| Use `lo <= hi` when... | Use `lo < hi` when... |
+|------------------------|----------------------|
+| Looking for exact match | Looking for a boundary/condition |
+| Both `lo` and `hi` move past mid (`mid+1`, `mid-1`) | One pointer sets to `mid` (candidate preservation) |
+| Loop exits when search space is empty (`lo > hi`) | Loop exits when `lo == hi` (converged to answer) |
+| Classic binary search | Lower/upper bound, search on answer |
+
+### Mid Calculation Overflow
+
+```java
+// WRONG: overflows when lo + hi > Integer.MAX_VALUE
+int mid = (lo + hi) / 2;
+
+// CORRECT: safe for all non-negative lo, hi
+int mid = lo + (hi - lo) / 2;
+```
+
+For `long` answer spaces:
+```java
+long mid = lo + (hi - lo) / 2;  // use long throughout
+```
+
+### Other Frequent Mistakes
+
+| Mistake | Fix |
+|---------|-----|
+| Forgetting to handle "target not found" after lower bound | Check `nums[lo] == target` after convergence |
+| Using `int` for sum in feasibility check | Use `long` to avoid overflow |
+| Wrong comparison direction in rotated array | Draw it out: `[lo] <= [mid]` means left half is sorted |
+| Not caching `arr.get(mid)` in interactive problems | Store in variable; API calls may be limited |
+| Setting search bounds too tight | `lo = max(array)` and `hi = sum(array)` for shipping/splitting |
 
 ---
 
-## Common Mistakes & Edge Cases
+## 7. Interview Strategy
 
-- **`left + (right - left) / 2` vs `(left + right) / 2`:** Use the former to avoid integer overflow when left+right is large.
-- **Classic: `left <= right` vs `left < right`:** For exact match, use `<=` so the last element is checked. For boundary search, use `left < right` with right exclusive.
-- **Left boundary: `right = mid` vs `right = mid - 1`:** Use `right = mid` when you want to keep mid as a candidate (insert position / first occurrence).
-- **Right boundary: return `left - 1`** after searching for first index where element > target.
-- **Rotated array:** Check which half is sorted by comparing `nums[left]` with `nums[mid]` (or `nums[mid]` with `nums[right]`).
-- **Empty input:** Handle `nums.length == 0`, `matrix.length == 0`.
-- **Single element:** Peak problem: single element is a valid peak.
-- **Binary search on answer:** Ensure `feasible()` handles edge values; use `low < high` with `high = mid` for minimize.
-- **Median of Two Arrays:** Ensure nums1 is the smaller array; handle partition at 0 and at length.
-- **Mountain Array:** Minimize `get()` calls—cache `arr.get(mid)` instead of calling twice.
+### Target Times
 
-## Pattern Variations
+| Difficulty | Recognition | Coding | Testing | Total |
+|------------|-------------|--------|---------|-------|
+| Easy | 30 sec | 2 min | 1 min | 3-4 min |
+| Medium | 1 min | 5 min | 2 min | 8-10 min |
+| Hard | 2 min | 10 min | 3 min | 15-20 min |
 
-| Variation               | Example                           | Key Technique                                   |
-|-------------------------|-----------------------------------|-------------------------------------------------|
-| Classic exact           | Binary Search #704                | `while (left <= right)`, return mid or -1       |
-| Left boundary           | Search Insert #35                 | First index where `>= target`                   |
-| Right boundary          | Last occurrence, TimeMap #981     | Last index where `<= target`                    |
-| Rotated sorted          | #33, #153                         | Compare mid with endpoints, find sorted half    |
-| Peak finding            | #162, #1095                       | Compare mid with neighbor, climb toward peak   |
-| 2D matrix               | #74                               | Flatten index or search row then col            |
-| Binary search on answer | #875, #410                        | Feasible check, minimize/maximize threshold     |
-| Two arrays              | #4                                | Partition both, binary search on smaller        |
-| Interactive (API)       | #1095                             | Minimize API calls, cache get() results         |
+### Explanation Script (What to Say Out Loud)
+
+**Step 1 — Recognize (10 seconds):**
+> "The input is sorted / there's a monotonic property on the answer space, so I'll use binary search."
+
+**Step 2 — Clarify the search space (20 seconds):**
+> "I'm searching over [indices / answer values from X to Y]. My invariant is: `lo` always stays [below the answer / infeasible] and `hi` always stays [at or above the answer / feasible]."
+
+**Step 3 — State the predicate (20 seconds):**
+> "At each step, I check [condition]. If true, I move hi down (answer could be smaller). If false, I move lo up (need bigger)."
+
+**Step 4 — Complexity (10 seconds):**
+> "This gives me O(log n) iterations [× O(n) per feasibility check = O(n log n) total]."
+
+**Step 5 — Code and narrate:**
+> Write template, fill in the predicate, handle edge cases.
+
+### Common Follow-Up Questions & Answers
+
+| Follow-Up | Your Response |
+|-----------|---------------|
+| "What if there are duplicates?" | "For rotated array, worst case degrades to O(n). For boundaries, templates still work as-is." |
+| "Can you do this without extra space?" | "Binary search is already O(1) space." |
+| "What if the array is very large (doesn't fit in memory)?" | "Binary search only needs random access to one element per iteration — works great with external storage." |
+| "Prove it terminates." | "Search space strictly shrinks: `hi - lo` decreases by at least 1 each iteration." |
+| "What about the edge case where...?" | Test your code mentally with size-1 array, target at boundaries. |
+
+### Interview Pro Tips
+
+1. **State your invariant before coding** — interviewers love this
+2. **Draw the number line** — mark lo, mid, hi and show which half you eliminate
+3. **Test with a 2-3 element array** — catches most off-by-one bugs
+4. **For "search on answer" problems, define feasible() first** — then the binary search wrapper is mechanical
+
+---
+
+## 8. Revision Strategy + Quick Reference Card
+
+### Revision Schedule
+
+| Day | Activity |
+|-----|----------|
+| Day 1 | Solve LC 704, 35. Master both templates (classic + lower bound) |
+| Day 2 | Solve LC 34, 33, 153. Practice rotated array logic on paper |
+| Day 3 | Solve LC 875, 1011, 410. Focus on "define feasible()" step |
+| Day 4 | Solve LC 4, 1095. These are stretch goals for top-tier interviews |
+| Day 5 | Re-solve all medium problems without looking at notes. Target times. |
+| Day 7 | Revisit any problem you couldn't solve in target time |
+| Day 14 | Full timed drill: pick 3 random problems, solve under interview conditions |
+
+### Quick Reference Card
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              BINARY SEARCH — QUICK REFERENCE                     │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  mid = lo + (hi - lo) / 2          ← ALWAYS (avoid overflow)   │
+│                                                                  │
+│  ┌──────────────────┬───────────────┬────────────────────────┐  │
+│  │ Variant          │ Loop          │ Update                 │  │
+│  ├──────────────────┼───────────────┼────────────────────────┤  │
+│  │ Exact match      │ lo <= hi      │ lo=mid+1 / hi=mid-1   │  │
+│  │ Lower bound      │ lo < hi       │ lo=mid+1 / hi=mid     │  │
+│  │ Upper bound      │ lo < hi       │ lo=mid+1 / hi=mid     │  │
+│  │ Search on answer │ lo < hi       │ lo=mid+1 / hi=mid     │  │
+│  └──────────────────┴───────────────┴────────────────────────┘  │
+│                                                                  │
+│  RETURN VALUE:                                                   │
+│    Exact match  → mid (during loop) or -1                       │
+│    Lower bound  → lo (first >= target)                          │
+│    Upper bound  → lo - 1 (last <= target)                       │
+│    Answer space → lo (min feasible answer)                      │
+│                                                                  │
+│  ROTATED ARRAY:                                                  │
+│    nums[lo] <= nums[mid] → left half sorted                     │
+│    else → right half sorted                                     │
+│    Check if target in sorted half's range, else search other    │
+│                                                                  │
+│  SEARCH ON ANSWER TEMPLATE:                                      │
+│    1. Define search bounds: [min possible, max possible]        │
+│    2. Write feasible(candidate): bool                           │
+│    3. Binary search: feasible → hi=mid, else → lo=mid+1        │
+│                                                                  │
+│  INFINITE LOOP CHECK:                                            │
+│    ✓ lo=mid+1 with lo<hi and left-biased mid → SAFE            │
+│    ✓ hi=mid with lo<hi and left-biased mid → SAFE              │
+│    ✗ lo=mid with lo<hi and left-biased mid → INFINITE LOOP     │
+│      Fix: use right-biased mid = lo + (hi-lo+1)/2              │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Pattern Recognition Cheat Sheet
+
+```
+Sorted array + find element        → Template 1 (classic)
+Sorted array + insert position     → Template 2 (lower bound)
+Sorted array + first/last of X     → Template 2 + Template 3
+"Minimum X such that condition"    → Template 4 (search on answer)
+"Maximum X such that condition"    → Template 4 (flip predicate)
+Rotated sorted array               → Template 5
+Rotated + find min                 → lo<hi, compare mid with hi
+Peak finding                       → lo<hi, compare mid with mid+1
+Two sorted arrays + median         → Partition-based on smaller array
+```

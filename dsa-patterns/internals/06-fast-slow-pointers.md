@@ -1,72 +1,87 @@
-# Fast & Slow Pointers
+# Fast & Slow Pointers (Floyd's) — Interview Execution Playbook
 
-> Two pointers moving at different speeds reveal cycles, middles, and structural properties—without extra space or multiple passes.
+> Two pointers at different speeds — O(1) space cycle detection, midpoint finding, and implicit-graph traversal. The Swiss Army knife for linked list interviews.
 
-## What Is This Pattern?
+---
 
-The **Fast & Slow Pointers** pattern (also known as the **tortoise and hare** or **Floyd's cycle detection**) uses two pointers traversing a sequence at different speeds. Typically, the **slow pointer** advances by one step per iteration while the **fast pointer** advances by two. This asymmetry creates a predictable relationship: if there is a cycle, the fast pointer will eventually "lap" the slow one and meet it inside the cycle.
+## 1. Pattern Recognition Signals
 
-**Visual intuition:** Imagine a circular track with a tortoise and a hare. The hare runs twice as fast. If they start from the same point, the hare will eventually catch the tortoise from behind—proof of a loop. If the track is straight (no cycle), the hare simply reaches the end first. In linked lists or array-as-graph structures, we don't need to hash nodes or count steps; the meeting point (or its absence) tells us everything we need.
+**Reach for fast/slow pointers when you see ANY of these in the problem statement:**
 
-The pattern generalizes beyond cycle detection: when the fast pointer reaches the end of a linked list, the slow pointer is at the **middle** (or one step past it). We can also use it to find the **k-th element from the end** by giving the fast pointer a head start. These applications share one idea: **relative positioning** through differential speed—no extra data structures, often O(1) space.
+| Signal | Example Problem |
+|--------|----------------|
+| "cycle", "loop", "circular" in a linked list | #141, #142 |
+| "middle of linked list" | #876 |
+| "palindrome linked list" (need midpoint + reverse) | #234 |
+| "reorder list" (need midpoint + reverse + merge) | #143 |
+| Array with values in range `[1, n]` + "find duplicate" + O(1) space | #287 |
+| Repeated function application that either terminates or loops | #202 Happy Number |
+| "split linked list" for merge sort | Merge sort on linked list |
+| O(1) space constraint on a problem that screams HashSet | Any cycle/duplicate problem |
 
-## When to Use This Pattern
+**Speed of recognition matters.** When the interviewer says "linked list" + "cycle", your hand should already be writing `slow = head, fast = head`. When they say "find duplicate in O(1) space", you should immediately say "This array is an implicit linked list — Floyd's algorithm."
 
-- **Cycle detection** in linked lists or implicit linked structures (e.g., array indices as "next" pointers)
-- **Finding the middle** of a linked list in one pass
-- **Finding the k-th node from the end** without knowing the length
-- **Palindrome checks** on linked lists (find middle, reverse second half, compare)
-- **Reordering / restructuring** linked lists (split at middle, reverse, merge)
-- **Problems where** you need positional info (middle, nth-from-end) but can't afford multiple passes or O(n) extra space
+---
 
-## How to Identify This Pattern
+## 2. Thinking Framework
 
-- "Detect cycle" / "has cycle" / "circular"
-- "Middle of the linked list"
-- "Nth node from the end"
-- "Palindrome linked list"
-- "Reorder list" / "in-place reorder"
-- Array with values in range [1, n] and "find duplicate" (array becomes implicit linked list)
-- "Happy number" (repeated squaring leads to a cycle)
-- Single pass, O(1) space, linked list or array-as-graph
+### Why Does Fast Always Catch Slow? (The Proof You Should Know)
 
-## Core Template (Pseudocode)
+Once both pointers enter a cycle of length `C`:
+- Each step, the gap between fast and slow **decreases by exactly 1** (fast gains 1 step per iteration).
+- Starting gap is at most `C - 1`.
+- After at most `C - 1` iterations, the gap becomes 0 → they meet.
 
-### Cycle Detection
+**Key insight to explain in interview:** "Fast gains one position on slow per iteration. Since we're in a finite cycle, the relative distance shrinks by 1 each step. They must meet within one full cycle traversal."
+
+### The Math Behind Finding the Cycle Start (Floyd's Phase 2)
+
+This is the part interviewers love to probe. Here's the proof:
+
 ```
-slow = head
-fast = head
-WHILE fast != null AND fast.next != null:
-    slow = slow.next
-    fast = fast.next.next
-    IF slow == fast:
-        RETURN true  // cycle exists
-RETURN false
-```
+Let:
+  F = distance from head to cycle entrance
+  a = distance from cycle entrance to meeting point (along cycle direction)
+  C = cycle length
 
-### Find Middle
-```
-slow = head
-fast = head
-WHILE fast != null AND fast.next != null:
-    slow = slow.next
-    fast = fast.next.next
-RETURN slow  // middle (or second of two middles for even length)
+When slow and fast meet:
+  slow traveled: F + a
+  fast traveled: F + a + k*C  (for some integer k ≥ 1, fast looped k times)
+  fast traveled 2× slow: 2(F + a) = F + a + k*C
+  Simplify: F + a = k*C
+  Therefore: F = k*C - a = (k-1)*C + (C - a)
 ```
 
-### Find Cycle Start (after detection)
-```
-// After slow and fast meet inside cycle:
-slow = head
-WHILE slow != fast:
-    slow = slow.next
-    fast = fast.next
-RETURN slow  // cycle entrance
+**What this means:** If you place one pointer at head and one at the meeting point, and advance both by 1, they'll meet at the cycle entrance. The pointer from head travels `F` steps. The pointer from the meeting point travels `(k-1)*C + (C - a)` steps — it completes some full loops then covers the remaining `(C - a)` distance to reach the entrance. Both arrive at the same spot.
+
+**Interview delivery:** "After detection, I reset one pointer to head. Both advance one step at a time. The math guarantees they converge at the cycle entrance because the distance from head to entrance equals the distance from meeting point to entrance modulo cycle length."
+
+### Why Fast/Slow Finds the Middle
+
+When fast reaches the end of a list of length `n`:
+- fast has moved `n` (or `n-1`) steps
+- slow has moved `n/2` (or `(n-1)/2`) steps → slow is at the middle
+
+For even-length lists: `while (fast != null && fast.next != null)` lands slow on the **second middle** node (what LeetCode expects for #876). For problems like palindrome/reorder where you want to split into equal halves, use `while (fast.next != null && fast.next.next != null)` to land slow on the **first middle** (last node of the first half).
+
+---
+
+## 3. Java Templates
+
+### Standard ListNode Definition
+
+```java
+public class ListNode {
+    int val;
+    ListNode next;
+    ListNode() {}
+    ListNode(int val) { this.val = val; }
+    ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+}
 ```
 
-## Core Template (Java)
+### Template A: Cycle Detection (LC #141)
 
-### Cycle Detection
 ```java
 public boolean hasCycle(ListNode head) {
     ListNode slow = head, fast = head;
@@ -79,9 +94,37 @@ public boolean hasCycle(ListNode head) {
 }
 ```
 
-### Find Middle
+**Guard condition:** `fast != null && fast.next != null` prevents NPE on `fast.next.next`. This is the single most important line — get it wrong and you crash.
+
+### Template B: Find Cycle Start (LC #142)
+
 ```java
-public ListNode findMiddle(ListNode head) {
+public ListNode detectCycle(ListNode head) {
+    ListNode slow = head, fast = head;
+    while (fast != null && fast.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
+        if (slow == fast) {
+            // Phase 2: find entrance
+            slow = head;
+            while (slow != fast) {
+                slow = slow.next;
+                fast = fast.next;
+            }
+            return slow;
+        }
+    }
+    return null;
+}
+```
+
+**Two-phase structure:** Phase 1 detects. Phase 2 finds the entrance. Both are O(n) and O(1) space.
+
+### Template C: Find Middle of Linked List (LC #876)
+
+```java
+// Returns second middle for even-length lists (LeetCode convention)
+public ListNode middleNode(ListNode head) {
     ListNode slow = head, fast = head;
     while (fast != null && fast.next != null) {
         slow = slow.next;
@@ -91,211 +134,184 @@ public ListNode findMiddle(ListNode head) {
 }
 ```
 
-### Cycle Start (Floyd's Algorithm)
 ```java
-// After detecting cycle: slow and fast met
-public ListNode detectCycleStart(ListNode head, ListNode slow, ListNode fast) {
-    slow = head;
-    while (slow != fast) {
+// Returns first middle (for split-based problems: palindrome, reorder, merge sort)
+public ListNode firstMiddle(ListNode head) {
+    ListNode slow = head, fast = head;
+    while (fast.next != null && fast.next.next != null) {
         slow = slow.next;
-        fast = fast.next;
+        fast = fast.next.next;
     }
     return slow;
 }
 ```
 
-## Complexity Cheat Sheet
+**Which middle?** Use "second middle" for #876. Use "first middle" for #234 (palindrome), #143 (reorder), and merge sort — you need `slow` to be the last node of the first half so you can cut with `slow.next = null`.
 
-| Use Case              | Time | Space | Notes                           |
-|-----------------------|------|-------|---------------------------------|
-| Cycle detection       | O(n) | O(1)  | Fast catches slow in ≤ n steps  |
-| Find middle           | O(n) | O(1)  | One pass                        |
-| Find cycle start      | O(n) | O(1)  | After detection, ≤ n more steps |
-| Nth from end          | O(n) | O(1)  | Fast gets n-step head start     |
-| Reorder / Palindrome  | O(n) | O(1)  | Middle + reverse + merge        |
-| Find Duplicate (#287) | O(n) | O(1)  | Array as implicit linked list   |
+### Template D: Cycle Detection on Implicit Graph (LC #287 / LC #202)
 
----
-
-## Problems (Progressive Difficulty)
-
-### Standard ListNode Definition (for linked list problems)
+**Array as linked list (Find Duplicate Number):**
 
 ```java
-// LeetCode standard ListNode - include when solving linked list problems
-public class ListNode {
-    int val;
-    ListNode next;
-    ListNode() {}
-    ListNode(int val) { this.val = val; }
-    ListNode(int val, ListNode next) { this.val = val; this.next = next; }
-}
-```
+public int findDuplicate(int[] nums) {
+    int slow = 0, fast = 0;
 
----
+    // Phase 1: detect cycle
+    do {
+        slow = nums[slow];
+        fast = nums[nums[fast]];
+    } while (slow != fast);
 
-### Easy (2 problems)
-
-#### Problem: [Linked List Cycle](https://leetcode.com/problems/linked-list-cycle/) (LeetCode #141)
-
-- **Brute Force:** Use a HashSet to store visited nodes; if we encounter a node already in the set, a cycle exists. Time O(n), Space O(n).
-- **Intuition:** If the list has a cycle, the fast pointer will eventually meet the slow pointer. If there is no cycle, the fast pointer reaches the end (null) first.
-- **Approach:**
-  1. Initialize both pointers at `head`
-  2. Move slow by 1, fast by 2 each iteration
-  3. If `slow == fast`, a cycle exists
-  4. If fast (or fast.next) becomes null, no cycle
-- **Java Solution:**
-
-```java
-public class Solution {
-    public boolean hasCycle(ListNode head) {
-        ListNode slow = head, fast = head;
-        while (fast != null && fast.next != null) {
-            slow = slow.next;
-            fast = fast.next.next;
-            if (slow == fast) return true;
-        }
-        return false;
+    // Phase 2: find entrance (the duplicate value)
+    slow = 0;
+    while (slow != fast) {
+        slow = nums[slow];
+        fast = nums[fast];
     }
+    return slow;
 }
 ```
 
-- **Complexity:** Time O(n), Space O(1)
+**Why this works:** Array indices are "nodes", `nums[i]` is the "next pointer". Since values are in `[1, n]` and there are `n+1` entries, by pigeonhole there's a duplicate. The duplicate value is the cycle entrance — two different indices point to the same value.
+
+**Sequence as implicit graph (Happy Number):**
+
+```java
+public boolean isHappy(int n) {
+    int slow = n, fast = n;
+    do {
+        slow = digitSquareSum(slow);
+        fast = digitSquareSum(digitSquareSum(fast));
+    } while (slow != fast);
+    return slow == 1;
+}
+
+private int digitSquareSum(int n) {
+    int sum = 0;
+    while (n > 0) {
+        int d = n % 10;
+        sum += d * d;
+        n /= 10;
+    }
+    return sum;
+}
+```
+
+**Why this works:** The sequence of digit-square-sums either reaches 1 (and stays at 1 forever — a trivial cycle) or enters a cycle that never includes 1. Fast/slow detects the cycle; we just check if the meeting value is 1.
 
 ---
 
-#### Problem: [Middle of the Linked List](https://leetcode.com/problems/middle-of-the-linked-list/) (LeetCode #876)
+## 4. Edge Cases
 
-- **Brute Force:** Traverse once to get the length, then traverse again to the middle node. Time O(n), Space O(1).
-- **Intuition:** When the fast pointer reaches the end (or past it), the slow pointer is exactly at the middle. For even-length lists, slow ends at the second middle node (as per LeetCode).
-- **Approach:**
-  1. Both start at `head`
-  2. While `fast != null && fast.next != null`, move slow by 1, fast by 2
-  3. When the loop exits, `slow` is the middle node
-- **Java Solution:**
+| Edge Case | What Happens | Handle With |
+|-----------|-------------|-------------|
+| `head == null` | No list at all | Guard at top: `if (head == null) return ...` |
+| Single node, no cycle | `fast.next` is null immediately → loop never executes | Returns false/returns the node itself |
+| Single node, self-loop (`1 → 1`) | `slow = fast` on first iteration | Correctly detected by cycle check |
+| Two nodes, cycle (`1 → 2 → 1`) | Fast wraps, meets slow | Works normally |
+| Even-length list (middle) | `slow` at second middle vs. first middle | Choose correct while-condition (see Template C) |
+| All identical values in array (#287) | Cycle still exists in index graph | Works — we compare indices, not values |
+| `n = 1` for Happy Number | `digitSquareSum(1) = 1` → trivially happy | `slow == fast == 1` → returns true |
+| Very long tail before cycle | Phase 1 takes O(F + C) steps | Still O(n) overall |
+
+**The edge case that burns people most:** Even vs. odd length for middle-finding. Draw out a 4-node and 5-node list on paper. Trace slow/fast positions. Know which while-condition gives which middle.
+
+---
+
+## 5. Problem Progression
+
+### Tier 1: Core Mechanics (Do These First)
+
+| # | Problem | Difficulty | Core Technique | Key Insight |
+|---|---------|-----------|----------------|-------------|
+| 141 | [Linked List Cycle](https://leetcode.com/problems/linked-list-cycle/) | Easy | Template A | Fast/slow meet → cycle exists |
+| 876 | [Middle of Linked List](https://leetcode.com/problems/middle-of-the-linked-list/) | Easy | Template C | When fast finishes, slow is at middle |
+
+### Tier 2: Floyd's Full Algorithm
+
+| # | Problem | Difficulty | Core Technique | Key Insight |
+|---|---------|-----------|----------------|-------------|
+| 142 | [Linked List Cycle II](https://leetcode.com/problems/linked-list-cycle-ii/) | Medium | Template B | Phase 2: reset to head, both advance 1 → cycle entrance |
+| 202 | [Happy Number](https://leetcode.com/problems/happy-number/) | Easy | Template D | Digit-square sequence is an implicit graph; cycle to non-1 = unhappy |
+| 287 | [Find the Duplicate Number](https://leetcode.com/problems/find-the-duplicate-number/) | Medium | Template D | Array as implicit linked list; duplicate = cycle entrance |
+
+### Tier 3: Middle as a Building Block
+
+| # | Problem | Difficulty | Core Technique | Key Insight |
+|---|---------|-----------|----------------|-------------|
+| 234 | [Palindrome Linked List](https://leetcode.com/problems/palindrome-linked-list/) | Easy | Template C + reverse | Find middle → reverse second half → compare |
+| 143 | [Reorder List](https://leetcode.com/problems/reorder-list/) | Medium | Template C + reverse + merge | Find middle → reverse second half → interleave merge |
+
+### Full Solutions for Tier 2 and Tier 3 Problems
+
+---
+
+#### LC #234 — Palindrome Linked List
+
+**Approach:** Find the first middle → reverse second half → compare node by node.
 
 ```java
 class Solution {
-    public ListNode middleNode(ListNode head) {
-        ListNode slow = head, fast = head;
-        while (fast != null && fast.next != null) {
-            slow = slow.next;
-            fast = fast.next.next;
-        }
-        return slow;
-    }
-}
-```
+    public boolean isPalindrome(ListNode head) {
+        if (head == null || head.next == null) return true;
 
-- **Complexity:** Time O(n), Space O(1)
-
----
-
-### Medium (4 problems)
-
-#### Problem: [Linked List Cycle II](https://leetcode.com/problems/linked-list-cycle-ii/) (LeetCode #142)
-
-- **Brute Force:** Use a HashSet to store visited nodes; the first node we see twice is the cycle entrance. Time O(n), Space O(n).
-- **Intuition:** After detecting a cycle (slow meets fast), reset slow to head. Move both one step at a time until they meet again—that meeting point is the cycle entrance. (Proof: distance from head to cycle start = distance from meeting point to cycle start.)
-- **Approach:**
-  1. Use Floyd's cycle detection to find the meeting point
-  2. If no cycle, return null
-  3. Set slow = head, keep fast at meeting point
-  4. Move both one step until they meet; return that node
-- **Java Solution:**
-
-```java
-public class Solution {
-    public ListNode detectCycle(ListNode head) {
-        ListNode slow = head, fast = head;
-        while (fast != null && fast.next != null) {
-            slow = slow.next;
-            fast = fast.next.next;
-            if (slow == fast) {
-                slow = head;
-                while (slow != fast) {
-                    slow = slow.next;
-                    fast = fast.next;
-                }
-                return slow;
-            }
-        }
-        return null;
-    }
-}
-```
-
-- **Complexity:** Time O(n), Space O(1)
-
----
-
-#### Problem: [Happy Number](https://leetcode.com/problems/happy-number/) (LeetCode #202)
-
-- **Brute Force:** Use a HashSet to store seen numbers in the digit-sum sequence; if we see a repeat before reaching 1, the number is not happy. Time O(log n) per step, Space O(log n).
-- **Intuition:** Repeatedly replacing n by the sum of squares of its digits creates a sequence. If we ever reach 1, we're happy. Otherwise we enter a cycle (numbers are bounded). Use fast/slow: if fast reaches 1, happy; if slow meets fast and neither is 1, not happy.
-- **Approach:**
-  1. Slow and fast both start at n
-  2. slow = next(slow), fast = next(next(fast))
-  3. If fast == 1, return true
-  4. If slow == fast (and both != 1), return false
-- **Java Solution:**
-
-```java
-class Solution {
-    public boolean isHappy(int n) {
-        int slow = n, fast = n;
-        do {
-            slow = sumOfSquares(slow);
-            fast = sumOfSquares(sumOfSquares(fast));
-            if (fast == 1) return true;
-        } while (slow != fast);
-        return false;
-    }
-
-    private int sumOfSquares(int n) {
-        int sum = 0;
-        while (n > 0) {
-            int d = n % 10;
-            sum += d * d;
-            n /= 10;
-        }
-        return sum;
-    }
-}
-```
-
-- **Complexity:** Time O(log n) per digit op, Space O(1)
-
----
-
-#### Problem: [Reorder List](https://leetcode.com/problems/reorder-list/) (LeetCode #143)
-
-- **Brute Force:** Copy all nodes into an array, then reorder by alternating indices (0, n-1, 1, n-2, ...) and rebuild the list. Time O(n), Space O(n).
-- **Intuition:** Reorder L0→L1→…→Ln-1 to L0→Ln→L1→Ln-1→… Use fast/slow to find the middle, reverse the second half, then merge the two lists alternately.
-- **Approach:**
-  1. Find middle with fast/slow
-  2. Reverse the second half (from middle.next onward)
-  3. Merge: alternate nodes from first half and reversed second half
-- **Java Solution:**
-
-```java
-class Solution {
-    public void reorderList(ListNode head) {
-        if (head == null || head.next == null) return;
-
-        // Find middle
         ListNode slow = head, fast = head;
         while (fast.next != null && fast.next.next != null) {
             slow = slow.next;
             fast = fast.next.next;
         }
 
-        // Reverse second half
+        ListNode secondHalf = reverse(slow.next);
+        ListNode firstHalf = head;
+
+        while (secondHalf != null) {
+            if (firstHalf.val != secondHalf.val) return false;
+            firstHalf = firstHalf.next;
+            secondHalf = secondHalf.next;
+        }
+        return true;
+    }
+
+    private ListNode reverse(ListNode head) {
+        ListNode prev = null;
+        while (head != null) {
+            ListNode next = head.next;
+            head.next = prev;
+            prev = head;
+            head = next;
+        }
+        return prev;
+    }
+}
+```
+
+**Complexity:** Time O(n), Space O(1). Three linear passes: find middle, reverse, compare.
+
+**Interview note:** If asked "should you restore the list?", say yes for production code, but clarify with the interviewer whether it's needed. Restoring means reversing the second half again after comparison.
+
+---
+
+#### LC #143 — Reorder List
+
+**Approach:** Find middle → cut → reverse second half → interleave merge.
+
+```java
+class Solution {
+    public void reorderList(ListNode head) {
+        if (head == null || head.next == null) return;
+
+        // Find first middle (last node of first half)
+        ListNode slow = head, fast = head;
+        while (fast.next != null && fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        // Cut and reverse second half
         ListNode second = reverse(slow.next);
         slow.next = null;
 
-        // Merge
+        // Interleave merge
         ListNode first = head;
         while (second != null) {
             ListNode tmp1 = first.next, tmp2 = second.next;
@@ -319,159 +335,158 @@ class Solution {
 }
 ```
 
-- **Complexity:** Time O(n), Space O(1)
+**Complexity:** Time O(n), Space O(1). The interleave merge is the tricky part — trace through a 4-node example to internalize the pointer dance.
 
 ---
 
-#### Problem: [Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list/) (LeetCode #19)
+#### Using Fast/Slow for Merge Sort on Linked Lists
 
-- **Brute Force:** Two passes: first get the list length, then traverse to the (length - n)th node and remove it. Time O(n), Space O(1).
-- **Intuition:** Give the fast pointer an n-step head start. When fast reaches the last node (or past it), slow is at the node before the one to remove.
-- **Approach:**
-  1. Use a dummy node to handle removal of head
-  2. Move fast n+1 steps ahead (so when fast is at null, slow is at predecessor of Nth-from-end)
-  3. Move both until fast == null
-  4. Remove slow.next
-- **Java Solution:**
+Finding the middle is the key step that enables merge sort on linked lists without random access:
 
 ```java
-class Solution {
-    public ListNode removeNthFromEnd(ListNode head, int n) {
-        ListNode dummy = new ListNode(0);
-        dummy.next = head;
-        ListNode fast = dummy, slow = dummy;
-        for (int i = 0; i <= n; i++) {
-            fast = fast.next;
-        }
-        while (fast != null) {
-            slow = slow.next;
-            fast = fast.next;
-        }
-        slow.next = slow.next.next;
-        return dummy.next;
+public ListNode sortList(ListNode head) {
+    if (head == null || head.next == null) return head;
+
+    // Split at middle
+    ListNode mid = firstMiddle(head);
+    ListNode right = mid.next;
+    mid.next = null;
+
+    // Recurse
+    ListNode left = sortList(head);
+    right = sortList(right);
+
+    // Merge sorted halves
+    return merge(left, right);
+}
+
+private ListNode firstMiddle(ListNode head) {
+    ListNode slow = head, fast = head;
+    while (fast.next != null && fast.next.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
     }
+    return slow;
+}
+
+private ListNode merge(ListNode l1, ListNode l2) {
+    ListNode dummy = new ListNode(0), tail = dummy;
+    while (l1 != null && l2 != null) {
+        if (l1.val <= l2.val) { tail.next = l1; l1 = l1.next; }
+        else { tail.next = l2; l2 = l2.next; }
+        tail = tail.next;
+    }
+    tail.next = (l1 != null) ? l1 : l2;
+    return dummy.next;
 }
 ```
 
-- **Complexity:** Time O(n), Space O(1)
+---
+
+## 6. Common Mistakes
+
+| Mistake | Why It Fails | Fix |
+|---------|-------------|-----|
+| Starting `fast` at `head.next` instead of `head` | Off-by-one for short lists, wrong middle calculation | Always `slow = head, fast = head` |
+| Checking only `fast != null` without `fast.next != null` | NPE on `fast.next.next` when list has even length | Always `while (fast != null && fast.next != null)` |
+| Using wrong while-condition for "first middle" vs. "second middle" | Wrong split point for palindrome/reorder — comparison fails or nodes get lost | `fast != null && fast.next != null` → second middle; `fast.next != null && fast.next.next != null` → first middle |
+| Forgetting `slow.next = null` after finding middle (for split problems) | The two halves remain connected → infinite loop or wrong result during merge/reverse | Always cut: `slow.next = null` |
+| In #287, starting at index `nums[0]` instead of index `0` | Misses the "head" of the implicit list; wrong cycle entrance | `slow = 0, fast = 0` — index 0 is the virtual head, not part of the cycle |
+| In #287, using `do-while` in phase 2 | Phase 2 must use `while` — if you use `do-while`, you skip checking the initial position | Phase 1: `do-while` (need at least one step). Phase 2: `while` (check immediately) |
+| Not handling `head == null` in split-based problems | NPE on `fast.next` | Guard clause at the top |
+| Confusing `slow == fast` (reference equality) with value equality | For linked lists, we compare node references (same object), not values | Use `==` for nodes (correct in Java for reference comparison) |
 
 ---
 
-### Hard (2 problems)
+## 7. Interview Strategy
 
-#### Problem: [Find the Duplicate Number](https://leetcode.com/problems/find-the-duplicate-number/) (LeetCode #287)
+### Opening (First 2 Minutes)
 
-- **Brute Force:** Use a HashSet; the first number we see twice is the duplicate. Time O(n), Space O(n).
-- **Intuition:** The array maps index i → nums[i], forming an implicit linked list. Because there's exactly one duplicate, there's exactly one node with two incoming edges—a cycle. Use Floyd's cycle detection: find meeting point, then find cycle entrance.
-- **Approach:**
-  1. Treat slow = nums[slow], fast = nums[nums[fast]] as pointer moves
-  2. Find meeting point (cycle exists guaranteed)
-  3. Reset slow = 0 (head), move both one step; meeting point is the duplicate
-- **Java Solution:**
+1. **Confirm input/output.** "So I'm given a linked list head, and I need to return whether there's a cycle — true or false?"
+2. **State the pattern.** "This is a classic fast-and-slow-pointer problem. I'll use Floyd's cycle detection — O(n) time, O(1) space."
+3. **Briefly mention brute force.** "We could use a HashSet to track visited nodes — that's O(n) time and O(n) space. But Floyd's avoids the extra space."
 
-```java
-class Solution {
-    public int findDuplicate(int[] nums) {
-        int slow = 0, fast = 0;
-        do {
-            slow = nums[slow];
-            fast = nums[nums[fast]];
-        } while (slow != fast);
+### Implementation (Minutes 2-10)
 
-        slow = 0;
-        while (slow != fast) {
-            slow = nums[slow];
-            fast = nums[fast];
-        }
-        return slow;
-    }
-}
+4. **Write the code.** Template A/B/C/D depending on the problem. These are short — you should be able to write any of them from memory in under 2 minutes.
+5. **Narrate while coding.** "Both pointers start at head. Fast moves two steps, slow moves one. If they meet, there's a cycle. If fast hits null, no cycle."
+6. **State the guard condition explicitly.** "I check `fast != null && fast.next != null` before accessing `fast.next.next` to avoid a null pointer exception."
+
+### Trace & Verify (Minutes 10-15)
+
+7. **Dry run on a small example.** Draw a 4-5 node list with a cycle, trace slow/fast positions. Show they meet.
+8. **Run through edge cases.** Null head, single node, two nodes with/without cycle.
+9. **State complexity.** "Time is O(n) because fast traverses at most 2n nodes before meeting slow or hitting null. Space is O(1) — just two pointers."
+
+### If Asked for the Proof (Bonus Points)
+
+10. **Explain the relative-speed argument.** "Once both are in the cycle, fast closes the gap by 1 each step. They must meet within C iterations, where C is the cycle length."
+11. **Explain phase 2 for cycle start.** "After meeting, slow has traveled F + a, fast has traveled F + a + kC. Since fast moves 2x slow, F + a = kC, so F = kC - a. If I reset one pointer to head and both advance by 1, they'll converge at the cycle entrance."
+
+### Complexity Summary to State Aloud
+
+| Problem | Time | Space |
+|---------|------|-------|
+| Cycle detection (#141) | O(n) | O(1) |
+| Cycle start (#142) | O(n) | O(1) |
+| Middle of list (#876) | O(n) | O(1) |
+| Happy Number (#202) | O(log n) per step, bounded iterations | O(1) |
+| Find Duplicate (#287) | O(n) | O(1) |
+| Palindrome List (#234) | O(n) | O(1) |
+| Reorder List (#143) | O(n) | O(1) |
+
+---
+
+## 8. Revision + Quick Reference
+
+### 30-Second Recall Drill
+
+1. **Cycle detection:** Both start at head. Slow +1, fast +2. Meet → cycle. Null → no cycle.
+2. **Cycle start:** After meeting, reset slow to head. Both +1. They meet at entrance.
+3. **Middle:** Both start at head. Slow +1, fast +2. When fast done, slow = middle.
+4. **Implicit graph:** Array index → value is a "next pointer". Floyd's finds the duplicate/cycle.
+
+### Pattern Decision Tree
+
+```
+Is there a cycle to detect?
+├── Linked list cycle? → Template A (#141) or Template B (#142)
+├── Number sequence loops? → Template D with custom next() (#202)
+└── Array with values in [1,n], find duplicate? → Template D with nums[i] as next (#287)
+
+Need the middle of a linked list?
+├── Just return middle? → Template C, second middle (#876)
+└── Need to split for further processing?
+    ├── Palindrome check? → First middle + reverse + compare (#234)
+    ├── Reorder list? → First middle + reverse + interleave (#143)
+    └── Merge sort on list? → First middle + recursive sort + merge
 ```
 
-- **Complexity:** Time O(n), Space O(1)
+### The Four Templates on One Page
 
----
-
-#### Problem: [Palindrome Linked List](https://leetcode.com/problems/palindrome-linked-list/) (LeetCode #234)
-
-- **Brute Force:** Copy the list values into an array, then use two pointers to check if the array is a palindrome. Time O(n), Space O(n).
-- **Intuition:** Find the middle with fast/slow, reverse the second half, then compare first half with reversed second half node-by-node.
-- **Approach:**
-  1. Find middle (slow)
-  2. Reverse from slow (or slow.next for odd length—handle even/odd)
-  3. Compare first half with reversed second half
-  4. (Optional) Restore the list by reversing again
-- **Java Solution:**
-
-```java
-class Solution {
-    public boolean isPalindrome(ListNode head) {
-        if (head == null || head.next == null) return true;
-
-        // Find middle (first of second half for even length)
-        ListNode slow = head, fast = head;
-        while (fast != null && fast.next != null) {
-            slow = slow.next;
-            fast = fast.next.next;
-        }
-
-        // Reverse second half
-        ListNode second = reverse(slow);
-        ListNode first = head;
-
-        // Compare
-        while (second != null) {
-            if (first.val != second.val) return false;
-            first = first.next;
-            second = second.next;
-        }
-        return true;
-    }
-
-    private ListNode reverse(ListNode head) {
-        ListNode prev = null;
-        while (head != null) {
-            ListNode next = head.next;
-            head.next = prev;
-            prev = head;
-            head = next;
-        }
-        return prev;
-    }
-}
+```
+Template A (Detect Cycle):      while (fast && fast.next) { slow++; fast+=2; if meet → cycle }
+Template B (Find Cycle Start):  Template A + reset slow to head, both +1 until meet
+Template C (Find Middle):       while (fast && fast.next) { slow++; fast+=2 } → slow is middle
+Template D (Implicit Graph):    same as B but next = nums[i] or f(x) instead of node.next
 ```
 
-- **Complexity:** Time O(n), Space O(1)
+### Connections to Other Patterns
 
----
+| Pattern | How Fast/Slow Connects |
+|---------|----------------------|
+| **Two Pointers** | Fast/slow IS a two-pointer technique — just with unequal speeds |
+| **Linked List Reversal** | Palindrome (#234) and Reorder (#143) combine middle-finding with in-place reversal |
+| **Merge Sort** | Finding middle via fast/slow enables merge sort on linked lists without random access |
+| **Hash Map** | HashSet is the brute-force alternative Floyd's replaces — mention it, then optimize |
+| **Math/Number Theory** | Happy Number (#202) uses Floyd's on a mathematical sequence |
 
-## Common Mistakes & Edge Cases
+### Must-Memorize Checklist
 
-| Mistake | Fix |
-|--------|-----|
-| Starting fast at `head.next` | Both should start at `head`; otherwise off-by-one for short lists |
-| Checking only `fast != null` | Check `fast != null && fast.next != null` before `fast.next.next` to avoid NPE |
-| Forgetting dummy for Remove Nth | Use dummy when removing head (n = length) |
-| Wrong middle for even-length | LeetCode #876: slow ends at second middle. For "first middle" use different condition |
-| Modifying list without restoring | Palindrome: if you must preserve list, reverse second half again after comparison |
-| Array index 0 in #287 | Indices 0..n; nums[i] in 1..n. Start slow=0, fast=0; next is nums[slow] |
-| Assuming cycle always exists | #141: return false when fast reaches null |
-
-**Edge Cases:**
-- Empty list (`head == null`)
-- Single node (no cycle possible; middle is that node)
-- Two nodes (cycle: 1→2→1; middle: second node per #876)
-- n = length in Remove Nth (removes head—use dummy)
-- All same values in array (#287 still works—cycle in implicit graph)
-
-## Pattern Variations
-
-| Variation | Example | Key Technique |
-|-----------|---------|---------------|
-| **Cycle detection** | Linked List Cycle (#141, #142) | slow +1, fast +2; meeting ⇒ cycle |
-| **Find cycle start** | Linked List Cycle II (#142), Find Duplicate (#287) | Reset slow to head; move both +1 until meet |
-| **Find middle** | Middle of List (#876), Reorder (#143), Palindrome (#234) | slow +1, fast +2; slow is middle when fast at end |
-| **Nth from end** | Remove Nth Node (#19) | Fast gets n-step head start |
-| **Implicit linked list** | Find Duplicate (#287) | Index → value forms graph; cycle detection finds duplicate |
-| **Sequence as graph** | Happy Number (#202) | Digit sum sequence; cycle ⇒ not happy |
-| **Split + reverse + merge** | Reorder List (#143), Palindrome (#234) | Middle → reverse second half → merge or compare |
+- [ ] Template A: 5 lines, cycle detection
+- [ ] Template B: Template A + 5 more lines for phase 2
+- [ ] Template C: 4 lines, middle finding (know both while-conditions)
+- [ ] Template D: Floyd's on array/sequence — `do-while` for phase 1, `while` for phase 2
+- [ ] The proof: `F = kC - a` → why phase 2 works
+- [ ] Even vs. odd middle: which while-condition gives which middle
+- [ ] #287 insight: array indices form implicit linked list, duplicate = cycle entrance

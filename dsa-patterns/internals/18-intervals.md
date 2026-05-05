@@ -1,103 +1,174 @@
-# Interval Problems
+# Intervals — Interview Execution Playbook
 
-> Model time ranges, meetings, or spans as [start, end] pairs. Sorting, merging, scanning, and sweep-line techniques handle overlap, coverage, and scheduling efficiently.
+> Sort by start, scan left-to-right, merge or track overlaps. Every interval problem reduces to: "after sorting, how do adjacent ranges relate?"
 
-## What Is This Pattern?
+---
 
-**Interval problems** deal with ranges over a 1D line—meetings, bookings, balloons, etc. Represent each as `[start, end]`. Key operations: **merge** overlapping intervals, **count** non-overlapping, **insert** new intervals, **find** intersections or free time. Most solutions: (1) **Sort** by start or end; (2) **Scan** with a single pass, updating state (current end, count, etc.); (3) **Sweep line** for complex cases (start/end events).
+## 1. Pattern Recognition Signals
 
-Common techniques: sort by end for "max non-overlapping" (activity selection), sort by start for merging, use a min-heap for "minimum meeting rooms" (chronological ordering of start/end events).
+**You're looking at an intervals problem when you see:**
 
-## When to Use This Pattern
+| Signal | Example Phrasing |
+|--------|------------------|
+| Overlapping ranges | "merge overlapping intervals", "find all intersections" |
+| Schedule / calendar conflicts | "can a person attend all meetings", "minimum rooms needed" |
+| Insert or remove from sorted ranges | "insert a new interval into non-overlapping list" |
+| The word "intervals" in the problem | "given a list of intervals...", "interval list intersections" |
+| Free time / gaps | "find common free time across schedules" |
+| Coverage or containment | "remove covered intervals", "minimum arrows to burst balloons" |
 
-- Input is **ranges**, **intervals**, **meetings**, or **time slots**.
-- You need to **merge**, **insert**, **remove overlaps**, or **count**.
-- Problem asks for **free time**, **conflicts**, **rooms needed**, or **coverage**.
-- Phrases like "overlapping", "merge intervals", "meeting rooms", "non-overlapping", "insert interval".
+**Data shape giveaway:** Input is `int[][]` where each element is `[start, end]`. If you see a list of pairs representing ranges on a number line or timeline, this is the pattern.
 
-## How to Identify This Pattern
+**Contrast with other patterns:**
+- If ranges represent indices into an array and you process elements within → likely **sliding window**
+- If you need optimal substructure across ranges → likely **DP on intervals**
+- If pairs represent graph edges → likely **graph** problem
 
-```
-Is the input a set of [start, end] pairs (or equivalent)?
-    NO → Consider other patterns
-    YES ↓
+---
 
-Do we need to reason about overlap, coverage, or ordering?
-    YES → INTERVAL PATTERN
+## 2. Thinking Framework
 
-Typical tasks: merge, insert, count non-overlapping, rooms, free time
-```
+When you see an intervals problem in an interview, execute this mental pipeline:
 
-## Core Template (Pseudocode)
+### Step 1: Sort
 
-### Merge Overlapping Intervals
+Almost every interval problem starts with sorting. The sort key depends on the goal:
 
-```
-FUNCTION merge(intervals):
-    SORT intervals by start
-    result = [intervals[0]]
+| Goal | Sort By | Why |
+|------|---------|-----|
+| Merge overlapping | **start** | Process left-to-right, extend the running interval |
+| Max non-overlapping / min removals | **end** | Greedy: pick the interval that finishes earliest, leaving maximum room |
+| Min rooms / max concurrent | **start** (or sweep events) | Track what's active at each point in time |
+| Intersections of two lists | Already sorted (given) | Two-pointer merge |
 
-    FOR i FROM 1 TO n-1:
-        last = result.last
-        IF intervals[i].start <= last.end:
-            last.end = max(last.end, intervals[i].end)
-        ELSE:
-            result.append(intervals[i])
+### Step 2: Process Linearly
 
-    RETURN result
-```
-
-### Max Non-Overlapping (Activity Selection)
+After sorting, a single left-to-right pass handles most problems. At each step, compare the current interval with the "active" state:
 
 ```
-FUNCTION maxNonOverlapping(intervals):
-    SORT intervals by end
-    count = 1
-    prevEnd = intervals[0].end
-
-    FOR i FROM 1 TO n-1:
-        IF intervals[i].start >= prevEnd:
-            count++
-            prevEnd = intervals[i].end
-
-    RETURN count
+For each interval curr (after sorting):
+    Compare curr.start with previous.end
+    
+    If curr.start <= prev.end → OVERLAP detected
+        Action depends on problem: merge, count, skip
+    
+    If curr.start > prev.end → NO OVERLAP
+        Action depends on problem: add gap, start new group, advance pointer
 ```
 
-### Min Meeting Rooms (Sweep)
+### Step 3: Merge, Count, or Track Overlaps
+
+The action in the overlap/no-overlap branch defines the sub-pattern:
+
+| Sub-pattern | On Overlap | On No Overlap |
+|-------------|-----------|---------------|
+| **Merge** | Extend end: `end = max(end, curr.end)` | Push current as new interval |
+| **Count non-overlapping** | Skip (count removal) | Keep (update prevEnd) |
+| **Min rooms (heap)** | Push curr end to heap | Pop expired from heap, push curr |
+| **Intersection** | Output `[max(starts), min(ends)]` | Advance the pointer with smaller end |
+
+### The Three Core Formulas
 
 ```
-FUNCTION minRooms(intervals):
-    events = [(start, +1), (end, -1) for each interval]
-    SORT events by (time, then -1 before +1 so end before start)
-    count = 0, maxCount = 0
-    FOR (time, delta) in events:
-        count += delta
-        maxCount = max(maxCount, count)
-    RETURN maxCount
+Overlap detection:     b.start <= a.end        (after sorting by start)
+Merge:                 a.end = max(a.end, b.end)
+Meeting rooms:         heap.size() = number of concurrent intervals at any point
 ```
 
-## Core Template (Java)
+---
 
-### Merge Overlapping
+## 3. Java Templates
+
+### Template 1: Merge Intervals
+
+The foundational template. Sort by start, walk through, extend or create new.
 
 ```java
 public int[][] merge(int[][] intervals) {
-    if (intervals.length == 0) return new int[0][2];
-    java.util.Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
-    var result = new java.util.ArrayList<int[]>();
-    result.add(intervals[0]);
+    Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+    List<int[]> res = new ArrayList<>();
+    res.add(intervals[0]);
     for (int i = 1; i < intervals.length; i++) {
-        int[] last = result.get(result.size() - 1);
+        int[] last = res.get(res.size() - 1);
         if (intervals[i][0] <= last[1])
             last[1] = Math.max(last[1], intervals[i][1]);
         else
-            result.add(intervals[i]);
+            res.add(intervals[i]);
     }
-    return result.toArray(new int[0][]);
+    return res.toArray(new int[0][]);
 }
 ```
 
-### Min Meeting Rooms (Sweep Line)
+**When to use:** Any problem that says "merge", "combine", or "union" of intervals.
+
+### Template 2: Insert Interval
+
+Three-phase pass: add all before, merge overlapping, add all after.
+
+```java
+public int[][] insert(int[][] intervals, int[] newInterval) {
+    List<int[]> res = new ArrayList<>();
+    int i = 0, n = intervals.length;
+
+    while (i < n && intervals[i][1] < newInterval[0])
+        res.add(intervals[i++]);
+
+    while (i < n && intervals[i][0] <= newInterval[1]) {
+        newInterval[0] = Math.min(newInterval[0], intervals[i][0]);
+        newInterval[1] = Math.max(newInterval[1], intervals[i][1]);
+        i++;
+    }
+    res.add(newInterval);
+
+    while (i < n)
+        res.add(intervals[i++]);
+    return res.toArray(new int[0][]);
+}
+```
+
+**When to use:** Input is already sorted and non-overlapping; you must insert one new interval.
+
+### Template 3: Non-overlapping Count (Activity Selection)
+
+Sort by **end**. Greedily keep intervals that start after or at the previous end.
+
+```java
+public int eraseOverlapIntervals(int[][] intervals) {
+    Arrays.sort(intervals, (a, b) -> Integer.compare(a[1], b[1]));
+    int keep = 1, prevEnd = intervals[0][1];
+    for (int i = 1; i < intervals.length; i++) {
+        if (intervals[i][0] >= prevEnd) {
+            keep++;
+            prevEnd = intervals[i][1];
+        }
+    }
+    return intervals.length - keep;
+}
+```
+
+**When to use:** "Minimum removals for non-overlapping", "maximum non-overlapping intervals", "minimum arrows".
+
+### Template 4: Meeting Rooms II (Min-Heap of End Times)
+
+Each heap entry is the end time of an active meeting. Heap size = rooms in use.
+
+```java
+public int minMeetingRooms(int[][] intervals) {
+    Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+    PriorityQueue<Integer> heap = new PriorityQueue<>();
+    for (int[] iv : intervals) {
+        if (!heap.isEmpty() && heap.peek() <= iv[0])
+            heap.poll();
+        heap.offer(iv[1]);
+        // heap.size() = rooms currently needed
+    }
+    return heap.size();
+}
+```
+
+**Why min-heap works:** The heap holds end times of all active meetings. Before adding a new meeting, check if the earliest-ending meeting finishes before this one starts. If yes, that room is freed (poll). Either way, push the new meeting's end. The max heap size seen = answer.
+
+**Alternate approach — sweep line with two sorted arrays:**
 
 ```java
 public int minMeetingRooms(int[][] intervals) {
@@ -107,48 +178,130 @@ public int minMeetingRooms(int[][] intervals) {
         starts[i] = intervals[i][0];
         ends[i] = intervals[i][1];
     }
-    java.util.Arrays.sort(starts);
-    java.util.Arrays.sort(ends);
+    Arrays.sort(starts);
+    Arrays.sort(ends);
     int rooms = 0, maxRooms = 0, s = 0, e = 0;
     while (s < n) {
-        if (starts[s] < ends[e]) {
-            rooms++;
-            s++;
-            maxRooms = Math.max(maxRooms, rooms);
-        } else {
-            rooms--;
-            e++;
-        }
+        if (starts[s] < ends[e]) { rooms++; s++; maxRooms = Math.max(maxRooms, rooms); }
+        else                     { rooms--; e++; }
     }
     return maxRooms;
 }
 ```
 
-## Complexity Cheat Sheet
+Both approaches are O(n log n). The heap version is more intuitive for interviews; the sweep line version uses less space conceptually.
 
-| Operation              | Time       | Space  | Notes                       |
-|------------------------|------------|--------|-----------------------------|
-| Merge intervals        | O(n log n) | O(n)   | Sort by start               |
-| Insert interval        | O(n)       | O(n)   | Or O(log n) with TreeMap    |
-| Non-overlapping count   | O(n log n) | O(1)   | Sort by end                 |
-| Min rooms (sweep)       | O(n log n) | O(n)   | Sort starts and ends        |
-| Interval intersections | O(n + m)   | O(1)   | Two pointers if sorted      |
+### Template 5: Interval List Intersections (Two Pointers)
 
-## Problems (Progressive Difficulty)
+Both lists are sorted and disjoint. Walk through with two pointers.
 
-### Easy (2 problems)
+```java
+public int[][] intervalIntersection(int[][] A, int[][] B) {
+    List<int[]> res = new ArrayList<>();
+    int i = 0, j = 0;
+    while (i < A.length && j < B.length) {
+        int lo = Math.max(A[i][0], B[j][0]);
+        int hi = Math.min(A[i][1], B[j][1]);
+        if (lo <= hi)
+            res.add(new int[]{lo, hi});
+        if (A[i][1] < B[j][1]) i++;
+        else j++;
+    }
+    return res.toArray(new int[0][]);
+}
+```
 
-#### Problem: [Meeting Rooms](https://leetcode.com/problems/meeting-rooms/) (LeetCode #252)
+**Key insight:** Intersection of `[a1, a2]` and `[b1, b2]` is `[max(a1,b1), min(a2,b2)]` — valid only when `max(starts) <= min(ends)`. Advance the pointer whose interval ends first because that interval can't intersect with anything else.
 
-- **Intuition:** Can one person attend all meetings? No overlap between any two. Sort by start; check intervals[i].start >= intervals[i-1].end.
-- **Brute Force:** Compare every pair of intervals for overlap. Time O(n²), Space O(1).
-- **Approach:** 1) Sort by start. 2) For i from 1 to n-1: if intervals[i][0] < intervals[i-1][1] return false. 3) Return true.
-- **Java Solution:**
+---
+
+## 4. Edge Cases
+
+| Edge Case | Why It Matters | How to Handle |
+|-----------|---------------|---------------|
+| Empty input | `intervals.length == 0` | Return empty array; check before accessing `intervals[0]` |
+| Single interval | Nothing to merge/compare | Usually returned as-is; ensure loop bounds are safe |
+| All intervals identical | `[[1,3],[1,3],[1,3]]` | Merge collapses to single `[1,3]`; rooms needed = n |
+| Touching boundaries | `[1,2],[2,3]` — overlap or not? | **Problem-dependent.** Merge Intervals: `<=` means touching = overlap. Meeting Rooms: if `[0,30],[30,40]` the second starts exactly when first ends — usually NOT a conflict |
+| Intervals already sorted | Insert Interval gives sorted input | Skip the sort; recognize the O(n) opportunity |
+| Interval fully contains another | `[1,10]` contains `[2,3]` | Merge: `max(end)` handles it. Covered intervals: this is the removal target |
+| Very large coordinates | `start = -10^9, end = 10^9` | Use `Integer.compare()` not subtraction (overflow risk with `a[0] - b[0]`) |
+| newInterval doesn't overlap anything | Insert at beginning or end of list | The three-phase insert template handles this naturally |
+
+---
+
+## 5. Problem Progression
+
+### Level 1: Foundation
+
+#### LC 56 — Merge Intervals
+
+- **Core idea:** Sort by start. Walk through; if `curr.start <= last.end`, extend `last.end = max(last.end, curr.end)`. Otherwise push new interval.
+- **Brute force:** Compare all pairs O(n²) and merge repeatedly until stable.
+- **Approach:** Sort by start → single merge pass.
+
+```java
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+        List<int[]> res = new ArrayList<>();
+        res.add(intervals[0]);
+        for (int i = 1; i < intervals.length; i++) {
+            int[] last = res.get(res.size() - 1);
+            if (intervals[i][0] <= last[1])
+                last[1] = Math.max(last[1], intervals[i][1]);
+            else
+                res.add(intervals[i]);
+        }
+        return res.toArray(new int[0][]);
+    }
+}
+```
+
+- **Complexity:** Time O(n log n) sort + O(n) scan. Space O(n) for result.
+
+---
+
+#### LC 57 — Insert Interval
+
+- **Core idea:** Input is already sorted and non-overlapping. Three phases: (1) add all intervals ending before newInterval, (2) merge all that overlap with newInterval, (3) add remaining.
+- **Brute force:** Append newInterval, sort, merge. O(n log n).
+- **Approach:** Linear scan in three phases → O(n).
+
+```java
+class Solution {
+    public int[][] insert(int[][] intervals, int[] newInterval) {
+        List<int[]> res = new ArrayList<>();
+        int i = 0, n = intervals.length;
+        while (i < n && intervals[i][1] < newInterval[0])
+            res.add(intervals[i++]);
+        while (i < n && intervals[i][0] <= newInterval[1]) {
+            newInterval[0] = Math.min(newInterval[0], intervals[i][0]);
+            newInterval[1] = Math.max(newInterval[1], intervals[i][1]);
+            i++;
+        }
+        res.add(newInterval);
+        while (i < n) res.add(intervals[i++]);
+        return res.toArray(new int[0][]);
+    }
+}
+```
+
+- **Complexity:** Time O(n) single pass. Space O(n) for result.
+
+---
+
+### Level 2: Overlap Detection & Counting
+
+#### LC 252 — Meeting Rooms
+
+- **Core idea:** Can one person attend all meetings? Sort by start; any adjacent overlap means "no".
+- **Approach:** Sort by start. For each consecutive pair, check `intervals[i][0] < intervals[i-1][1]`.
 
 ```java
 class Solution {
     public boolean canAttendMeetings(int[][] intervals) {
-        java.util.Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
         for (int i = 1; i < intervals.length; i++)
             if (intervals[i][0] < intervals[i - 1][1])
                 return false;
@@ -157,84 +310,45 @@ class Solution {
 }
 ```
 
-- **Complexity:** Time O(n log n), Space O(log n)
+- **Complexity:** Time O(n log n). Space O(log n) sort stack.
 
 ---
 
-#### Problem: [Merge Intervals](https://leetcode.com/problems/merge-intervals/) (LeetCode #56)
+#### LC 253 — Meeting Rooms II
 
-- **Intuition:** Merge all overlapping intervals. Sort by start; if current overlaps with last merged, extend last; else add new.
-- **Brute Force:** For each interval, check all others for overlap and merge repeatedly until no changes. Time O(n²), Space O(n).
-- **Approach:** 1) Sort by start. 2) result = [intervals[0]]. 3) For each: if overlap with last, merge; else add. 4) Return result.
-- **Java Solution:**
+- **Core idea:** Minimum concurrent rooms = maximum overlap at any point. Use a min-heap of end times: for each meeting (sorted by start), free the earliest-ending room if possible, then allocate.
+- **Brute force:** For each interval, count overlaps with all others. O(n²).
+- **Approach:** Min-heap of end times.
 
 ```java
 class Solution {
-    public int[][] merge(int[][] intervals) {
-        if (intervals.length == 0) return new int[0][2];
-        java.util.Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
-        var result = new java.util.ArrayList<int[]>();
-        result.add(intervals[0]);
-        for (int i = 1; i < intervals.length; i++) {
-            int[] last = result.get(result.size() - 1);
-            if (intervals[i][0] <= last[1])
-                last[1] = Math.max(last[1], intervals[i][1]);
-            else
-                result.add(intervals[i]);
+    public int minMeetingRooms(int[][] intervals) {
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
+        PriorityQueue<Integer> heap = new PriorityQueue<>();
+        for (int[] iv : intervals) {
+            if (!heap.isEmpty() && heap.peek() <= iv[0])
+                heap.poll();
+            heap.offer(iv[1]);
         }
-        return result.toArray(new int[0][]);
+        return heap.size();
     }
 }
 ```
 
-- **Complexity:** Time O(n log n), Space O(n)
+- **Complexity:** Time O(n log n). Space O(n) for heap.
+- **Why heap.peek() <= iv[0]:** If the earliest ending meeting ends at or before the current meeting starts, that room is available. Using `<=` means `[0,30]` and `[30,40]` can share a room (meeting ends exactly when next starts).
 
 ---
 
-### Medium (5 problems)
+#### LC 435 — Non-overlapping Intervals
 
-#### Problem: [Insert Interval](https://leetcode.com/problems/insert-interval/) (LeetCode #57)
-
-- **Intuition:** Non-overlapping intervals sorted by start. Insert newInterval and merge. Add all ending before newInterval, merge overlapping, add rest.
-- **Brute Force:** Append newInterval to the list, sort by start, then merge all intervals in one pass. Time O(n log n), Space O(n).
-- **Approach:** 1) Add intervals ending before newInterval.start. 2) Merge newInterval with all that overlap (start <= newInterval.end). 3) Add remaining. 4) Return.
-- **Java Solution:**
-
-```java
-class Solution {
-    public int[][] insert(int[][] intervals, int[] newInterval) {
-        var result = new java.util.ArrayList<int[]>();
-        int i = 0, n = intervals.length;
-        while (i < n && intervals[i][1] < newInterval[0])
-            result.add(intervals[i++]);
-        while (i < n && intervals[i][0] <= newInterval[1]) {
-            newInterval[0] = Math.min(newInterval[0], intervals[i][0]);
-            newInterval[1] = Math.max(newInterval[1], intervals[i][1]);
-            i++;
-        }
-        result.add(newInterval);
-        while (i < n) result.add(intervals[i++]);
-        return result.toArray(new int[0][]);
-    }
-}
-```
-
-- **Complexity:** Time O(n), Space O(n)
-
----
-
-#### Problem: [Non-overlapping Intervals](https://leetcode.com/problems/non-overlapping-intervals/) (LeetCode #435)
-
-- **Intuition:** Minimum intervals to remove so rest are non-overlapping. Equivalent to max non-overlapping we can keep. Sort by end; greedily keep non-overlapping.
-- **Brute Force:** Try all subsets of intervals, find the largest non-overlapping subset; return n - its size. Time O(2ⁿ), Space O(n).
-- **Approach:** 1) Sort by end. 2) keep = 1, prevEnd = intervals[0][1]. 3) For each: if start >= prevEnd, keep++, prevEnd = end. 4) Return n - keep.
-- **Java Solution:**
+- **Core idea:** Minimum intervals to remove = n - (max non-overlapping you can keep). Sort by **end** (activity selection greedy). Keep an interval if `start >= prevEnd`.
+- **Why sort by end?** Choosing the interval that finishes earliest maximizes remaining space — classic greedy proof by exchange argument.
 
 ```java
 class Solution {
     public int eraseOverlapIntervals(int[][] intervals) {
-        if (intervals.length == 0) return 0;
-        java.util.Arrays.sort(intervals, (a, b) -> Integer.compare(a[1], b[1]));
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[1], b[1]));
         int keep = 1, prevEnd = intervals[0][1];
         for (int i = 1; i < intervals.length; i++) {
             if (intervals[i][0] >= prevEnd) {
@@ -247,133 +361,80 @@ class Solution {
 }
 ```
 
-- **Complexity:** Time O(n log n), Space O(log n)
+- **Complexity:** Time O(n log n). Space O(log n).
 
 ---
 
-#### Problem: [Meeting Rooms II](https://leetcode.com/problems/meeting-rooms-ii/) (LeetCode #253)
+### Level 3: Two-Pointer & Multi-List
 
-- **Intuition:** Minimum rooms so all meetings can be held. Sweep line: sort starts and ends; when a meeting starts before one ends, need new room.
-- **Brute Force:** For each interval, count how many others overlap with it; max overlap equals rooms needed. Time O(n²), Space O(1).
-- **Approach:** 1) Extract and sort starts and ends. 2) Two pointers: when starts[s] < ends[e], rooms++; else rooms--, e++. 3) Track max rooms.
-- **Java Solution:**
+#### LC 986 — Interval List Intersections
 
-```java
-class Solution {
-    public int minMeetingRooms(int[][] intervals) {
-        int n = intervals.length;
-        int[] starts = new int[n], ends = new int[n];
-        for (int i = 0; i < n; i++) {
-            starts[i] = intervals[i][0];
-            ends[i] = intervals[i][1];
-        }
-        java.util.Arrays.sort(starts);
-        java.util.Arrays.sort(ends);
-        int rooms = 0, maxRooms = 0, s = 0, e = 0;
-        while (s < n) {
-            if (starts[s] < ends[e]) {
-                rooms++;
-                s++;
-                maxRooms = Math.max(maxRooms, rooms);
-            } else {
-                rooms--;
-                e++;
-            }
-        }
-        return maxRooms;
-    }
-}
-```
-
-- **Complexity:** Time O(n log n), Space O(n)
-
----
-
-#### Problem: [Minimum Number of Arrows to Burst Balloons](https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons/) (LeetCode #452)
-
-- **Intuition:** Intervals = balloons. One vertical arrow bursts all it touches. Min arrows. Greedy: sort by end; shoot at first end; skip overlapping; repeat.
-- **Brute Force:** Sort by end, then repeatedly pick the leftmost unburst balloon, shoot at its end, remove all burst balloons; repeat. Time O(n²), Space O(n).
-- **Approach:** 1) Sort by end. 2) arrows = 1, pos = points[0][1]. 3) For each: if start > pos, arrows++, pos = end. 4) Return arrows.
-- **Java Solution:**
-
-```java
-class Solution {
-    public int findMinArrowShots(int[][] points) {
-        if (points.length == 0) return 0;
-        java.util.Arrays.sort(points, (a, b) -> Integer.compare(a[1], b[1]));
-        int arrows = 1, pos = points[0][1];
-        for (int i = 1; i < points.length; i++) {
-            if (points[i][0] > pos) {
-                arrows++;
-                pos = points[i][1];
-            }
-        }
-        return arrows;
-    }
-}
-```
-
-- **Complexity:** Time O(n log n), Space O(log n)
-
----
-
-#### Problem: [Interval List Intersections](https://leetcode.com/problems/interval-list-intersections/) (LeetCode #986)
-
-- **Intuition:** Two lists of disjoint intervals sorted by start. Find all intersections. Two pointers: intersect [max(a.start,b.start), min(a.end,b.end)] if max <= min.
-- **Brute Force:** For each pair (A[i], B[j]), compute intersection if overlapping and add to result. Time O(n·m), Space O(1) excluding output.
-- **Approach:** 1) i=0, j=0. 2) While both in range: lo = max(A[i][0], B[j][0]), hi = min(A[i][1], B[j][1]). If lo<=hi, add [lo,hi]. 3) Advance pointer of interval with smaller end.
-- **Java Solution:**
+- **Core idea:** Two sorted disjoint lists. Two pointers. Intersection = `[max(starts), min(ends)]` when valid. Advance the pointer whose interval ends first.
+- **Approach:** No sorting needed (given sorted). O(n + m) two-pointer merge.
 
 ```java
 class Solution {
     public int[][] intervalIntersection(int[][] firstList, int[][] secondList) {
-        var result = new java.util.ArrayList<int[]>();
+        List<int[]> res = new ArrayList<>();
         int i = 0, j = 0;
         while (i < firstList.length && j < secondList.length) {
             int lo = Math.max(firstList[i][0], secondList[j][0]);
             int hi = Math.min(firstList[i][1], secondList[j][1]);
-            if (lo <= hi) result.add(new int[]{lo, hi});
+            if (lo <= hi) res.add(new int[]{lo, hi});
             if (firstList[i][1] < secondList[j][1]) i++;
             else j++;
         }
-        return result.toArray(new int[0][]);
+        return res.toArray(new int[0][]);
     }
 }
 ```
 
-- **Complexity:** Time O(n + m), Space O(1) excluding output
+- **Complexity:** Time O(n + m). Space O(1) excluding output.
 
 ---
 
-### Hard (2 problems)
+#### LC 1288 — Remove Covered Intervals
 
-#### Problem: [Employee Free Time](https://leetcode.com/problems/employee-free-time/) (LeetCode #759)
-
-- **Intuition:** Each employee has sorted list of busy intervals. Find free time common to all. Merge all intervals, then gaps between merged intervals are free time.
-- **Brute Force:** Flatten and sort all intervals, merge overlapping, then output gaps between consecutive merged intervals. Time O(n log n), Space O(n).
-- **Approach:** 1) Flatten all intervals, sort by start. 2) Merge overlapping. 3) Gaps between consecutive merged intervals (merged[i][1] to merged[i+1][0]) are free time.
-- **Java Solution:**
+- **Core idea:** Interval `[a,b]` is covered by `[c,d]` if `c <= a` and `b <= d`. Sort by start ascending, then by end **descending** (so among same-start intervals, the widest comes first). Track the running max end; any interval with `end <= maxEnd` is covered.
+- **Why sort end descending for same start?** If `[1,4]` and `[1,2]` have same start, we want `[1,4]` first so `[1,2]` is correctly identified as covered.
 
 ```java
-/*
-// Definition for an Interval.
-class Interval {
-    public int start;
-    public int end;
-    public Interval() {}
-    public Interval(int _start, int _end) {
-        start = _start;
-        end = _end;
+class Solution {
+    public int removeCoveredIntervals(int[][] intervals) {
+        Arrays.sort(intervals, (a, b) ->
+            a[0] != b[0] ? Integer.compare(a[0], b[0]) : Integer.compare(b[1], a[1]));
+        int count = 0, maxEnd = 0;
+        for (int[] iv : intervals) {
+            if (iv[1] > maxEnd) {
+                count++;
+                maxEnd = iv[1];
+            }
+        }
+        return count;
     }
 }
-*/
+```
 
+- **Complexity:** Time O(n log n). Space O(log n).
+
+---
+
+### Level 4: Advanced
+
+#### LC 759 — Employee Free Time
+
+- **Core idea:** Multiple employees each have sorted busy intervals. Find gaps common to all. Flatten all intervals → sort by start → merge → gaps between merged intervals = free time.
+- **Approach:** Merge all intervals from all employees, then extract gaps.
+
+```java
 class Solution {
-    public java.util.List<Interval> employeeFreeTime(java.util.List<java.util.List<Interval>> schedule) {
-        var all = new java.util.ArrayList<Interval>();
-        for (var list : schedule) all.addAll(list);
+    public List<Interval> employeeFreeTime(List<List<Interval>> schedule) {
+        List<Interval> all = new ArrayList<>();
+        for (List<Interval> emp : schedule)
+            all.addAll(emp);
         all.sort((a, b) -> Integer.compare(a.start, b.start));
-        var merged = new java.util.ArrayList<Interval>();
+
+        List<Interval> merged = new ArrayList<>();
         merged.add(all.get(0));
         for (int i = 1; i < all.size(); i++) {
             Interval last = merged.get(merged.size() - 1);
@@ -383,7 +444,8 @@ class Solution {
             else
                 merged.add(cur);
         }
-        var free = new java.util.ArrayList<Interval>();
+
+        List<Interval> free = new ArrayList<>();
         for (int i = 1; i < merged.size(); i++)
             free.add(new Interval(merged.get(i - 1).end, merged.get(i).start));
         return free;
@@ -391,72 +453,211 @@ class Solution {
 }
 ```
 
-- **Complexity:** Time O(n log n), Space O(n)
+- **Complexity:** Time O(n log n) where n = total intervals across all employees. Space O(n).
+- **Heap alternative:** Use a min-heap with one interval per employee (k-way merge). Same time complexity but avoids flattening. Overkill for interviews unless asked.
 
 ---
 
-#### Problem: [Data Stream as Disjoint Intervals](https://leetcode.com/problems/data-stream-as-disjoint-intervals/) (LeetCode #352)
+## 6. Common Mistakes
 
-- **Intuition:** Numbers added one by one. getIntervals() returns sorted list of disjoint intervals covering all numbers so far. Use TreeMap: key = start, value = end. When adding val: find邻居, merge if adjacent.
-- **Brute Force:** Store all added numbers in a set; on getIntervals(), sort and merge into intervals. Time O(k log k) per getIntervals where k = count, Space O(k).
-- **Approach:** 1) TreeMap<Integer,Integer> for [start, end]. 2) addNum: find floor and ceiling of val. Merge with left if val <= leftEnd+1, with right if val >= rightStart-1. Handle both neighbors. 3) getIntervals: convert to list.
-- **Java Solution:**
+### Mistake 1: Not Sorting (or Sorting by Wrong Key)
 
-```java
-class SummaryRanges {
-    private final java.util.TreeMap<Integer, Integer> intervals = new java.util.TreeMap<>();
-
-    public void addNum(int val) {
-        Integer left = intervals.floorKey(val);
-        Integer right = intervals.ceilingKey(val);
-        if (left != null && val <= intervals.get(left)) return;
-        boolean mergeLeft = left != null && intervals.get(left) == val - 1;
-        boolean mergeRight = right != null && right == val + 1;
-        if (mergeLeft && mergeRight) {
-            intervals.put(left, intervals.get(right));
-            intervals.remove(right);
-        } else if (mergeLeft) {
-            intervals.put(left, val);
-        } else if (mergeRight) {
-            intervals.put(val, intervals.get(right));
-            intervals.remove(right);
-        } else {
-            intervals.put(val, val);
-        }
-    }
-
-    public int[][] getIntervals() {
-        return intervals.entrySet().stream()
-            .map(e -> new int[]{e.getKey(), e.getValue()})
-            .toArray(int[][]::new);
-    }
-}
+```
+❌ Trying to merge intervals without sorting first
+❌ Sorting by start when doing activity selection (need sort by end)
+❌ Sorting by end when merging (need sort by start)
 ```
 
-- **Complexity:** addNum O(log n), getIntervals O(n); Space O(n)
+**Rule of thumb:** Merge → sort by start. Max non-overlapping → sort by end. Meeting rooms → sort by start.
+
+### Mistake 2: Wrong Merge/Overlap Condition
+
+```
+❌ Using < instead of <= for overlap detection
+   [1,5] and [5,8]: these DO overlap for merge purposes (touching = overlapping)
+   
+❌ Using a.start < b.end instead of b.start <= a.end
+   Overlap check is always: does the NEXT interval's start fall within the PREVIOUS interval's range?
+
+✅ Overlap (merge):     curr.start <= last.end
+✅ Overlap (conflict):  curr.start < last.end  (strict, for meeting rooms)
+```
+
+**Note the subtlety:** "Touching at boundary" (`[1,5],[5,8]`) counts as overlapping for merge but often NOT a conflict for meetings. Read the problem statement carefully.
+
+### Mistake 3: Off-by-One on Boundaries
+
+```
+❌ heap.peek() < iv[0]  →  should be heap.peek() <= iv[0] for meeting rooms
+   If a meeting ends at 10 and next starts at 10, same room works.
+
+❌ Forgetting to handle the case where newInterval goes at the very end or very start
+
+❌ Using intervals[i][0] - intervals[j][0] for comparator
+   Integer overflow if values are near Integer.MIN_VALUE / MAX_VALUE.
+   Always use Integer.compare(a[0], b[0]).
+```
+
+### Mistake 4: Forgetting to Update State After Merge
+
+```
+❌ Merging but not updating the end:
+   last[1] = intervals[i][1]         // WRONG: might shrink the interval
+   last[1] = Math.max(last[1], intervals[i][1])  // CORRECT: always extend
+```
+
+### Mistake 5: Activity Selection — Returning Wrong Value
+
+```
+❌ Returning the count of intervals kept (that's max non-overlapping)
+   When the problem asks for MINIMUM REMOVALS: return n - keep
+```
+
+### Mistake 6: Remove Covered — Wrong Sort Tiebreaker
+
+```
+❌ Sorting by (start ASC, end ASC)
+   [1,2] comes before [1,4] → [1,4] is NOT identified as covering [1,2]
+
+✅ Sort by (start ASC, end DESC)
+   [1,4] comes first → [1,2].end <= maxEnd → correctly counted as covered
+```
 
 ---
 
-## Common Mistakes
+## 7. Interview Strategy
 
-- **Meeting Rooms:** Check overlap: intervals[i][0] < intervals[i-1][1].
-- **Merge Intervals:** Sort by start; overlap when curr.start <= last.end.
-- **Insert Interval:** Handle empty list; merge all overlapping with newInterval.
-- **Non-overlapping:** Sort by end for greedy; count kept, return n - kept.
-- **Meeting Rooms II:** Sweep: starts[s] < ends[e] means new meeting starts before one ends.
-- **Interval Intersections:** Advance the interval with smaller end.
-- **Employee Free Time:** Merge all first; sort comparator should use start.
-- **Summary Ranges:** Handle merge of three intervals when val connects left and right.
+### Communication Script
 
-## Pattern Variations
+**After reading the problem (30 seconds):**
+> "This is an intervals problem. I see we have `[start, end]` pairs and need to [merge/count/find rooms]. My approach: sort by [start/end], then process linearly with [merge/greedy/heap]."
 
-| Variation           | Example   | Key Technique                          |
-|---------------------|-----------|----------------------------------------|
-| No overlap check    | #252      | Sort, compare consecutive              |
-| Merge               | #56, #57  | Sort by start, extend last             |
-| Max keep/erase      | #435      | Sort by end, greedy keep                |
-| Min resources       | #253      | Sweep: starts + ends sorted             |
-| Min arrows          | #452      | Sort by end, shoot at end               |
-| Two lists           | #986      | Two pointers, advance smaller end      |
-| Free time           | #759      | Merge all, gaps = free                  |
-| Streaming           | #352      | TreeMap for O(log n) insert/merge       |
+**Before coding (1 minute):**
+> "Let me trace through the example: after sorting we get [...]. Walking through: first interval is [...], next one [overlaps/doesn't overlap] because [start <= end / start > end], so we [merge/keep/skip]..."
+
+**While coding (stay narrated):**
+> "I'll sort by start using Integer.compare to avoid overflow... Now I iterate, comparing each interval's start against the last merged interval's end..."
+
+### Time Allocation (35-minute problem)
+
+| Phase | Time | Action |
+|-------|------|--------|
+| Understand + examples | 3 min | Identify sub-pattern (merge/rooms/select/intersect) |
+| Approach + trace | 4 min | State sort key, walk through example, confirm with interviewer |
+| Code | 12 min | Write the template, adapt to problem specifics |
+| Test | 6 min | Trace through given example, then edge cases |
+| Optimize discussion | 5 min | Discuss alternatives (heap vs sweep, O(n) vs O(n log n)) |
+| Buffer | 5 min | Handle follow-ups |
+
+### Follow-Up Questions to Expect
+
+| Question | Response |
+|----------|----------|
+| "Can you do this without extra space?" | Merge in-place by tracking a write pointer instead of using ArrayList |
+| "What if intervals are streaming?" | Use a TreeMap or balanced BST for O(log n) insert + merge (LC 352) |
+| "What if we need to support delete too?" | TreeMap or segment tree; discuss trade-offs |
+| "How would you parallelize this?" | Partition intervals, merge within partitions, then merge results across partitions (MapReduce-style) |
+
+### Pattern Matching Cheat Sheet for Interview
+
+| Keyword in Problem | Sub-pattern | Sort By | Template |
+|---------------------|-------------|---------|----------|
+| "merge intervals" | Merge | start | Template 1 |
+| "insert interval" | Insert | already sorted | Template 2 |
+| "non-overlapping", "min remove" | Activity Selection | **end** | Template 3 |
+| "meeting rooms", "min rooms", "max concurrent" | Min-Heap | start | Template 4 |
+| "intersection of two lists" | Two Pointers | already sorted | Template 5 |
+| "covered intervals" | Coverage | start ASC, end DESC | Track maxEnd |
+| "free time", "gaps" | Merge + Gaps | start | Template 1 → extract gaps |
+
+---
+
+## 8. Revision + Quick Reference
+
+### The Five Rules of Intervals
+
+```
+1. SORT FIRST — almost always by start (except activity selection → by end)
+2. OVERLAP = b.start <= a.end (after sorting by start)
+3. MERGE = a.end = max(a.end, b.end)
+4. MEETING ROOMS = min-heap of end times; heap.size() = concurrent count
+5. INTERSECTION = [max(starts), min(ends)] valid when max(starts) <= min(ends)
+```
+
+### Complexity Summary
+
+| Problem | Time | Space | Technique |
+|---------|------|-------|-----------|
+| LC 56 Merge Intervals | O(n log n) | O(n) | Sort by start + merge pass |
+| LC 57 Insert Interval | O(n) | O(n) | Three-phase linear scan |
+| LC 252 Meeting Rooms | O(n log n) | O(log n) | Sort by start + adjacent check |
+| LC 253 Meeting Rooms II | O(n log n) | O(n) | Sort by start + min-heap of ends |
+| LC 435 Non-overlapping | O(n log n) | O(log n) | Sort by end + greedy keep |
+| LC 986 Intersections | O(n + m) | O(1)* | Two pointers, advance smaller end |
+| LC 1288 Remove Covered | O(n log n) | O(log n) | Sort start ASC/end DESC + maxEnd |
+| LC 759 Employee Free | O(n log n) | O(n) | Flatten + merge + extract gaps |
+
+*Excluding output space.
+
+### 30-Second Recall Drill
+
+```
+Q: How do you merge intervals?
+A: Sort by start. If curr.start <= last.end, set last.end = max(ends). Else push new.
+
+Q: How do you find minimum meeting rooms?
+A: Sort by start. Min-heap of end times. For each meeting, pop if heap.peek() <= start.
+   Answer = max heap size = heap.size() at end.
+
+Q: How do you find max non-overlapping intervals?
+A: Sort by END. Greedy: keep if start >= prevEnd. Answer = count kept.
+
+Q: How do you intersect two interval lists?
+A: Two pointers. Intersection = [max(starts), min(ends)]. Advance pointer with smaller end.
+
+Q: Merge vs conflict — what's the boundary condition difference?
+A: Merge: curr.start <= last.end (touching = overlap)
+   Conflict: curr.start < last.end (touching = no conflict)
+```
+
+### Visual Mental Model
+
+```
+Sorted intervals:     [---]  [-----]  [--]     [------]
+                       1  3   2    6   5  7     10   14
+
+After merge:          [----------]              [------]
+                       1         7              10   14
+
+Rooms needed at peak:  |  |  |||  |   
+                       Time →    (3 overlapping at once = 3 rooms)
+
+Min-heap tracks:      [3] → [3,6] → [6,7] → [7,14]
+                       ^      ^        ^
+                      size 1  size 2   poll 3 (<=5), push 7 → size 2
+```
+
+### Pattern Decision Flowchart
+
+```
+Input: list of [start, end] pairs
+              │
+     What does the problem ask?
+              │
+    ┌─────────┼──────────┬──────────────┬───────────────┐
+    ▼         ▼          ▼              ▼               ▼
+  MERGE    CAN ALL    HOW MANY     MAX KEEP /      INTERSECT
+ overlaps  FIT w/o    ROOMS?       MIN REMOVE?     two lists?
+           overlap?
+    │         │          │              │               │
+ Sort by   Sort by    Sort by       Sort by          Two
+ start     start      start         END              pointers
+    │         │          │              │               │
+ Merge     Check     Min-heap       Greedy          max/min
+ pass     adjacent   of ends        keep             formula
+    │         │          │              │               │
+ Template  LC 252    Template 4     Template 3      Template 5
+   1                  LC 253         LC 435          LC 986
+ LC 56
+ LC 57
+```

@@ -1,121 +1,116 @@
-# Prefix Sum
+# Prefix Sum — Interview Execution Playbook
 
-> Precompute cumulative sums so any subarray sum becomes O(1) lookup—transform repeated range queries into constant-time operations.
-
-## What Is This Pattern?
-
-**Prefix sum** (also called cumulative sum or running sum) is a preprocessing technique that stores the sum of elements from the start of the array up to each index. Given `arr[0..n-1]`, we build `prefix[i] = arr[0] + arr[1] + ... + arr[i]` (often with `prefix[-1] = 0` for convenience).
-
-Once built, the sum of any subarray `arr[i..j]` is `prefix[j] - prefix[i-1]`—a single subtraction. Instead of iterating over the subarray every time, we answer in O(1). This is especially powerful when you need many range sum queries or when searching for subarrays with a target sum (by rearranging to `prefix[j] - prefix[i-1] = k` → `prefix[j] - k = prefix[i-1]`, then using a hash map to count valid pairs).
-
-**Visual intuition:** Imagine a bar chart where each bar's height is the cumulative total. The "height difference" between two bars equals the sum of the segment between them. Prefix sum captures those cumulative heights up-front; any "segment sum" is just the difference between two stored values.
-
-## When to Use This Pattern
-
-- **Repeated range sum queries** on an immutable array (e.g., "sum from left to right")
-- **Subarray sum equals K** (or divisible by K) — convert to "count pairs where prefix[j] - prefix[i] = k"
-- **Find pivot / equilibrium index** — left sum vs right sum; prefix sum gives both in O(1)
-- **Product of array except self** — prefix product (or prefix × suffix) avoids recomputation
-- **Subarray problems** where you need to check "does any subarray have property X?" and property X involves a cumulative metric
-- **Merge sort + prefix sum** for problems like "count pairs where lower ≤ sum ≤ upper" (e.g., Count of Range Sum)
-
-## How to Identify This Pattern
-
-1. Problem asks for **sum/product of a contiguous subarray** or **range query**
-2. Keywords: "subarray sum", "range sum", "cumulative", "prefix", "running sum"
-3. Need to answer **many queries** on the same array without modification
-4. Looking for **count of subarrays** with a given sum, or **pivot/equilibrium** index
-5. Often pairs with **hash map** when counting "prefix[j] - k = prefix[i]" occurrences
-
-## Core Template (Pseudocode)
-
-```
-// Build prefix sum array (1-indexed for convenience)
-prefix[0] = 0
-for i from 0 to n-1:
-    prefix[i+1] = prefix[i] + arr[i]
-
-// Query: sum of arr[left..right]
-sum = prefix[right+1] - prefix[left]
-
-// Count subarrays with sum K (hash map variant)
-count = 0
-map = {0: 1}  // prefix 0 seen once (empty subarray)
-for each prefix_sum in prefixes:
-    count += map.get(prefix_sum - K, 0)
-    map[prefix_sum] = map.get(prefix_sum, 0) + 1
-return count
-```
-
-## Core Template (Java)
-
-```java
-// Build prefix sum array
-int[] prefix = new int[n + 1];
-for (int i = 0; i < n; i++) {
-    prefix[i + 1] = prefix[i] + nums[i];
-}
-
-// Query: sum of nums[left..right]
-int rangeSum = prefix[right + 1] - prefix[left];
-
-// Count subarrays with sum K (using HashMap)
-Map<Integer, Integer> countByPrefix = new HashMap<>();
-countByPrefix.put(0, 1);
-int count = 0, prefixSum = 0;
-for (int num : nums) {
-    prefixSum += num;
-    count += countByPrefix.getOrDefault(prefixSum - k, 0);
-    countByPrefix.merge(prefixSum, 1, Integer::sum);
-}
-```
-
-## Complexity Cheat Sheet
-
-| Operation | Time | Space |
-|-----------|------|-------|
-| Build prefix array | O(n) | O(n) |
-| Single range query | O(1) | - |
-| m range queries | O(n + m) | O(n) |
-| Subarray sum = K (hash) | O(n) | O(n) |
-| Count of range sum (merge) | O(n log n) | O(n) |
+> **Pattern Mastery Level:** Prefix sum is the backbone of subarray problems. If you can't see "prefix[right+1] - prefix[left]" within 10 seconds of reading a range-sum problem, you're leaving easy points on the table. It appears in ~12% of FAANG coding rounds, often disguised as "subarray count" or "range query" problems.
 
 ---
 
-## Problems (Progressive Difficulty)
+## 1. Pattern Recognition Signals
 
-### Easy (2 problems)
+### When to Use Prefix Sum
 
-#### Problem: [Running Sum of 1d Array](https://leetcode.com/problems/running-sum-of-1d-array/) (LeetCode #1480)
+```
+INSTANT TRIGGERS (say "prefix sum" within 5 seconds):
+  ✓ "Range sum query" or "sum of subarray from i to j"
+  ✓ "Count subarrays with sum equal to K"
+  ✓ "Subarray sum divisible by K"
+  ✓ "Product of array except self" (prefix × suffix product)
+  ✓ "Equal number of 0s and 1s" (transform 0→-1, then sum=0)
+  ✓ "2D rectangle sum query" on a matrix
+```
 
-- **Intuition:** Each element of the result is the sum of all elements from index 0 to the current index—exactly the definition of prefix sum.
-- **Brute Force:** For each index i, iterate from 0 to i and sum all elements. Time O(n²), Space O(1) for in-place output.
-- **Optimized Approach:** Initialize `runningSum[0] = nums[0]`. For each `i > 0`, set `runningSum[i] = runningSum[i-1] + nums[i]`. Can be done in-place.
-- **Java Solution:**
+### Keywords in Problem Statements
+
+```
+DIRECT SIGNALS:          INDIRECT SIGNALS:
+  "range sum"              "subarray"
+  "cumulative sum"         "contiguous"
+  "sum between i and j"    "divisible by K"
+  "prefix"                 "equal number of X and Y"
+  "running sum"            "product except self"
+  "immutable" + "query"    "balance point / pivot"
+```
+
+### When NOT to Use
+
+```
+✗ Array is being MODIFIED between queries → use Fenwick Tree or Segment Tree
+✗ Need minimum/maximum of subarray (not sum) → use Monotonic Stack / Sparse Table
+✗ Sliding window of FIXED size with simple aggregate → plain sliding window is simpler
+✗ Need actual subarray elements (not just sum) → prefix sum only gives aggregate
+✗ Single query on a single subarray → just iterate, no need to precompute
+```
+
+---
+
+## 2. Thinking Framework (Step-by-Step Intuition)
+
+### The 60-Second Decision Process
+
+```
+Step 1: "Does the problem ask about SUMS of SUBARRAYS or ranges?"
+  YES → Prefix sum is almost certainly involved
+  NO  → Check if you can TRANSFORM the problem into one about sums
+        (e.g., equal 0s and 1s → replace 0 with -1 → subarray sum = 0)
+
+Step 2: "What's the brute force?"
+  Usually O(n²): for each pair (i,j), compute sum of arr[i..j]
+  
+Step 3: "Where's the bottleneck?"
+  Recomputing sums from scratch for every (i,j) pair
+  Prefix sum precomputes ALL cumulative sums in O(n), then any range in O(1)
+
+Step 4: "Do I need to COUNT subarrays or just QUERY ranges?"
+  QUERY ranges → Basic prefix array, answer in O(1)
+  COUNT subarrays with sum=K → Prefix sum + HashMap
+  COUNT subarrays with sum divisible by K → Prefix sum mod K + HashMap/array
+  2D matrix sums → 2D prefix sum with inclusion-exclusion
+```
+
+### The Core Insight (Memorize This)
+
+```
+PREFIX SUM WORKS BECAUSE:
+  prefix[i] = arr[0] + arr[1] + ... + arr[i-1]
+  
+  Sum of arr[left..right] = prefix[right+1] - prefix[left]
+  
+  One subtraction replaces an entire loop. Build once in O(n), query forever in O(1).
+
+  For "count subarrays with sum = K":
+    prefix[j] - prefix[i] = K  →  prefix[i] = prefix[j] - K
+    So at each j, ask: "how many earlier prefix sums equal prefix[j] - K?"
+    A HashMap answers that in O(1).
+
+KEY IDENTITY:
+  "exactly K" = atMost(K) - atMost(K-1)
+  Use this trick when "exactly K" is hard but "at most K" is easy.
+```
+
+---
+
+## 3. Java Templates (Production-Quality)
+
+### Template 1: Basic Prefix Sum Array
 
 ```java
-class Solution {
-    public int[] runningSum(int[] nums) {
-        for (int i = 1; i < nums.length; i++) {
-            nums[i] += nums[i - 1];
-        }
-        return nums;
+// USE FOR: Range Sum Query, Pivot Index, any repeated range-sum queries
+// TIME: O(n) build, O(1) per query | SPACE: O(n)
+public int[] buildPrefixSum(int[] nums) {
+    int n = nums.length;
+    int[] prefix = new int[n + 1]; // prefix[0] = 0 (empty prefix)
+    for (int i = 0; i < n; i++) {
+        prefix[i + 1] = prefix[i] + nums[i];
     }
+    return prefix;
+    // Sum of nums[left..right] = prefix[right + 1] - prefix[left]
 }
 ```
 
-- **Complexity:** Time O(n), Space O(1) in-place (O(n) if output must be separate)
-
----
-
-#### Problem: [Range Sum Query - Immutable](https://leetcode.com/problems/range-sum-query-immutable/) (LeetCode #303)
-
-- **Intuition:** Precompute prefix sums so any range `[left, right]` is `prefix[right+1] - prefix[left]` in O(1).
-- **Brute Force:** For each query, iterate from left to right and sum elements. Time O(n) per query, Space O(1).
-- **Optimized Approach:** In constructor, build `prefix[i] = sum of nums[0..i-1]`. For `sumRange(left, right)`, return `prefix[right+1] - prefix[left]`.
-- **Java Solution:**
+### Template 2: Range Sum Queries (LC 303)
 
 ```java
+// USE FOR: NumArray / Range Sum Query — Immutable
+// TIME: O(n) constructor, O(1) per query | SPACE: O(n)
 class NumArray {
     private int[] prefix;
 
@@ -132,278 +127,375 @@ class NumArray {
 }
 ```
 
-- **Complexity:** Time O(n) preprocess, O(1) per query; Space O(n)
-
----
-
-### Medium (5 problems)
-
-#### Problem: [Subarray Sum Equals K](https://leetcode.com/problems/subarray-sum-equals-k/) (LeetCode #560)
-
-- **Intuition:** Subarray `nums[i..j]` has sum `prefix[j+1] - prefix[i] = k`. Rearranging: `prefix[j+1] - k = prefix[i]`. So for each prefix, count how many previous prefixes equal `prefix - k`.
-- **Brute Force:** For each pair (i, j), compute sum of nums[i..j] and count if equals k. Time O(n²), Space O(1).
-- **Optimized Approach:** Use a hash map to store prefix sum frequencies. For each position, add `nums[i]` to running prefix, then add `count(prefix - k)` to the answer and increment `count(prefix)`.
-- **Java Solution:**
+### Template 3: Subarray Sum Equals K (Prefix Sum + HashMap)
 
 ```java
-class Solution {
-    public int subarraySum(int[] nums, int k) {
-        Map<Integer, Integer> countByPrefix = new HashMap<>();
-        countByPrefix.put(0, 1);
-        int count = 0, prefixSum = 0;
-        for (int num : nums) {
-            prefixSum += num;
-            count += countByPrefix.getOrDefault(prefixSum - k, 0);
-            countByPrefix.merge(prefixSum, 1, Integer::sum);
-        }
-        return count;
+// USE FOR: Subarray Sum Equals K, Contiguous Array, Subarrays Divisible by K
+// TIME: O(n) | SPACE: O(n)
+public int subarraySum(int[] nums, int k) {
+    Map<Integer, Integer> prefixCount = new HashMap<>();
+    prefixCount.put(0, 1); // empty prefix has sum 0
+    int count = 0, prefixSum = 0;
+    for (int num : nums) {
+        prefixSum += num;
+        // How many earlier prefixes satisfy: prefixSum - earlier = k?
+        count += prefixCount.getOrDefault(prefixSum - k, 0);
+        prefixCount.merge(prefixSum, 1, Integer::sum);
     }
+    return count;
 }
 ```
 
-- **Complexity:** Time O(n), Space O(n)
-
----
-
-#### Problem: [Contiguous Array](https://leetcode.com/problems/contiguous-array/) (LeetCode #525)
-
-- **Intuition:** Replace 0 with -1 so "equal 0s and 1s" means subarray sum = 0. Use prefix sum + hash map: longest subarray with sum 0 is `max(j - i)` where `prefix[j] = prefix[i]`.
-- **Brute Force:** For each pair (i, j), check if subarray has equal 0s and 1s by counting. Time O(n²), Space O(1).
-- **Optimized Approach:** Map prefix sum to first index seen. When we see a prefix again, the distance from first occurrence is the length of a valid subarray. Track the maximum.
-- **Java Solution:**
+### Template 4: 2D Prefix Sum (Matrix Region Sum)
 
 ```java
-class Solution {
-    public int findMaxLength(int[] nums) {
-        Map<Integer, Integer> firstIdx = new HashMap<>();
-        firstIdx.put(0, -1);
-        int maxLen = 0, prefix = 0;
-        for (int i = 0; i < nums.length; i++) {
-            prefix += nums[i] == 1 ? 1 : -1;
-            if (firstIdx.containsKey(prefix)) {
-                maxLen = Math.max(maxLen, i - firstIdx.get(prefix));
-            } else {
-                firstIdx.put(prefix, i);
+// USE FOR: 304 Range Sum Query 2D, 1074 Submatrices That Sum to Target
+// TIME: O(m*n) build, O(1) per query | SPACE: O(m*n)
+class NumMatrix {
+    private int[][] prefix;
+
+    public NumMatrix(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        prefix = new int[m + 1][n + 1];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                prefix[i + 1][j + 1] = matrix[i][j]
+                    + prefix[i][j + 1]
+                    + prefix[i + 1][j]
+                    - prefix[i][j]; // inclusion-exclusion
             }
         }
-        return maxLen;
+    }
+
+    // Sum of rectangle (r1,c1) to (r2,c2) inclusive
+    public int sumRegion(int r1, int c1, int r2, int c2) {
+        return prefix[r2 + 1][c2 + 1]
+             - prefix[r1][c2 + 1]
+             - prefix[r2 + 1][c1]
+             + prefix[r1][c1]; // inclusion-exclusion
     }
 }
 ```
 
-- **Complexity:** Time O(n), Space O(n)
+---
+
+## 4. Edge Case Checklist
+
+```
+INPUT EDGE CASES:
+  □ Empty array (length 0) → return 0 / empty
+  □ Single element → subarray is just that element; prefix = [0, nums[0]]
+  □ All zeros → every subarray sums to 0; count subarrays = n*(n+1)/2 when k=0
+  □ All negative numbers → prefix sum decreases; HashMap approach still works
+  □ k = 0 → "subarray sum = 0" has valid answers; don't skip this case
+
+OVERFLOW RISKS:
+  □ Large n with large values → prefix sums can overflow int
+     Use long[] for prefix when nums[i] up to 10^5 and n up to 10^5 (sum up to 10^10)
+  □ Product prefix → even faster overflow; consider log-transform or BigInteger
+
+PREFIX SUM SPECIFIC:
+  □ prefix[0] = 0 → must initialize; represents empty subarray before index 0
+  □ Off-by-one: sum of nums[left..right] = prefix[right+1] - prefix[left], NOT prefix[right] - prefix[left]
+  □ HashMap must start with put(0, 1) → the empty prefix appears once
+  □ Negative mod in Java: (-5 % 3) = -2, NOT 1 → use ((x % k) + k) % k
+
+2D SPECIFIC:
+  □ Matrix with single row or single column → degenerates to 1D prefix sum
+  □ Include-exclude formula: add, subtract, subtract, add — easy to get signs wrong
+```
 
 ---
 
-#### Problem: [Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/) (LeetCode #238)
+## 5. Problem Progression (LeetCode)
 
-- **Intuition:** For each index `i`, we need product of all elements except `nums[i]`. That's `(prefix product before i) × (suffix product after i)`. Use prefix and suffix product arrays.
-- **Brute Force:** For each index i, compute product of all elements except nums[i] by iterating through the array. Time O(n²), Space O(1) excluding output.
-- **Optimized Approach:** Build `left[i] = product of nums[0..i-1]` and `right[i] = product of nums[i+1..n-1]`. Result `ans[i] = left[i] * right[i]`. Can optimize to O(1) extra space by computing result in one pass using running prefix, then a second pass with running suffix.
-- **Java Solution:**
+### Level 1: Easy — Build the Foundation
+
+| # | Problem | Key Insight | Time |
+|---|---------|------------|------|
+| 303 | [Range Sum Query - Immutable](https://leetcode.com/problems/range-sum-query-immutable/) | Build prefix once, query = prefix[r+1] - prefix[l] | O(n) build, O(1) query |
+| 1480 | [Running Sum of 1d Array](https://leetcode.com/problems/running-sum-of-1d-array/) | Literally the definition of prefix sum, in-place | O(n) |
+| 724 | [Find Pivot Index](https://leetcode.com/problems/find-pivot-index/) | leftSum == totalSum - leftSum - nums[i] | O(n) |
+
+### Level 2: Standard Medium — Core Technique
+
+| # | Problem | Key Insight | Time |
+|---|---------|------------|------|
+| 560 | [Subarray Sum Equals K](https://leetcode.com/problems/subarray-sum-equals-k/) | HashMap of prefix sums; count where prefix - k existed before | O(n) |
+| 525 | [Contiguous Array](https://leetcode.com/problems/contiguous-array/) | Replace 0→-1, then longest subarray with sum=0 via first-index HashMap | O(n) |
+| 238 | [Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/) | Prefix product from left, suffix product from right; O(1) extra space trick | O(n) |
+| 974 | [Subarray Sums Divisible by K](https://leetcode.com/problems/subarray-sums-divisible-by-k/) | Same-remainder prefix sums form valid subarrays; fix negative mod | O(n) |
+
+### Level 3: Tricky Medium — Pattern Combinations
+
+| # | Problem | Key Insight | Time |
+|---|---------|------------|------|
+| 523 | [Continuous Subarray Sum](https://leetcode.com/problems/continuous-subarray-sum/) | Prefix mod k + HashMap of first index; check length ≥ 2 | O(n) |
+| 930 | [Binary Subarrays With Sum](https://leetcode.com/problems/binary-subarrays-with-sum/) | exactly(K) = atMost(K) - atMost(K-1) OR prefix sum + HashMap | O(n) |
+| 304 | [Range Sum Query 2D - Immutable](https://leetcode.com/problems/range-sum-query-2d-immutable/) | 2D prefix with inclusion-exclusion; four-corner formula | O(mn) build, O(1) query |
+
+### Level 4: Hard — FAANG Interview Level
+
+| # | Problem | Key Insight | Time |
+|---|---------|------------|------|
+| 1074 | [Number of Submatrices That Sum to Target](https://leetcode.com/problems/number-of-submatrices-that-sum-to-target/) | Fix two rows, compress to 1D, then Subarray Sum = K | O(m²n) |
+| 327 | [Count of Range Sum](https://leetcode.com/problems/count-of-range-sum/) | Merge sort on prefix sums; count valid pairs during merge | O(n log n) |
+| 689 | [Maximum Sum of 3 Non-Overlapping Subarrays](https://leetcode.com/problems/maximum-sum-of-3-non-overlapping-subarrays/) | Prefix sum for window sums + leftBest/rightBest arrays | O(n) |
+
+### Solving Order for Maximum Learning
+
+```
+Day 1: 303 → 1480 → 724 (build muscle memory for prefix array construction)
+Day 2: 560 → 525 (master the prefix sum + HashMap combo — this is the money pattern)
+Day 3: 238 → 974 (prefix product variant + modular arithmetic with negatives)
+Day 4: 304 → 1074 (2D prefix sum: build → query → combine with HashMap)
+Day 5: 327 → 689 (hard combinations: merge sort + prefix, multi-window optimization)
+Day 6: Re-solve 560, 525, 974, 1074 WITHOUT notes (test recall under pressure)
+```
+
+---
+
+## 6. Common Mistakes & Interview Traps
+
+### Mistake 1: Off-by-One in Prefix Array Indexing
 
 ```java
-class Solution {
-    public int[] productExceptSelf(int[] nums) {
-        int n = nums.length;
-        int[] ans = new int[n];
-        ans[0] = 1;
-        for (int i = 1; i < n; i++) {
-            ans[i] = ans[i - 1] * nums[i - 1];
-        }
-        int suffix = 1;
-        for (int i = n - 1; i >= 0; i--) {
-            ans[i] *= suffix;
-            suffix *= nums[i];
-        }
-        return ans;
-    }
-}
+// WRONG: prefix[right] - prefix[left] for sum of nums[left..right]
+int sum = prefix[right] - prefix[left]; // MISSES nums[left]!
+
+// CORRECT: prefix[right + 1] - prefix[left]
+int sum = prefix[right + 1] - prefix[left]; // includes nums[left..right]
+
+// WHY: prefix[i] = sum of nums[0..i-1], so prefix[right+1] includes nums[right]
 ```
 
-- **Complexity:** Time O(n), Space O(1) excluding output
-
----
-
-#### Problem: [Find Pivot Index](https://leetcode.com/problems/find-pivot-index/) (LeetCode #724)
-
-- **Intuition:** Pivot index `i` satisfies: sum of elements left of `i` = sum of elements right of `i`. With prefix sum, left sum = `prefix[i]`, total = `prefix[n]`; right sum = `prefix[n] - prefix[i+1]`. So `prefix[i] == prefix[n] - prefix[i+1]` → `2 * prefix[i] = prefix[n] - nums[i]`, or equivalently `prefix[i] + nums[i] = prefix[n] - prefix[i]`.
-- **Brute Force:** For each index i, compute left sum and right sum by iterating through both sides. Time O(n²), Space O(1).
-- **Optimized Approach:** Build full prefix, then iterate. At index `i`, left sum = `prefix[i]`, right sum = `total - prefix[i] - nums[i]`. If equal, return `i`. Alternatively, iterate with running left sum and compute right from total.
-- **Java Solution:**
+### Mistake 2: Forgetting to Initialize HashMap with (0, 1)
 
 ```java
-class Solution {
-    public int pivotIndex(int[] nums) {
-        int total = 0;
-        for (int num : nums) total += num;
-        int leftSum = 0;
-        for (int i = 0; i < nums.length; i++) {
-            if (leftSum == total - leftSum - nums[i]) return i;
-            leftSum += nums[i];
-        }
-        return -1;
-    }
+// WRONG: missing the empty-prefix base case
+Map<Integer, Integer> map = new HashMap<>();
+int count = 0, prefix = 0;
+for (int num : nums) {
+    prefix += num;
+    count += map.getOrDefault(prefix - k, 0); // misses subarrays starting at index 0!
+    map.merge(prefix, 1, Integer::sum);
 }
+
+// CORRECT: always seed with the empty prefix
+Map<Integer, Integer> map = new HashMap<>();
+map.put(0, 1); // empty prefix (sum 0) seen once — represents subarray from index 0
+int count = 0, prefix = 0;
+for (int num : nums) {
+    prefix += num;
+    count += map.getOrDefault(prefix - k, 0);
+    map.merge(prefix, 1, Integer::sum);
+}
+
+// Example: nums = [3], k = 3
+// Without init: prefix=3, map has no entry for 3-3=0, count=0 → WRONG (answer is 1)
+// With init:    prefix=3, map has (0,1), count=1 → CORRECT
 ```
 
-- **Complexity:** Time O(n), Space O(1)
-
----
-
-#### Problem: [Subarray Sums Divisible by K](https://leetcode.com/problems/subarray-sums-divisible-by-k/) (LeetCode #974)
-
-- **Intuition:** Subarray sum divisible by K means `(prefix[j] - prefix[i]) % K == 0` → `prefix[j] % K == prefix[i] % K`. Count pairs of indices with the same prefix mod K.
-- **Brute Force:** For each pair (i, j), compute subarray sum and check if divisible by K. Time O(n²), Space O(1).
-- **Optimized Approach:** Use prefix sum mod K. Handle negatives: `(prefix % K + K) % K`. Count frequencies of each remainder; for each remainder `r` with count `c`, add `c*(c-1)/2` pairs. Include empty prefix: `count[0] = 1` initially.
-- **Java Solution:**
+### Mistake 3: Negative Modulo in Java (Divisible by K)
 
 ```java
-class Solution {
-    public int subarraysDivByK(int[] nums, int k) {
-        int[] count = new int[k];
-        count[0] = 1;
-        int prefix = 0, ans = 0;
-        for (int num : nums) {
-            prefix = ((prefix + num) % k + k) % k;
-            ans += count[prefix];
-            count[prefix]++;
-        }
-        return ans;
-    }
-}
+// WRONG: Java's % can return negative values
+int remainder = prefix % k; // if prefix = -5, k = 3 → remainder = -2 (NOT 1)
+
+// CORRECT: normalize to non-negative
+int remainder = ((prefix % k) + k) % k; // -5 % 3 = -2 → (-2 + 3) % 3 = 1
+
+// WHY IT MATTERS: -2 and 1 are the SAME equivalence class mod 3
+// Without normalization, you'll miss valid subarray pairs
 ```
 
-- **Complexity:** Time O(n), Space O(k)
-
----
-
-### Hard (2 problems)
-
-#### Problem: [Count of Range Sum](https://leetcode.com/problems/count-of-range-sum/) (LeetCode #327)
-
-- **Intuition:** For each prefix sum `prefix[j]`, we need count of `prefix[i]` (i < j) such that `lower ≤ prefix[j] - prefix[i] ≤ upper` → `prefix[j] - upper ≤ prefix[i] ≤ prefix[j] - lower`. Use merge sort on prefix array: when merging, for each element in right half, count elements in left half in the range `[prefix[j]-upper, prefix[j]-lower]` using binary search or two pointers.
-- **Brute Force:** For each pair (i, j), compute prefix[j]-prefix[i] and count if in [lower, upper]. Time O(n²), Space O(n) for prefix array.
-- **Optimized Approach:** Build prefix array. Implement merge sort that counts valid pairs during merge: for each `right[j]`, find count of `left` elements in `[right[j]-upper, right[j]-lower]` (left subarray is sorted). Add to result. Merge and return.
-- **Java Solution:**
+### Mistake 4: Integer Overflow on Large Prefix Sums
 
 ```java
-class Solution {
-    private int lower, upper;
+// WRONG: using int when values can be large
+int[] prefix = new int[n + 1];
+// n = 100000, nums[i] up to 10^5 → prefix can reach 10^10 → OVERFLOW
 
-    public int countRangeSum(int[] nums, int lower, int upper) {
-        this.lower = lower;
-        this.upper = upper;
-        int n = nums.length;
-        long[] prefix = new long[n + 1];
-        for (int i = 0; i < n; i++) {
-            prefix[i + 1] = prefix[i] + nums[i];
-        }
-        return mergeSort(prefix, 0, n);
-    }
-
-    private int mergeSort(long[] prefix, int lo, int hi) {
-        if (lo >= hi) return 0;
-        int mid = lo + (hi - lo) / 2;
-        int count = mergeSort(prefix, lo, mid) + mergeSort(prefix, mid + 1, hi);
-
-        int i = lo, j1 = mid + 1, j2 = mid + 1;
-        for (; i <= mid; i++) {
-            while (j1 <= hi && prefix[j1] - prefix[i] < lower) j1++;
-            while (j2 <= hi && prefix[j2] - prefix[i] <= upper) j2++;
-            count += j2 - j1;
-        }
-
-        merge(prefix, lo, mid, hi);
-        return count;
-    }
-
-    private void merge(long[] prefix, int lo, int mid, int hi) {
-        long[] tmp = new long[hi - lo + 1];
-        int i = lo, j = mid + 1, k = 0;
-        while (i <= mid && j <= hi) {
-            if (prefix[i] <= prefix[j]) tmp[k++] = prefix[i++];
-            else tmp[k++] = prefix[j++];
-        }
-        while (i <= mid) tmp[k++] = prefix[i++];
-        while (j <= hi) tmp[k++] = prefix[j++];
-        System.arraycopy(tmp, 0, prefix, lo, tmp.length);
-    }
+// CORRECT: use long
+long[] prefix = new long[n + 1];
+for (int i = 0; i < n; i++) {
+    prefix[i + 1] = prefix[i] + nums[i];
 }
+// Also use Map<Long, Integer> for the HashMap variant
 ```
 
-- **Complexity:** Time O(n log n), Space O(n)
-
----
-
-#### Problem: [Maximum Sum of 3 Non-Overlapping Subarrays](https://leetcode.com/problems/maximum-sum-of-3-non-overlapping-subarrays/) (LeetCode #689)
-
-- **Intuition:** We need three non-overlapping subarrays of length `k` with maximum total sum. Fix the middle subarray at some position; then choose best left subarray (before it) and best right subarray (after it). Prefix sum gives each subarray sum in O(1).
-- **Brute Force:** Try all combinations of 3 non-overlapping windows of size k; for each triple compute sum and track maximum. Time O(n²), Space O(n).
-- **Optimized Approach:** (1) Build `windowSum[i] = sum of nums[i..i+k-1]` using prefix sum. (2) Build `leftBest[i]` = index of best window in `[0..i]`. (3) Build `rightBest[i]` = index of best window in `[i..n-k]`. (4) For each middle start index `i` from `k` to `n-2k`, compute total = windowSum[leftBest[i-1]] + windowSum[i] + windowSum[rightBest[i+k]], track max and indices.
-- **Java Solution:**
+### Mistake 5: Counting Before Updating HashMap (Order Matters)
 
 ```java
-class Solution {
-    public int[] maxSumOfThreeSubarrays(int[] nums, int k) {
-        int n = nums.length;
-        int[] prefix = new int[n + 1];
-        for (int i = 0; i < n; i++) {
-            prefix[i + 1] = prefix[i] + nums[i];
-        }
-
-        int[] windowSum = new int[n - k + 1];
-        for (int i = 0; i < windowSum.length; i++) {
-            windowSum[i] = prefix[i + k] - prefix[i];
-        }
-
-        int[] leftBest = new int[windowSum.length];
-        int bestIdx = 0;
-        for (int i = 0; i < leftBest.length; i++) {
-            if (windowSum[i] > windowSum[bestIdx]) bestIdx = i;
-            leftBest[i] = bestIdx;
-        }
-
-        int[] rightBest = new int[windowSum.length];
-        bestIdx = windowSum.length - 1;
-        for (int i = windowSum.length - 1; i >= 0; i--) {
-            if (windowSum[i] >= windowSum[bestIdx]) bestIdx = i;
-            rightBest[i] = bestIdx;
-        }
-
-        int maxSum = 0;
-        int[] ans = new int[3];
-        for (int i = k; i <= n - 2 * k; i++) {
-            int left = leftBest[i - 1], right = rightBest[i + k];
-            int total = windowSum[left] + windowSum[i] + windowSum[right];
-            if (total > maxSum) {
-                maxSum = total;
-                ans[0] = left;
-                ans[1] = i;
-                ans[2] = right;
-            }
-        }
-        return ans;
-    }
+// WRONG: update map BEFORE counting → counts current prefix as a "previous" prefix
+for (int num : nums) {
+    prefixSum += num;
+    prefixCount.merge(prefixSum, 1, Integer::sum);  // updated FIRST
+    count += prefixCount.getOrDefault(prefixSum - k, 0); // BUG: includes current!
 }
+
+// CORRECT: count FIRST, then update
+for (int num : nums) {
+    prefixSum += num;
+    count += prefixCount.getOrDefault(prefixSum - k, 0); // count with previous prefixes
+    prefixCount.merge(prefixSum, 1, Integer::sum);        // THEN record current
+}
+
+// WHY: we need strictly EARLIER prefixes; recording current first creates a
+// self-referencing match (subarray of length 0) when k = 0
 ```
 
-- **Complexity:** Time O(n), Space O(n)
+### What Interviewers Actually Look For
+
+```
+JUNIOR:    Can build a prefix array and answer range queries correctly
+SENIOR:    Instinctively reaches for prefix sum + HashMap for "count subarrays" problems,
+           handles negative mod, overflow, and off-by-one without prompting
+STAFF:     Reduces 2D problems to 1D prefix sum, identifies the "exactly K = atMost(K) -
+           atMost(K-1)" trick, discusses trade-offs with Fenwick/Segment Tree for mutable data
+```
 
 ---
 
-## Common Mistakes & Edge Cases
+## 7. Interview Strategy
 
-- **Off-by-one:** Prefix `prefix[i]` typically means sum of `nums[0..i-1]`, so `nums[i..j]` sum = `prefix[j+1] - prefix[i]`. Be consistent with 0- vs 1-indexing.
-- **Negative modulo (Java):** `-5 % 3 == -2`. Use `(x % k + k) % k` for non-negative remainder.
-- **Empty subarray:** For "count subarrays with sum K", initialize `map.put(0, 1)`—the empty prefix represents the subarray starting at index 0.
-- **Integer overflow:** For large arrays or large values, use `long` for prefix sums (e.g., Count of Range Sum).
-- **Mutable vs immutable:** If the array can change between queries, prefix sum must be rebuilt; consider a Fenwick tree or segment tree instead for dynamic updates.
+### Target Solving Times
 
-## Pattern Variations
+```
+Easy (Range Sum Query, Pivot Index):         5-8 minutes (including explanation)
+Medium (Subarray Sum = K, Contiguous Array): 10-15 minutes
+Hard (Submatrices Sum to Target):            18-25 minutes
 
-- **Prefix product:** Same idea as prefix sum but with multiplication (e.g., Product of Array Except Self).
-- **Prefix sum + hash map:** Count subarrays with given sum/remainder—"how many previous prefixes satisfy X?"
-- **Prefix sum + binary search:** When the array is sorted or when you need to find bounds (e.g., lower_bound on prefix).
-- **2D prefix sum:** For matrix range queries, build `prefix[i][j] = sum of rectangle (0,0) to (i-1,j-1)`; query `[r1,c1] to [r2,c2]` = `prefix[r2+1][c2+1] - prefix[r1][c2+1] - prefix[r2+1][c1] + prefix[r1][c1]`.
-- **Merge sort on prefix:** For "count pairs where lower ≤ diff ≤ upper" (Count of Range Sum), merge sort partitions and counts during merge.
+If you're taking longer than these, you haven't internalized the templates.
+```
+
+### How to Explain Your Approach (Script)
+
+```
+STEP 1 (30 seconds): State the brute force
+  "The brute force checks all O(n²) subarrays and computes each sum in O(1)
+   with a running total, giving O(n²) overall."
+
+STEP 2 (30 seconds): Identify the optimization
+  "I'll precompute a prefix sum array where prefix[i] is the sum of the first
+   i elements. Then the sum of any subarray nums[left..right] is just
+   prefix[right+1] - prefix[left] in O(1)."
+
+  FOR COUNT PROBLEMS, add:
+  "To count subarrays summing to K, I rearrange: prefix[j] - K = prefix[i].
+   I use a HashMap to track how many times each prefix sum has appeared.
+   At each position, I look up prefix - K in the map. This gives O(n) time."
+
+STEP 3 (15 seconds): Confirm edge cases
+  "I'll handle empty arrays, initialize the HashMap with (0,1) for the empty
+   prefix, and use long if values might overflow."
+
+STEP 4: Code (5-12 minutes)
+
+STEP 5 (30 seconds): Walk through an example
+  "For nums=[1,2,3], k=3: prefix sums are 0,1,3,6.
+   At prefix=1: 1-3=-2 not in map.
+   At prefix=3: 3-3=0 is in map (count 1) → found [1,2].
+   At prefix=6: 6-3=3 is in map (count 1) → found [3]. Answer: 2."
+```
+
+### Follow-Up Questions Interviewers Ask
+
+```
+Q: "What if the array can be updated between queries?"
+A: "Prefix sum assumes immutable data. For mutable arrays, I'd use a
+    Fenwick Tree (BIT) for O(log n) point update and O(log n) range query,
+    or a Segment Tree for more complex range operations."
+
+Q: "Can you solve Subarray Sum = K without extra space?"
+A: "Not in O(n) time. The HashMap is essential for O(1) lookups of previous
+    prefix sums. Without it, we'd fall back to O(n²) brute force. The O(n)
+    space is a necessary trade-off."
+
+Q: "How would you handle this in 2D?"
+A: "Build a 2D prefix sum using inclusion-exclusion. To count submatrices
+    with a target sum, fix two rows (r1, r2), compress each column into
+    a single value using prefix sums, then apply the 1D Subarray Sum = K
+    technique. That gives O(m²·n) for an m×n matrix."
+
+Q: "What if we need subarrays with sum in a range [lower, upper]?"
+A: "That's LC 327. Prefix sum alone isn't enough. I'd use merge sort on
+    the prefix array and count valid pairs during the merge step, which
+    gives O(n log n)."
+
+Q: "What's the 'exactly K = atMost(K) - atMost(K-1)' trick?"
+A: "Some problems are easier to solve for 'at most K' using sliding window.
+    'Exactly K' subarrays = atMost(K) - atMost(K-1). For example,
+    Binary Subarrays With Sum (LC 930) uses this when the array is binary."
+```
+
+---
+
+## 8. Revision Strategy
+
+### Weekly Revision Plan
+
+```
+WEEK 1: Solve all 13 problems from scratch. Time yourself.
+WEEK 2: Re-solve only the ones you couldn't do in target time.
+WEEK 3: Solve 560, 974, and 1074 from memory (no notes, no IDE help).
+WEEK 4: Mix with other patterns (sliding window, two pointers) to practice
+         pattern selection — "is this prefix sum or sliding window?"
+```
+
+### What to Memorize vs Understand
+
+```
+MEMORIZE:
+  ✓ prefix[i] = sum of arr[0..i-1]; range sum = prefix[right+1] - prefix[left]
+  ✓ The HashMap template: seed with (0,1), count THEN update
+  ✓ Negative mod fix: ((x % k) + k) % k
+  ✓ 2D inclusion-exclusion formula (add, subtract, subtract, add)
+  ✓ "exactly K = atMost(K) - atMost(K-1)" trick
+
+UNDERSTAND (don't memorize — derive each time):
+  ✓ WHY prefix[j] - prefix[i] = K leads to a HashMap approach
+  ✓ WHY we initialize HashMap with (0, 1) — the empty prefix
+  ✓ WHY 2D prefix uses inclusion-exclusion (Venn diagram of overlapping rectangles)
+  ✓ HOW to reduce 2D submatrix problems to 1D (fix row range, compress columns)
+  ✓ WHY Contiguous Array transforms 0→-1 (equal 0s and 1s ↔ subarray sum = 0)
+```
+
+### Signals That Indicate Mastery
+
+```
+□ You see "subarray sum" and IMMEDIATELY think "prefix sum + HashMap" (< 5 seconds)
+□ You can write Subarray Sum = K with HashMap in under 5 minutes without looking at anything
+□ You never forget to initialize the HashMap with (0, 1)
+□ You handle negative mod in Java without thinking twice
+□ You can reduce 2D submatrix problems to 1D prefix sum and explain the O(m²n) complexity
+□ You can articulate when to use prefix sum vs sliding window vs Fenwick tree
+□ You can derive the "exactly K" trick on the fly when prompted
+```
+
+---
+
+## Quick Reference Card (Print This)
+
+```
+PATTERN                   TEMPLATE                                    TIME        SPACE
+────────────────────────────────────────────────────────────────────────────────────────
+Build prefix array        prefix[i+1] = prefix[i] + nums[i]          O(n)        O(n)
+Range sum query           prefix[right+1] - prefix[left]              O(1)        —
+Subarray sum = K          HashMap of prefix sums; count prefix-k      O(n)        O(n)
+Longest subarray sum=0    HashMap of first-index; max(j - firstIdx)   O(n)        O(n)
+Divisible by K            ((prefix % k) + k) % k; count same mod      O(n)        O(k)
+Product except self       prefix product left × suffix product right  O(n)        O(1)*
+2D range sum              inclusion-exclusion on 2D prefix             O(mn)       O(mn)
+2D submatrix count = T    fix 2 rows + compress to 1D + HashMap       O(m²n)      O(n)
+Exactly K (binary array)  atMost(K) - atMost(K-1)                     O(n)        O(1)
+
+DECISION FLOW:
+  range sum on immutable array?     → BASIC PREFIX ARRAY
+  count subarrays with sum = K?     → PREFIX SUM + HASHMAP
+  subarray sum divisible by K?      → PREFIX MOD K + HASHMAP
+  2D rectangle sum?                 → 2D PREFIX (inclusion-exclusion)
+  array changes between queries?    → FENWICK TREE / SEGMENT TREE (not prefix sum)
+
+* O(1) extra space when reusing output array for prefix pass
+```

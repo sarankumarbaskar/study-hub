@@ -1,127 +1,84 @@
-# Interval DP & State Machine DP
+# Interval DP — Interview Execution Playbook
 
-> **Interval DP**: Solve problems on contiguous subarrays by splitting or merging intervals—typical for palindromes, matrix chain multiplication, and burst balloons. **State Machine DP**: Model discrete states (e.g., bought/sold, cooldown) and transitions between them—classic for stock buy/sell with constraints.
+> **Core Idea**: `dp[i][j]` = optimal answer for the subproblem on range `[i, j]`. Try every split point `k` to divide the range into two smaller subproblems. Fill the table by **increasing interval length** so all dependencies are ready.
 
-## What Is This Pattern?
+---
 
-### Interval DP
+## 1. Pattern Recognition Signals
 
-**Interval DP** solves problems where the optimal solution depends on optimal solutions to overlapping contiguous subintervals. You define `dp[i][j]` as the answer for the subarray/substring from index `i` to `j` (inclusive). The recurrence typically either:
+You're looking at Interval DP when:
 
-- **Split**: `dp[i][j] = min/max over k (dp[i][k] + dp[k+1][j] + cost)` — partition at every k.
-- **Merge**: When an operation "uses" endpoints (e.g., burst last balloon), `dp[i][j]` = cost of that operation + subproblems.
+| Signal | Example Phrasing |
+|--------|-----------------|
+| **Merge/split operations on a range** | "merge stones", "cut a stick", "burst balloons" |
+| **Optimal partition of a sequence** | "minimum cost to split array", "matrix chain multiplication" |
+| **"Minimum/maximum cost to process range [i, j]"** | "minimum insertions to make palindrome", "minimum score triangulation" |
+| **Answer for [i, j] depends on smaller sub-intervals** | "longest palindromic subsequence in s[i..j]" |
+| **Order of operations matters within a range** | "burst balloons — which one to pop last?" |
+| **Problem involves contiguous subarray/substring** | "strange printer — minimum turns to print s[i..j]" |
 
-Order of filling: iterate by interval length (len = 1, 2, … n), or use memoization. Base case: `dp[i][i]` for single-element intervals.
+**Quick litmus test**: If you can phrase the problem as "What's the best I can do on subarray `[i, j]`?" and the answer combines results from `[i, k]` and `[k+1, j]` (or similar decomposition), it's Interval DP.
 
-### State Machine DP
+---
 
-**State Machine DP** models a process as a finite state machine. Each state represents a "situation" (e.g., holding stock, just sold). Transitions have costs/rewards. You compute `dp[i][state]` = best outcome at day `i` in that state. Classic example: **stock buy/sell** — states like "hold", "sold" (or "cooldown"), transitions depend on buy/sell/rest rules.
+## 2. Thinking Framework
 
-## When to Use
-
-**Interval DP:**
-- Problem involves **contiguous subarrays** or **substrings**.
-- Optimal structure: combining solutions to **smaller contiguous pieces**.
-- Examples: palindromic subsequence, matrix chain multiplication, burst balloons, optimal binary search tree, minimum cost tree from leaf values.
-
-**State Machine DP:**
-- Problem has **discrete states** and **allowed transitions**.
-- Each step: **buy**, **sell**, **rest**, **cooldown**, etc.
-- Classic: **stock buy/sell** with transaction limits, fees, or cooldowns.
-
-## How to Identify
+### Step-by-Step Mental Model
 
 ```
-Is the input a contiguous sequence (array/string)?
-    NO → Consider other DP (knapsack, LCS, etc.)
-    YES ↓
+1. DEFINE STATE
+   dp[i][j] = answer for interval [i, j]
+   (cost, length, count — whatever the problem asks)
 
-Does the problem ask for optimal on a RANGE [i..j]?
-    YES → INTERVAL DP (split/merge on subintervals)
-    NO ↓
+2. IDENTIFY TRANSITION
+   For each split point k in [i, j-1] (or [i+1, j-1] for "last element" style):
+     dp[i][j] = optimize over k of:
+       dp[i][k] + dp[k+1][j] + cost(i, k, j)
 
-Does the problem involve BUY/SELL with constraints?
-    YES → STATE MACHINE DP
-    NO ↓
+3. SET BASE CASES
+   - Single element: dp[i][i] = 0 or 1 (problem-dependent)
+   - Adjacent pair: dp[i][i+1] (sometimes needed)
 
-Are there discrete states (hold, sold, cooldown)?
-    YES → STATE MACHINE DP
+4. DETERMINE ITERATION ORDER
+   ⚠️ ALWAYS iterate by LENGTH (len = 1, 2, ..., n)
+   For each length, sweep all valid starting positions i.
+   j = i + len - 1
+
+5. EXTRACT ANSWER
+   Usually dp[0][n-1] (entire range)
 ```
 
-## Core Template (Pseudocode)
+### Why Iterate by Length?
 
-### Interval DP — Merge/Split
+When computing `dp[i][j]`, you need `dp[i][k]` and `dp[k+1][j]` — both are **shorter intervals**. If you iterate by start index `i` or end index `j` alone, dependencies may not be satisfied. Iterating by increasing length guarantees all shorter intervals are computed first.
 
-```
-// dp[i][j] = answer for subarray arr[i..j]
-FUNCTION intervalDP(arr):
-    n = length(arr)
-    dp[i][j] = 2D array, init with base values
+### Complexity Profile
 
-    FOR len FROM 2 TO n:
-        FOR i FROM 0 TO n - len:
-            j = i + len - 1
-            dp[i][j] = INF or -INF
-            FOR k FROM i TO j - 1:
-                // Split: combine [i..k] and [k+1..j]
-                candidate = dp[i][k] + dp[k+1][j] + cost(i, k, j)
-                dp[i][j] = min/max(dp[i][j], candidate)
+| Aspect | Typical |
+|--------|---------|
+| Time | O(n³) — three nested loops: length × start × split |
+| Space | O(n²) — the dp table |
+| Optimization | Knuth's optimization → O(n²) for specific cost functions |
 
-    RETURN dp[0][n-1]
-```
+---
 
-### Interval DP — Burst Balloons Style (last item "used")
+## 3. Java Templates
 
-```
-// dp[i][j] = max coins from bursting balloons i..j, with boundaries i-1 and j+1
-FUNCTION burstStyleDP(nums):
-    n = length(nums)
-    // Pad with 1s at boundaries
-    FOR len FROM 1 TO n:
-        FOR i FROM 1 TO n:
-            j = i + len - 1
-            IF j > n: BREAK
-            FOR k FROM i TO j:
-                coins = nums[i-1] * nums[k] * nums[j+1]
-                dp[i][j] = max(dp[i][j], dp[i][k-1] + coins + dp[k+1][j])
-
-    RETURN dp[1][n]
-```
-
-### State Machine DP — Buy/Sell Stocks
-
-```
-// States: 0 = can buy (no holding), 1 = holding stock
-FUNCTION stockStateMachine(prices):
-    n = length(prices)
-    dp[0][0] = 0, dp[0][1] = -prices[0]
-
-    FOR i FROM 1 TO n-1:
-        dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])   // rest or sell
-        dp[i][1] = max(dp[i-1][1], dp[i-1][0] - prices[i])   // rest or buy
-
-    RETURN dp[n-1][0]
-
-// With cooldown: add state "just sold" and transition to cooldown.
-// With k transactions: dp[i][k][0/1] = day i, k transactions left, holding or not.
-```
-
-## Core Template (Java)
-
-### Interval DP — Merge/Split
+### Template A: Standard Interval DP with Split Point Enumeration
 
 ```java
 public int intervalDP(int[] arr) {
     int n = arr.length;
     int[][] dp = new int[n][n];
+    // Base cases: dp[i][i] = 0 (or problem-specific value)
 
     for (int len = 2; len <= n; len++) {
-        for (int i = 0; i + len <= n; i++) {
+        for (int i = 0; i + len - 1 < n; i++) {
             int j = i + len - 1;
-            dp[i][j] = Integer.MAX_VALUE;  // or MIN_VALUE for max
+            dp[i][j] = Integer.MAX_VALUE; // or MIN_VALUE for maximization
             for (int k = i; k < j; k++) {
-                int cost = /* compute from arr, i, k, j */;
-                dp[i][j] = Math.min(dp[i][j], dp[i][k] + dp[k + 1][j] + cost);
+                int cost = dp[i][k] + dp[k + 1][j] + mergeCost(arr, i, k, j);
+                dp[i][j] = Math.min(dp[i][j], cost);
             }
         }
     }
@@ -129,186 +86,133 @@ public int intervalDP(int[] arr) {
 }
 ```
 
-### State Machine DP — Buy/Sell
+### Template B: Matrix Chain Multiplication Pattern
+
+Used when combining two sub-results has a cost that depends on the boundaries.
 
 ```java
-public int maxProfitStateMachine(int[] prices) {
-    int n = prices.length;
-    int notHold = 0, hold = -prices[0];
+public int matrixChainOrder(int[] dims) {
+    // dims has n+1 elements for n matrices: matrix i is dims[i] x dims[i+1]
+    int n = dims.length - 1;
+    int[][] dp = new int[n][n];
 
-    for (int i = 1; i < n; i++) {
-        int newNotHold = Math.max(notHold, hold + prices[i]);
-        int newHold = Math.max(hold, notHold - prices[i]);
-        notHold = newNotHold;
-        hold = newHold;
-    }
-    return notHold;
-}
-```
-
-## Complexity Cheat Sheet
-
-| Pattern            | Time        | Space       | Notes                                      |
-|--------------------|-------------|-------------|--------------------------------------------|
-| Interval DP (split)| O(n³)       | O(n²)       | Triple loop: len × i × k                   |
-| Interval DP (memo) | O(n³)       | O(n²)       | Same; recursive with memo                  |
-| State machine (2D) | O(n × S)    | O(n × S)    | S = number of states (often 2 or 3)        |
-| State machine (1D) | O(n)        | O(1)        | Roll DP; S = 2–3                           |
-| Stock with k txns  | O(n × k)    | O(k)        | Optimize to O(k) space                     |
-
-## Problems with Full Solutions
-
-### Easy (2)
-
-#### Problem: [Best Time to Buy and Sell Stock](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/) (LeetCode #121)
-
-- **Brute Force:** Check every pair (i,j) with i<j; profit = prices[j]-prices[i], take max. Time O(n²), Space O(1).
-- **Intuition:** One transaction only. Find max profit = max(price[j] - price[i]) for i < j. Equivalent to: track minimum price seen so far; at each day, profit = price - min, take max.
-- **Approach:** Single pass: maintain `minPrice`, at each day `profit = prices[i] - minPrice`, update `maxProfit`. No DP needed, but it's the simplest state-machine case (buy once, sell once).
-- **Java Solution:**
-
-```java
-class Solution {
-    public int maxProfit(int[] prices) {
-        if (prices == null || prices.length < 2) return 0;
-        int minPrice = prices[0];
-        int maxProfit = 0;
-        for (int i = 1; i < prices.length; i++) {
-            maxProfit = Math.max(maxProfit, prices[i] - minPrice);
-            minPrice = Math.min(minPrice, prices[i]);
-        }
-        return maxProfit;
-    }
-}
-```
-
-- **Complexity:** Time O(n), Space O(1)
-
----
-
-#### Problem: [Best Time to Buy and Sell Stock II](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/) (LeetCode #122)
-
-- **Brute Force:** Recursively try all valid buy/sell sequences (buy then sell, repeat). Time O(2^n), Space O(n).
-- **Intuition:** Unlimited transactions. Capture every price rise: if prices[i] > prices[i-1], add the difference. Greedy works; state machine: hold/notHold, always prefer selling when price rises.
-- **Approach:** Greedy: sum all positive (prices[i] - prices[i-1]). Or state machine: notHold = max(notHold, hold + p), hold = max(hold, notHold - p).
-- **Java Solution:**
-
-```java
-class Solution {
-    public int maxProfit(int[] prices) {
-        int profit = 0;
-        for (int i = 1; i < prices.length; i++) {
-            if (prices[i] > prices[i - 1]) {
-                profit += prices[i] - prices[i - 1];
+    for (int len = 2; len <= n; len++) {
+        for (int i = 0; i + len - 1 < n; i++) {
+            int j = i + len - 1;
+            dp[i][j] = Integer.MAX_VALUE;
+            for (int k = i; k < j; k++) {
+                int cost = dp[i][k] + dp[k + 1][j]
+                         + dims[i] * dims[k + 1] * dims[j + 1];
+                dp[i][j] = Math.min(dp[i][j], cost);
             }
         }
-        return profit;
     }
+    return dp[0][n - 1];
 }
 ```
 
-- **Complexity:** Time O(n), Space O(1)
+### Template C: "Last Element" Style (Burst Balloons)
 
----
-
-### Medium (4)
-
-#### Problem: Best Time to Buy and Sell Stock with Cooldown (LeetCode #309)
-
-- **Intuition:** After selling, must wait one day before buying. States: `hold` (own stock), `sold` (just sold, in cooldown), `rest` (can buy). Transitions: hold→hold (rest) or hold→sold (sell); sold→rest; rest→rest or rest→hold (buy).
-- **Approach:** Three states: `hold = max(hold, rest - p)`, `sold = hold + p`, `rest = max(rest, sold)`. Process in order: sold depends on old hold; hold and rest depend on previous rest/sold.
-- **Java Solution:**
+Instead of splitting into left/right, pick which element to process **last** in the range.
 
 ```java
-class Solution {
-    public int maxProfit(int[] prices) {
-        if (prices == null || prices.length == 0) return 0;
-        int hold = -prices[0], sold = 0, rest = 0;
-        for (int i = 1; i < prices.length; i++) {
-            int prevHold = hold, prevSold = sold, prevRest = rest;
-            hold = Math.max(prevHold, prevRest - prices[i]);
-            sold = prevHold + prices[i];
-            rest = Math.max(prevRest, prevSold);
-        }
-        return Math.max(sold, rest);
-    }
-}
-```
+public int burstBalloons(int[] nums) {
+    int n = nums.length;
+    int[] vals = new int[n + 2];
+    vals[0] = vals[n + 1] = 1;
+    for (int i = 0; i < n; i++) vals[i + 1] = nums[i];
 
-- **Complexity:** Time O(n), Space O(1)
+    int[][] dp = new int[n + 2][n + 2];
+    // dp[i][j] = max coins from bursting all balloons in open interval (i, j)
 
----
-
-#### Problem: [Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/) (LeetCode #714)
-
-- **Brute Force:** Recursively try all buy/sell sequences, subtracting fee on each sell. Time O(2^n), Space O(n).
-- **Intuition:** Each sell incurs `fee`. States: hold, notHold. `notHold = max(notHold, hold + p - fee)`, `hold = max(hold, notHold - p)`.
-- **Approach:** Two-state DP; subtract fee when selling.
-- **Java Solution:**
-
-```java
-class Solution {
-    public int maxProfit(int[] prices, int fee) {
-        int notHold = 0, hold = -prices[0];
-        for (int i = 1; i < prices.length; i++) {
-            int newNotHold = Math.max(notHold, hold + prices[i] - fee);
-            int newHold = Math.max(hold, notHold - prices[i]);
-            notHold = newNotHold;
-            hold = newHold;
-        }
-        return notHold;
-    }
-}
-```
-
-- **Complexity:** Time O(n), Space O(1)
-
----
-
-#### Problem: [Minimum Cost Tree From Leaf Values](https://leetcode.com/problems/minimum-cost-tree-from-leaf-values/) (LeetCode #1130)
-
-- **Brute Force:** Try all possible binary tree structures with in-order leaves; compute cost for each. Time O(n!), Space O(n).
-- **Intuition:** Build a binary tree from leaf array (in-order). Non-leaf value = left.max × right.max. Minimize sum of all non-leaf values. Interval DP: `dp[i][j]` = min cost for leaves i..j; split at k, cost = dp[i][k] + dp[k+1][j] + max(i..k)*max(k+1..j).
-- **Approach:** Precompute `max[i][j]`. Fill `dp` by length. `dp[i][j] = min over k of (dp[i][k] + dp[k+1][j] + max[i][k]*max[k+1][j])`.
-- **Java Solution:**
-
-```java
-class Solution {
-    public int mctFromLeafValues(int[] arr) {
-        int n = arr.length;
-        int[][] max = new int[n][n];
-        for (int i = 0; i < n; i++) {
-            max[i][i] = arr[i];
-            for (int j = i + 1; j < n; j++)
-                max[i][j] = Math.max(max[i][j - 1], arr[j]);
-        }
-
-        int[][] dp = new int[n][n];
-        for (int len = 2; len <= n; len++) {
-            for (int i = 0; i + len <= n; i++) {
-                int j = i + len - 1;
-                dp[i][j] = Integer.MAX_VALUE;
-                for (int k = i; k < j; k++) {
-                    int cost = dp[i][k] + dp[k + 1][j] + max[i][k] * max[k + 1][j];
-                    dp[i][j] = Math.min(dp[i][j], cost);
-                }
+    for (int len = 1; len <= n; len++) {
+        for (int i = 1; i + len - 1 <= n; i++) {
+            int j = i + len - 1;
+            for (int k = i; k <= j; k++) {
+                // k is the LAST balloon burst in range [i, j]
+                int coins = vals[i - 1] * vals[k] * vals[j + 1];
+                dp[i][j] = Math.max(dp[i][j], dp[i][k - 1] + coins + dp[k + 1][j]);
             }
         }
-        return dp[0][n - 1];
     }
+    return dp[1][n];
 }
 ```
 
-- **Complexity:** Time O(n³), Space O(n²)
+### Template D: Palindrome Interval DP
+
+Endpoints match → extend from inside. Otherwise shrink from one side.
+
+```java
+public int longestPalindromicSubseq(String s) {
+    int n = s.length();
+    int[][] dp = new int[n][n];
+    for (int i = 0; i < n; i++) dp[i][i] = 1;
+
+    for (int len = 2; len <= n; len++) {
+        for (int i = 0; i + len - 1 < n; i++) {
+            int j = i + len - 1;
+            if (s.charAt(i) == s.charAt(j)) {
+                dp[i][j] = 2 + dp[i + 1][j - 1];
+            } else {
+                dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+    return dp[0][n - 1];
+}
+```
+
+### Template E: Top-Down Memoization (Alternative)
+
+When iteration order is confusing, recursion + memo is safer (same complexity).
+
+```java
+int[][] memo;
+
+public int solve(int[] arr) {
+    int n = arr.length;
+    memo = new int[n][n];
+    for (int[] row : memo) Arrays.fill(row, -1);
+    return dp(arr, 0, n - 1);
+}
+
+private int dp(int[] arr, int i, int j) {
+    if (i >= j) return 0; // base case
+    if (memo[i][j] != -1) return memo[i][j];
+
+    int res = Integer.MAX_VALUE;
+    for (int k = i; k < j; k++) {
+        res = Math.min(res, dp(arr, i, k) + dp(arr, k + 1, j) + cost(arr, i, k, j));
+    }
+    return memo[i][j] = res;
+}
+```
 
 ---
 
-#### Problem: [Longest Palindromic Subsequence](https://leetcode.com/problems/longest-palindromic-subsequence/) (LeetCode #516)
+## 4. Edge Cases
 
-- **Brute Force:** Generate all 2^n subsequences, check each if palindrome, take max length. Time O(2^n · n), Space O(n).
-- **Intuition:** LPS of s = LCS(s, reverse(s)). Or interval DP: `dp[i][j]` = LPS length for s[i..j]. If s[i]==s[j]: 2 + dp[i+1][j-1]; else: max(dp[i+1][j], dp[i][j-1]).
-- **Approach:** Fill by length. Base: `dp[i][i]=1`. For len≥2: `dp[i][j] = s[i]==s[j] ? 2+dp[i+1][j-1] : max(dp[i+1][j], dp[i][j-1])`.
-- **Java Solution:**
+| Edge Case | How to Handle |
+|-----------|--------------|
+| **Single element (n = 1)** | `dp[i][i]` is your base case — often 0 (no cost) or 1 (length) |
+| **Two elements (n = 2)** | Only one split point; verify your loop handles `len = 2` correctly |
+| **All elements identical** | Palindrome problems collapse; ensure no off-by-one |
+| **Empty range after split** | `dp[i][k-1]` where `k = i` → accessing `dp[i][i-1]`; initialize as 0 |
+| **Boundary padding** | Burst Balloons needs `vals[0] = vals[n+1] = 1`; forgetting breaks the logic |
+| **Large n (n > 500)** | O(n³) means ~125M ops at n=500; may TLE — check constraints |
+| **Integer overflow** | Multiplication in cost (e.g., triangulation) can overflow int; use long if products exceed 2³¹ |
+| **Memoization vs iteration** | Both O(n³); iteration avoids stack overflow for large n |
+
+---
+
+## 5. Problem Progression
+
+### Warm-Up: LC 516 — Longest Palindromic Subsequence
+
+- **Why first**: Pure interval DP without complex cost functions. Builds intuition for `dp[i][j]` on ranges.
+- **Key insight**: If `s[i] == s[j]`, extend the palindrome from inside: `dp[i][j] = 2 + dp[i+1][j-1]`. Otherwise take the better of shrinking from either end.
+- **Complexity**: O(n²) time, O(n²) space.
 
 ```java
 class Solution {
@@ -318,7 +222,7 @@ class Solution {
         for (int i = 0; i < n; i++) dp[i][i] = 1;
 
         for (int len = 2; len <= n; len++) {
-            for (int i = 0; i + len <= n; i++) {
+            for (int i = 0; i + len - 1 < n; i++) {
                 int j = i + len - 1;
                 if (s.charAt(i) == s.charAt(j))
                     dp[i][j] = 2 + dp[i + 1][j - 1];
@@ -331,96 +235,54 @@ class Solution {
 }
 ```
 
-- **Complexity:** Time O(n²), Space O(n²)
-
 ---
 
-### Hard (3)
+### Core: LC 1039 — Minimum Score Triangulation of Polygon
 
-#### Problem: [Best Time to Buy and Sell Stock III](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/) (LeetCode #123)
-
-- **Brute Force:** Try all pairs of non-overlapping buy-sell intervals (split at each k). Time O(n⁴), Space O(1).
-- **Intuition:** At most 2 transactions. Track best profit after 1 buy, 1 sell, 2 buys, 2 sells. `buy1 = max(buy1, -p)`, `sell1 = max(sell1, buy1+p)`, `buy2 = max(buy2, sell1-p)`, `sell2 = max(sell2, buy2+p)`.
-- **Approach:** Four variables in one pass; each uses the previous.
-- **Java Solution:**
+- **Problem**: Given a convex polygon with `n` vertices (values[]), triangulate it to minimize the sum of triangle scores (product of three vertex values).
+- **Key insight**: `dp[i][j]` = minimum cost to triangulate the sub-polygon from vertex `i` to vertex `j`. For each `k` between `i` and `j`, triangle `(i, k, j)` is formed with cost `values[i] * values[k] * values[j]`.
+- **Complexity**: O(n³) time, O(n²) space.
 
 ```java
 class Solution {
-    public int maxProfit(int[] prices) {
-        if (prices == null || prices.length < 2) return 0;
-        int buy1 = -prices[0], sell1 = 0;
-        int buy2 = -prices[0], sell2 = 0;
-        for (int i = 1; i < prices.length; i++) {
-            int p = prices[i];
-            sell2 = Math.max(sell2, buy2 + p);
-            buy2 = Math.max(buy2, sell1 - p);
-            sell1 = Math.max(sell1, buy1 + p);
-            buy1 = Math.max(buy1, -p);
-        }
-        return sell2;
-    }
-}
-```
+    public int minScoreTriangulation(int[] values) {
+        int n = values.length;
+        int[][] dp = new int[n][n];
 
-- **Complexity:** Time O(n), Space O(1)
-
----
-
-#### Problem: [Best Time to Buy and Sell Stock IV](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/) (LeetCode #188)
-
-- **Brute Force:** Recursively try all sequences of up to k buy-sell pairs. Time O(2^n), Space O(n).
-- **Intuition:** At most k transactions. `dp[t][0]` = max profit after t sells (not holding), `dp[t][1]` = after t sells and one buy (holding). For each day: update all transaction levels. When k ≥ n/2, same as unlimited (#122).
-- **Approach:** `dp[k][0]` and `dp[k][1]` arrays. `dp[j][0] = max(dp[j][0], dp[j][1] + p)`, `dp[j][1] = max(dp[j][1], dp[j-1][0] - p)` for j from k down to 1.
-- **Java Solution:**
-
-```java
-class Solution {
-    public int maxProfit(int k, int[] prices) {
-        if (prices == null || prices.length < 2 || k <= 0) return 0;
-        if (k >= prices.length / 2) {
-            int profit = 0;
-            for (int i = 1; i < prices.length; i++)
-                if (prices[i] > prices[i - 1]) profit += prices[i] - prices[i - 1];
-            return profit;
-        }
-        int[] sell = new int[k + 1];
-        int[] buy = new int[k + 1];
-        java.util.Arrays.fill(buy, Integer.MIN_VALUE);
-
-        for (int p : prices) {
-            for (int j = k; j >= 1; j--) {
-                sell[j] = Math.max(sell[j], buy[j] + p);
-                buy[j] = Math.max(buy[j], sell[j - 1] - p);
+        for (int len = 3; len <= n; len++) {
+            for (int i = 0; i + len - 1 < n; i++) {
+                int j = i + len - 1;
+                dp[i][j] = Integer.MAX_VALUE;
+                for (int k = i + 1; k < j; k++) {
+                    int cost = dp[i][k] + dp[k][j] + values[i] * values[k] * values[j];
+                    dp[i][j] = Math.min(dp[i][j], cost);
+                }
             }
         }
-        return sell[k];
+        return dp[0][n - 1];
     }
 }
 ```
 
-- **Complexity:** Time O(n × k), Space O(k)
-
 ---
 
-#### Problem: [Burst Balloons](https://leetcode.com/problems/burst-balloons/) (LeetCode #312)
+### Core: LC 312 — Burst Balloons
 
-- **Brute Force:** Try all n! orders of bursting balloons; compute coins for each order. Time O(n!), Space O(n).
-- **Intuition:** Burst balloons to maximize coins. When bursting `k` last in range [i,j], coins = nums[i-1]*nums[k]*nums[j+1]. Interval DP: `dp[i][j]` = max coins from bursting balloons in (i,j) with boundaries. Pad array with 1s.
-- **Approach:** Build `vals = [1, ... nums, 1]`. `dp[i][j] = max over k in (i,j) of (vals[i]*vals[k]*vals[j] + dp[i][k] + dp[k][j])`. Iterate by length.
-- **Java Solution:**
+- **Problem**: Burst all balloons to maximize total coins. Bursting balloon `k` earns `nums[left] * nums[k] * nums[right]`.
+- **Key insight**: Think in reverse — which balloon do you burst **last** in range `[i, j]`? If `k` is last, its neighbors are the boundaries `i-1` and `j+1` (everything else is already gone). Pad array with 1s.
+- **Complexity**: O(n³) time, O(n²) space.
 
 ```java
 class Solution {
     public int maxCoins(int[] nums) {
         int n = nums.length;
         int[] vals = new int[n + 2];
-        vals[0] = 1;
-        vals[n + 1] = 1;
+        vals[0] = vals[n + 1] = 1;
         for (int i = 0; i < n; i++) vals[i + 1] = nums[i];
 
         int[][] dp = new int[n + 2][n + 2];
         for (int len = 1; len <= n; len++) {
-            for (int i = 1; i + len <= n + 1; i++) {
+            for (int i = 1; i + len - 1 <= n; i++) {
                 int j = i + len - 1;
                 for (int k = i; k <= j; k++) {
                     int coins = vals[i - 1] * vals[k] * vals[j + 1];
@@ -433,30 +295,220 @@ class Solution {
 }
 ```
 
-- **Complexity:** Time O(n³), Space O(n²)
+---
+
+### Core: LC 1312 — Minimum Insertion Steps to Make a Palindrome
+
+- **Problem**: Minimum characters to insert into `s` so it becomes a palindrome.
+- **Key insight**: `min insertions = n - LPS(s)`. Or directly: `dp[i][j]` = min insertions for `s[i..j]`. If `s[i] == s[j]`, no extra insertions needed for the ends: `dp[i][j] = dp[i+1][j-1]`. Otherwise insert one char to match: `dp[i][j] = 1 + min(dp[i+1][j], dp[i][j-1])`.
+- **Complexity**: O(n²) time, O(n²) space.
+
+```java
+class Solution {
+    public int minInsertions(String s) {
+        int n = s.length();
+        int[][] dp = new int[n][n];
+
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i + len - 1 < n; i++) {
+                int j = i + len - 1;
+                if (s.charAt(i) == s.charAt(j)) {
+                    dp[i][j] = dp[i + 1][j - 1];
+                } else {
+                    dp[i][j] = 1 + Math.min(dp[i + 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[0][n - 1];
+    }
+}
+```
 
 ---
 
-## Common Mistakes
+### Advanced: LC 87 — Scramble String
 
-| Mistake | How to Avoid |
-|---------|--------------|
-| **Interval DP loop order** | Fill by increasing interval length so `dp[i][k]` and `dp[k+1][j]` are ready when computing `dp[i][j]`. |
-| **Burst Balloons boundaries** | Pad with 1s; `dp[i][j]` uses boundaries `vals[i-1]` and `vals[j+1]`. Iterate `i` from 1, `j` up to n. |
-| **State machine transition order** | When states depend on each other, compute all "new" values from "old", then assign (avoid overwriting too early). |
-| **Stock IV: k large** | If k ≥ n/2, treat as unlimited transactions to avoid TLE. |
-| **Stock III update order** | Update sell2, buy2, sell1, buy1 in that order so each uses previous values from same day. |
-| **MCT from leaf values** | Cost = max(left) × max(right) for the root, not sum. Precompute max[i][j] for O(1) lookup. |
-| **LPS base case** | `dp[i][i] = 1`. For `i+1 > j-1` (len 2 with same char), `dp[i+1][j-1]` = 0, so 2+0=2 is correct. |
+- **Problem**: Determine if `s2` is a scrambled version of `s1` (recursively swap halves at any split point).
+- **Key insight**: 3D interval DP. `dp[i][j][len]` = true if `s1[i..i+len-1]` can be scrambled into `s2[j..j+len-1]`. For each split length `k`: either the halves align directly or they swap positions.
+- **Complexity**: O(n⁴) time, O(n³) space.
 
-## Pattern Variations
+```java
+class Solution {
+    public boolean isScramble(String s1, String s2) {
+        int n = s1.length();
+        if (n != s2.length()) return false;
 
-| Variation | Description | Example |
-|-----------|-------------|---------|
-| **Interval split** | Combine two adjacent intervals at each split point | MCT from Leaf Values (#1130), Matrix Chain |
-| **Interval merge (last)** | "Use" a specific element last; subproblems exclude it | Burst Balloons (#312) |
-| **Palindrome interval** | Match endpoints or take max of shrink | LPS (#516) |
-| **2-state stock** | hold / notHold | #122, #714 |
-| **3-state stock** | hold / sold / rest (cooldown) | #309 |
-| **k-transaction stock** | DP over transaction count | #123 (k=2), #188 (k general) |
-| **Monotonic stack optimization** | MCT can be optimized to O(n) with stack | #1130 (advanced) |
+        boolean[][][] dp = new boolean[n][n][n + 1];
+
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                dp[i][j][1] = s1.charAt(i) == s2.charAt(j);
+
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i + len <= n; i++) {
+                for (int j = 0; j + len <= n; j++) {
+                    for (int k = 1; k < len; k++) {
+                        // No swap: left matches left, right matches right
+                        if (dp[i][j][k] && dp[i + k][j + k][len - k]) {
+                            dp[i][j][len] = true;
+                            break;
+                        }
+                        // Swap: left matches right's tail, right matches left's head
+                        if (dp[i][j + len - k][k] && dp[i + k][j][len - k]) {
+                            dp[i][j][len] = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return dp[0][0][n];
+    }
+}
+```
+
+---
+
+### Advanced: LC 664 — Strange Printer
+
+- **Problem**: A printer can print a sequence of the same character in one turn. Minimum turns to print string `s`.
+- **Key insight**: `dp[i][j]` = minimum turns to print `s[i..j]`. Base: `dp[i][i] = 1`. If `s[i] == s[j]`, then `dp[i][j] = dp[i][j-1]` (print `s[j]` in the same turn as `s[i]`). Otherwise try every split: `dp[i][j] = min(dp[i][k] + dp[k+1][j])` for `k` in `[i, j-1]`.
+- **Complexity**: O(n³) time, O(n²) space.
+
+```java
+class Solution {
+    public int strangePrinter(String s) {
+        int n = s.length();
+        int[][] dp = new int[n][n];
+
+        for (int i = 0; i < n; i++) dp[i][i] = 1;
+
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i + len - 1 < n; i++) {
+                int j = i + len - 1;
+                dp[i][j] = dp[i][j - 1] + 1; // worst case: print s[j] alone
+                for (int k = i; k < j; k++) {
+                    if (s.charAt(k) == s.charAt(j)) {
+                        dp[i][j] = Math.min(dp[i][j], dp[i][k] + dp[k + 1][j - 1]);
+                    }
+                }
+            }
+        }
+        return dp[0][n - 1];
+    }
+}
+```
+
+---
+
+## 6. Common Mistakes
+
+| Mistake | Why It Happens | Fix |
+|---------|---------------|-----|
+| **Iterating by start index instead of length** | Seems natural to loop `i` then `j`, but `dp[i][j]` needs shorter intervals that may not be computed yet | **Always outer loop = length**, inner loop = start position |
+| **Off-by-one in split point range** | Confusing `k < j` vs `k <= j` vs `k` in `(i, j)` exclusive | Standard split: `k` from `i` to `j-1` (splits into `[i,k]` and `[k+1,j]`). "Last element" style: `k` from `i` to `j` |
+| **Forgetting boundary padding** | Burst Balloons and Triangulation need virtual boundaries | Pad array: `vals[0] = vals[n+1] = 1` for balloons |
+| **Wrong base case** | Using `dp[i][i] = arr[i]` when it should be 0, or vice versa | Think: "What's the cost/value of a single element range?" Usually 0 for cost, 1 for length |
+| **Integer overflow in cost** | `values[i] * values[k] * values[j]` where values can be large | Use `long` for intermediate products, cast back |
+| **Not initializing dp to INF/-INF** | Forgetting means `dp[i][j] = 0` beats real answers in min problems | Always set `dp[i][j] = Integer.MAX_VALUE` before the `k` loop for minimization |
+| **Memoization without proper "visited" check** | Using `memo[i][j] == 0` as "not computed" when 0 is a valid answer | Initialize memo to `-1` and check against it |
+| **Confusing open vs closed intervals** | Burst Balloons uses open intervals `(i, j)` while others use closed `[i, j]` | Be explicit about your interval convention; adjust array indexing accordingly |
+
+---
+
+## 7. Interview Strategy
+
+### Before Coding (2-3 minutes)
+
+1. **Identify the pattern**: "This is asking for optimal cost on a range — Interval DP."
+2. **Define state clearly**: State aloud: "`dp[i][j]` represents [what] for the subarray from index `i` to `j`."
+3. **Explain transition**: "I'll try every split point `k` and combine left/right results."
+4. **Clarify base cases**: "Single element ranges return [X]."
+5. **State complexity**: "This will be O(n³) time, O(n²) space — acceptable for n ≤ 500."
+
+### During Coding (10-12 minutes)
+
+1. Write the three nested loops first (length → start → split).
+2. Fill in the recurrence inside the innermost loop.
+3. Handle base cases before the main loops.
+4. Extract the answer from `dp[0][n-1]`.
+
+### Communication Tips
+
+- **If stuck on transition**: "Let me think about what happens if I process element `k` last in this range..."
+- **If stuck on iteration order**: "I need shorter intervals first, so I'll iterate by length."
+- **Justify O(n³)**: "Each of the O(n²) subproblems tries O(n) split points, giving O(n³) total."
+
+### Top-Down vs Bottom-Up Decision
+
+| Use Top-Down When | Use Bottom-Up When |
+|---|---|
+| Transition logic is complex or has many branches | Standard split-point enumeration |
+| Not all subproblems are needed | All subproblems will be visited |
+| Easier to reason about recursively | Want to avoid stack overflow (large n) |
+| Interview allows either approach | Interviewer asks for iterative |
+
+---
+
+## 8. Revision + Quick Reference
+
+### One-Page Cheat Sheet
+
+```
+INTERVAL DP FORMULA:
+  dp[i][j] = optimize over k in [i, j-1]:
+    dp[i][k] + dp[k+1][j] + cost(i, k, j)
+
+ITERATION ORDER:
+  for len = 2 to n:
+    for i = 0 to n-len:
+      j = i + len - 1
+      for k = i to j-1:
+        update dp[i][j]
+
+BASE CASES:
+  dp[i][i] = 0 (cost) or 1 (length) or arr[i] (value)
+
+ANSWER:
+  dp[0][n-1]
+
+COMPLEXITY:
+  Time: O(n³)    Space: O(n²)
+```
+
+### Pattern Variants at a Glance
+
+| Variant | Split Logic | Example |
+|---------|------------|---------|
+| **Standard split** | `dp[i][k] + dp[k+1][j] + cost` | Matrix Chain, MCT from Leaf Values |
+| **Last element** | Pick `k` last in `[i,j]`, use boundaries | Burst Balloons, Triangulation |
+| **Palindrome** | Match endpoints → shrink inward | LPS, Min Insertions |
+| **Matching characters** | If `s[k] == s[j]`, merge turns | Strange Printer |
+| **3D interval** | `dp[i][j][len]` for two-string problems | Scramble String |
+
+### 30-Second Recall Drill
+
+1. **State**: `dp[i][j]` = answer for range `[i, j]`
+2. **Transition**: Try all split points `k`
+3. **Order**: Iterate by LENGTH (small → large)
+4. **Base**: Single elements (and sometimes pairs)
+5. **Answer**: `dp[0][n-1]`
+6. **Time**: O(n³)
+
+### Problem Quick-Reference Table
+
+| # | Problem | Difficulty | Key Twist |
+|---|---------|-----------|-----------|
+| 516 | Longest Palindromic Subsequence | Medium | Endpoints match → +2 and shrink |
+| 1039 | Min Score Triangulation | Medium | Triangle (i,k,j), product cost |
+| 312 | Burst Balloons | Hard | Think "last burst", pad boundaries |
+| 1312 | Min Insertions for Palindrome | Hard | `n - LPS` or direct interval DP |
+| 87 | Scramble String | Hard | 3D DP, swap vs no-swap at each split |
+| 664 | Strange Printer | Hard | Match `s[k] == s[j]` to save turns |
+
+### Related Patterns
+
+- **1D DP**: When the interval always starts at 0 (prefix-based)
+- **2D DP on Grid**: When `i, j` are row/col not interval endpoints
+- **Tree DP**: When the "intervals" form a tree structure (sometimes interval DP builds trees)
+- **Matrix Chain**: The canonical textbook interval DP problem

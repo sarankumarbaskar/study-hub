@@ -1,91 +1,156 @@
-# Monotonic Stack
+# Monotonic Stack — Interview Execution Playbook
 
-> Maintain a stack where elements are kept in strictly increasing or strictly decreasing order—enabling O(1) "next greater/lesser" lookups and O(n) scans over arrays.
+> **Pattern Mastery Level:** This is the most "mechanical" advanced pattern — once you see the signal, the template writes itself. It appears in ~8% of FAANG coding rounds and is the backbone of histogram, span, and "next greater/smaller" families. If you can't write the decreasing stack template in 2 minutes, you're not ready.
 
-## What Is This Pattern?
+---
 
-A **monotonic stack** is a stack that maintains elements in strictly monotonic order (either strictly increasing or strictly decreasing) as you process a sequence. When you push a new element, you pop from the stack until the monotonic property is restored. The key insight: elements that get "popped" have found their **answer**—the element that caused them to pop is their next greater (or lesser) element.
+## 1. Pattern Recognition Signals
 
-Think of it visually: imagine processing an array left-to-right. For a *decreasing* stack, you're building a "skyline" where each new building either fits under the previous ones (push) or "blocks the view" of shorter buildings to its left—those shorter ones pop and record *this* new element as their "next greater." The stack always reads top-to-bottom as: newest → oldest, with strictly decreasing values. For an *increasing* stack, the logic flips: you find "next smaller" elements.
-
-The power comes from **amortized O(1)** per element: each element is pushed once and popped at most once, so total operations are O(n). This transforms "find next greater for every element" from O(n²) brute-force to O(n).
-
-## When to Use This Pattern
-
-- The problem asks for **next greater element**, **next smaller element**, **previous greater**, or **previous smaller** for each position.
-- You need to find the **nearest** element satisfying a comparison (>, <, ≥, ≤) in one direction.
-- The problem involves **histograms**, **rectangles**, **trapping water**, or **subarray min/max** contributions.
-- You see phrases like "next greater", "daily temperature", "stock span", "subarray minimums", "remove k digits", "asteroid collision".
-- Brute-force would scan right (or left) for each element—monotonic stack achieves O(n) in one pass.
-
-## How to Identify This Pattern
+### When to Use Monotonic Stack
 
 ```
-Is the input a 1D array or sequence?
-    NO → Consider other patterns (graph, tree, 2D DP)
-    YES ↓
-
-Does the problem ask for "next/previous greater/smaller" per element?
-    YES → MONOTONIC STACK
-    NO ↓
-
-Are we computing something over ranges where min/max matters?
-    (e.g., subarray min, rectangle area, trapped water)
-    YES → Often MONOTONIC STACK (with left/right boundaries)
-    NO → Consider sliding window, two pointers
+INSTANT TRIGGERS (say "monotonic stack" within 5 seconds):
+  ✓ "Next greater element" or "next smaller element"
+  ✓ "Previous greater element" or "previous smaller element"
+  ✓ "Daily temperatures" / "days until warmer"
+  ✓ "Stock span" / "consecutive days ≤ price"
+  ✓ "Histogram" + "largest rectangle"
+  ✓ "Trapping rain water" (stack variant)
+  ✓ "Remove k digits" / "smallest number after removal"
+  ✓ "Remove duplicate letters" / "smallest subsequence"
 ```
 
-## Core Template (Pseudocode) — Monotonic Decreasing and Monotonic Increasing Stack
-
-### Monotonic Decreasing Stack (find next greater on right)
+### Keywords in Problem Statements
 
 ```
-FUNCTION nextGreaterRight(arr):
-    n = length(arr)
-    result = array of size n, filled with -1  // default: no next greater
-    stack = empty stack of indices
-
-    FOR i FROM 0 TO n-1:
-        WHILE stack not empty AND arr[stack.top()] < arr[i]:
-            idx = stack.pop()
-            result[idx] = arr[i]  // arr[i] is next greater for arr[idx]
-        stack.push(i)
-
-    RETURN result
+DIRECT SIGNALS:                 INDIRECT SIGNALS:
+  "next greater"                  "histogram" / "bar chart"
+  "next smaller"                  "span" / "consecutive"
+  "previous greater"              "remove digits" / "minimize number"
+  "daily temperature"             "maximal rectangle"
+  "stock span"                    "subarray minimum/maximum"
+  "asteroid collision"            "lexicographically smallest"
 ```
 
-### Monotonic Increasing Stack (find next smaller on right)
+### When NOT to Use
 
 ```
-FUNCTION nextSmallerRight(arr):
-    n = length(arr)
-    result = array of size n, filled with n  // default: no next smaller (use n as sentinel)
-    stack = empty stack of indices
-
-    FOR i FROM 0 TO n-1:
-        WHILE stack not empty AND arr[stack.top()] > arr[i]:
-            idx = stack.pop()
-            result[idx] = i  // i is index of next smaller for arr[idx]
-        stack.push(i)
-
-    RETURN result
+✗ Need kth largest/smallest globally → use HEAP
+✗ Sliding window min/max with fixed window size → use MONOTONIC DEQUE (both ends needed)
+✗ Finding pairs with a target sum → use TWO POINTERS or HASHING
+✗ Need to process elements in sorted order → use SORTING or HEAP
+✗ Tree or graph traversal → use BFS/DFS with a regular stack
 ```
 
-## Core Template (Java)
+---
 
-### Monotonic Decreasing Stack (next greater)
+## 2. Thinking Framework (Step-by-Step Intuition)
+
+### The 60-Second Decision Process
+
+```
+Step 1: "Does the problem ask about the NEXT or PREVIOUS element that is 
+         GREATER or SMALLER than the current one?"
+  YES → Classic monotonic stack. Go to Step 3.
+  NO  → Continue to Step 2.
+
+Step 2: "Does the problem involve boundaries/extents defined by 
+         greater/smaller elements?"
+  (histogram area, trapped water, subarray min contribution)
+  YES → Monotonic stack to find left/right boundaries.
+  NO  → Probably not a monotonic stack problem.
+
+Step 3: "Do I need NEXT GREATER or NEXT SMALLER?"
+  NEXT GREATER  → Monotonic DECREASING stack (pop when current > top)
+  NEXT SMALLER  → Monotonic INCREASING stack (pop when current < top)
+
+Step 4: "Do I need the VALUE or the INDEX?"
+  INDEX → Store indices in the stack (most problems)
+  VALUE → Store values directly (only when distance/width is irrelevant)
+```
+
+### The Core Insight (Memorize This)
+
+```
+THE STACK IS A WAITING ROOM.
+
+Elements sit in the stack WAITING for their answer. When a new element
+arrives that "beats" the stack top:
+  - The new element IS the answer for the popped element
+  - Pop it, record the answer, repeat
+
+Why O(n)? Each element enters the waiting room once (push) and leaves
+once (pop). Total operations = 2n = O(n).
+
+WHY STORE INDICES, NOT VALUES:
+  - Indices give you BOTH the value (arr[idx]) and the position
+  - Position is needed for: distance (days until warmer), width 
+    (histogram rectangle), or range (trapped water segment)
+  - Values alone lose positional information permanently
+
+DECREASING vs INCREASING — THE RULE:
+  Monotonic DECREASING (big on bottom, small on top):
+    → Pops when current > top → finds NEXT GREATER
+  Monotonic INCREASING (small on bottom, big on top):
+    → Pops when current < top → finds NEXT SMALLER
+```
+
+### The Four Variants (Next/Previous × Greater/Smaller)
+
+```
+┌─────────────────────┬────────────────────┬────────────────────┐
+│                      │ GREATER            │ SMALLER            │
+├─────────────────────┼────────────────────┼────────────────────┤
+│ NEXT (look right)   │ Decreasing stack   │ Increasing stack   │
+│                     │ L→R scan           │ L→R scan           │
+│                     │ Pop when cur > top  │ Pop when cur < top  │
+├─────────────────────┼────────────────────┼────────────────────┤
+│ PREVIOUS (look left)│ Decreasing stack   │ Increasing stack   │
+│                     │ After pop, peek =  │ After pop, peek =  │
+│                     │ prev greater       │ prev smaller       │
+└─────────────────────┴────────────────────┴────────────────────┘
+
+Key: "Previous" comes free — after popping, the new stack top IS the
+     previous greater (or smaller) for the current element.
+```
+
+### Relationship to Sliding Window Maximum
+
+```
+Monotonic stack:  finds next/previous greater/smaller for ALL elements
+Monotonic deque:  maintains max/min within a SLIDING WINDOW of fixed size
+
+Sliding window max (LC 239) uses a monotonic DEQUE because:
+  - We need to add from one end (new element) and remove from the other 
+    (element leaving the window)
+  - A stack only has one end → can't expire old elements efficiently
+
+Rule of thumb:
+  - Fixed window size → Monotonic DEQUE
+  - No window / variable boundaries → Monotonic STACK
+```
+
+---
+
+## 3. Java Templates (Production-Quality)
+
+### Template 1: Next Greater Element (Monotonic Decreasing Stack)
 
 ```java
-public int[] nextGreaterRight(int[] arr) {
+// USE FOR: Next Greater Element I/II, Daily Temperatures
+// Stack maintains DECREASING order (big on bottom)
+// Pop when current > top → current IS the next greater for popped element
+// TIME: O(n) | SPACE: O(n)
+public int[] nextGreater(int[] arr) {
     int n = arr.length;
     int[] result = new int[n];
     Arrays.fill(result, -1);
-    Deque<Integer> stack = new ArrayDeque<>();
+    Deque<Integer> stack = new ArrayDeque<>(); // stores INDICES
 
     for (int i = 0; i < n; i++) {
         while (!stack.isEmpty() && arr[stack.peek()] < arr[i]) {
             int idx = stack.pop();
-            result[idx] = arr[i];
+            result[idx] = arr[i]; // or (i - idx) for distance
         }
         stack.push(i);
     }
@@ -93,45 +158,405 @@ public int[] nextGreaterRight(int[] arr) {
 }
 ```
 
-### Monotonic Increasing Stack (next smaller)
+### Template 2: Previous Smaller Element (Monotonic Increasing Stack)
 
 ```java
-public int[] nextSmallerRight(int[] arr) {
+// USE FOR: Histogram boundaries, subarray min contribution
+// Stack maintains INCREASING order (small on bottom)
+// Pop when current ≤ top → top has no use anymore
+// After pops, peek = previous smaller for current element
+// TIME: O(n) | SPACE: O(n)
+public int[] previousSmaller(int[] arr) {
     int n = arr.length;
     int[] result = new int[n];
-    Arrays.fill(result, n);  // sentinel: no next smaller
-    Deque<Integer> stack = new ArrayDeque<>();
+    Arrays.fill(result, -1); // -1 means no previous smaller
+    Deque<Integer> stack = new ArrayDeque<>(); // stores INDICES
 
     for (int i = 0; i < n; i++) {
-        while (!stack.isEmpty() && arr[stack.peek()] > arr[i]) {
-            int idx = stack.pop();
-            result[idx] = i;
+        while (!stack.isEmpty() && arr[stack.peek()] >= arr[i]) {
+            stack.pop();
         }
+        result[i] = stack.isEmpty() ? -1 : stack.peek();
         stack.push(i);
     }
     return result;
 }
 ```
 
-## Complexity Cheat Sheet
+### Template 3: Monotonic Decreasing Stack (Histogram / Boundary Pattern)
 
-| Operation | Time | Space | Notes |
-|-----------|------|-------|-------|
-| Single pass (next greater/smaller) | O(n) | O(n) | Each element pushed/popped at most once |
-| Circular array (double pass) | O(n) | O(n) | Same logic, iterate 2n or use modulo |
-| Left + right boundaries | O(n) | O(n) | Two passes: left boundaries, right boundaries |
-| With index storage | O(n) | O(n) | Store indices for range width calculations |
+```java
+// USE FOR: Largest Rectangle in Histogram, Maximal Rectangle, Trapping Rain Water
+// When an element pops, we know BOTH its boundaries:
+//   right boundary = current index (the element that caused the pop)
+//   left boundary  = new stack top (the element just beneath in stack)
+// TIME: O(n) | SPACE: O(n)
+public int histogramArea(int[] heights) {
+    int n = heights.length;
+    Deque<Integer> stack = new ArrayDeque<>();
+    int maxArea = 0;
 
-## Problems (Progressive Difficulty)
+    for (int i = 0; i <= n; i++) {
+        int h = (i == n) ? 0 : heights[i]; // sentinel triggers final cleanup
+        while (!stack.isEmpty() && heights[stack.peek()] > h) {
+            int idx = stack.pop();
+            int left = stack.isEmpty() ? -1 : stack.peek();
+            int width = i - left - 1;
+            maxArea = Math.max(maxArea, heights[idx] * width);
+        }
+        stack.push(i);
+    }
+    return maxArea;
+}
+```
 
-### Easy (2 problems)
+### Template 4: Monotonic Increasing Stack (Greedy Removal)
 
-#### Problem: [Next Greater Element I](https://leetcode.com/problems/next-greater-element-i/) (LeetCode #496)
+```java
+// USE FOR: Remove K Digits, Remove Duplicate Letters
+// Maintain smallest possible sequence by removing larger preceding elements
+// Stack is increasing: pop larger elements when a smaller one arrives
+// TIME: O(n) | SPACE: O(n)
+public String removeKDigits(String num, int k) {
+    StringBuilder stack = new StringBuilder();
 
-- **Intuition:** `nums1` is a subset of `nums2`. For each element in `nums1`, find its next greater in `nums2`. Use a monotonic decreasing stack on `nums2` to compute next greater for every element, then map results to `nums1`.
-- **Brute Force:** For each element in nums1, linearly scan nums2 to find it, then scan rightward until finding a greater element. Time O(n×m), Space O(1).
-- **Approach:** 1) Build a map from value → next greater using a decreasing stack on `nums2`. 2) For each value in `nums1`, look up its next greater in the map. 3) Return the result array.
-- **Java Solution:**
+    for (char c : num.toCharArray()) {
+        while (k > 0 && stack.length() > 0 
+               && stack.charAt(stack.length() - 1) > c) {
+            stack.setLength(stack.length() - 1);
+            k--;
+        }
+        if (stack.length() > 0 || c != '0') {
+            stack.append(c);
+        }
+    }
+
+    while (k-- > 0 && stack.length() > 0) {
+        stack.setLength(stack.length() - 1);
+    }
+    return stack.length() == 0 ? "0" : stack.toString();
+}
+```
+
+---
+
+## 4. Edge Case Checklist
+
+```
+INPUT EDGE CASES:
+  □ Empty array (length 0) → return empty/0
+  □ Single element → no next greater/smaller exists, return -1/default
+  □ All elements identical → no element is strictly greater/smaller
+  □ Strictly increasing array → stack never pops (all get -1 for next greater)
+  □ Strictly decreasing array → every element pops immediately
+  □ Array with all same values → strict vs non-strict comparison matters
+
+COMPARISON EDGE CASES:
+  □ Strict (< / >) vs non-strict (≤ / ≥) — changes behavior with duplicates
+  □ For "next greater": use STRICT (arr[top] < arr[i]) to pop
+  □ For contribution counting with duplicates: use asymmetric comparisons
+    (one side strict, one side non-strict) to avoid double-counting
+
+STACK CLEANUP:
+  □ Elements remaining in stack after the loop have NO answer
+  □ Set their result to -1, n, or 0 depending on problem semantics
+  □ Histogram trick: append a sentinel height 0 to force all pops
+
+SPECIAL PATTERNS:
+  □ Circular array → iterate 2n elements, use i % n, only push when i < n
+  □ Leading zeros → in Remove K Digits, skip leading '0' pushes
+  □ Integer overflow → use long for multiplication (subarray min contribution)
+  □ Width calculation → width = rightBoundary - leftBoundary - 1 (exclusive)
+  □ Trapped water → after popping floor, check if stack is empty before computing
+```
+
+---
+
+## 5. Problem Progression (LeetCode)
+
+### Level 1: Easy — Template Application
+
+| # | Problem | Key Insight | Time |
+|---|---------|------------|------|
+| 496 | [Next Greater Element I](https://leetcode.com/problems/next-greater-element-i/) | Decreasing stack on nums2, HashMap to map answers to nums1 | O(n+m) |
+| 739 | [Daily Temperatures](https://leetcode.com/problems/daily-temperatures/) | Next greater by INDEX; result[idx] = i - idx gives days to wait | O(n) |
+
+### Level 2: Standard Medium
+
+| # | Problem | Key Insight | Time |
+|---|---------|------------|------|
+| 901 | [Online Stock Span](https://leetcode.com/problems/online-stock-span/) | Previous greater via decreasing stack; accumulate spans when popping | O(1) amortized |
+| 503 | [Next Greater Element II](https://leetcode.com/problems/next-greater-element-ii/) | Circular array: iterate 2n, use i % n, push only when i < n | O(n) |
+| 402 | [Remove K Digits](https://leetcode.com/problems/remove-k-digits/) | Increasing stack; pop larger preceding digits to minimize number | O(n) |
+| 316 | [Remove Duplicate Letters](https://leetcode.com/problems/remove-duplicate-letters/) | Increasing stack + frequency count + inStack boolean array | O(n) |
+
+### Level 3: Hard — FAANG Interview Level
+
+| # | Problem | Key Insight | Time |
+|---|---------|------------|------|
+| 84 | [Largest Rectangle in Histogram](https://leetcode.com/problems/largest-rectangle-in-histogram/) | Increasing stack; on pop, both boundaries known → width × height | O(n) |
+| 85 | [Maximal Rectangle](https://leetcode.com/problems/maximal-rectangle/) | Build histogram per row, run LC 84 on each row | O(rows×cols) |
+| 42 | [Trapping Rain Water](https://leetcode.com/problems/trapping-rain-water/) | Decreasing stack; pop = valley floor; water = min(walls) - floor × width | O(n) |
+
+### Solving Order for Maximum Learning
+
+```
+Day 1: 496 → 739 (build the "next greater" muscle memory)
+Day 2: 901 → 503 (previous greater, circular arrays)
+Day 3: 402 → 316 (greedy removal — different application of same idea)
+Day 4: 84 → 85  (histogram family — the hardest template)
+Day 5: 42 (trapping rain water — stack approach, compare with two-pointer approach)
+Day 6: Re-solve 84 and 42 from memory (no notes). If you can't, repeat Day 4-5.
+```
+
+---
+
+## 6. Common Mistakes & Interview Traps
+
+### Mistake 1: Storing Values Instead of Indices
+
+```
+WRONG: stack.push(arr[i])
+  You lose positional information. Can't compute distance, width, or range.
+
+CORRECT: stack.push(i)
+  Access value via arr[stack.peek()]. You get BOTH position AND value.
+
+EXCEPTION: LC 496 (Next Greater Element I) — values are unique and you only 
+need the value mapping, so storing values directly is acceptable.
+Stock Span stores (price, span) pairs — still positional via accumulated span.
+```
+
+### Mistake 2: Wrong Comparison Direction
+
+```
+WRONG: Using > when you need < (or vice versa)
+
+REMEMBER:
+  Next GREATER → pop when arr[top] < arr[i]   (current beats top)
+  Next SMALLER → pop when arr[top] > arr[i]   (current beats top)
+
+The comparison is ALWAYS "top vs current". The question is:
+  "Does the current element ANSWER the question for the top element?"
+  If top is waiting for a GREATER element and current IS greater → pop.
+  If top is waiting for a SMALLER element and current IS smaller → pop.
+```
+
+### Mistake 3: Forgetting Stack Cleanup After the Loop
+
+```
+WRONG: Returning result without handling remaining stack elements
+  Elements left in stack have no next greater/smaller → need default values
+
+FIX: Either:
+  (a) Pre-fill result with defaults: Arrays.fill(result, -1) or Arrays.fill(result, n)
+  (b) Use a sentinel value at the end (histogram: append height 0)
+  (c) Process remaining stack in a second loop
+
+Best practice: Pre-fill with defaults. It's the cleanest.
+```
+
+### Mistake 4: Double-Counting Duplicates in Contribution Problems
+
+```
+PROBLEM: In LC 907 (Sum of Subarray Minimums), duplicate values cause
+  the same subarray to be counted by two different elements.
+
+FIX: Use asymmetric comparisons:
+  Left boundary:  previous SMALLER OR EQUAL (>=, pop equal values)
+  Right boundary: next strictly SMALLER   (<, stop at equal values)
+  
+  This assigns each subarray to exactly one element (the LEFTMOST minimum).
+```
+
+### Mistake 5: Off-by-One in Width Calculation
+
+```
+WRONG: width = right - left
+  This includes one boundary → overcounts by 1
+
+CORRECT: width = right - left - 1
+  Exclusive boundaries: elements BETWEEN left boundary and right boundary
+
+Drawing it out:
+  indices: ... [left] [x] [x] [x] [right] ...
+  width = right - left - 1 = number of x's
+
+Always draw the boundary picture if you're unsure.
+```
+
+### What Interviewers Actually Look For
+
+```
+JUNIOR:    Can write next greater element with the template
+SENIOR:    Knows when to use increasing vs decreasing, handles histogram,
+           explains why O(n) despite nested while loop
+STAFF:     Immediately sees the monotonic stack signal, chooses between
+           stack/two-pointer/DP approaches, discusses trade-offs,
+           handles all edge cases without prompting
+```
+
+---
+
+## 7. Interview Strategy
+
+### Target Solving Times
+
+```
+Easy (Next Greater I, Daily Temps):          5-8 minutes
+Medium (Stock Span, Remove K Digits):        10-15 minutes
+Hard (Histogram, Trapping Rain Water):       15-20 minutes
+
+If you're taking longer, you haven't internalized the templates.
+```
+
+### How to Explain Your Approach (Script)
+
+```
+STEP 1 (30 seconds): State the brute force
+  "Brute force: for each element, scan right to find the next greater.
+   That's O(n²) — each element scans up to n elements."
+
+STEP 2 (30 seconds): Identify the optimization
+  "I'll use a monotonic stack. Elements wait in the stack for their answer.
+   When a new element arrives that's greater, it answers all smaller elements
+   on top. Each element is pushed once and popped once, so it's O(n)."
+
+STEP 3 (15 seconds): State the stack type
+  "I need next GREATER, so I'll use a monotonic DECREASING stack —
+   I pop when the current element is greater than the top."
+
+STEP 4 (15 seconds): Clarify index vs value
+  "I'll store indices in the stack so I can compute distances/widths."
+
+STEP 5: Code (5-12 minutes)
+
+STEP 6 (30 seconds): Dry run with example
+  "For [2,1,4,3]: 
+   i=0: push 0 (stack: [0])
+   i=1: 1 < 2, push 1 (stack: [0,1])
+   i=2: 4 > 1, pop 1 → result[1]=4. 4 > 2, pop 0 → result[0]=4. Push 2.
+   i=3: 3 < 4, push 3 (stack: [2,3])
+   Remaining: result[2]=-1, result[3]=-1
+   Result: [4, 4, -1, -1] ✓"
+```
+
+### The "Why O(n)?" Question (They WILL Ask)
+
+```
+"Even though there's a while loop inside the for loop, the total work
+is still O(n). Here's why: each of the n elements is pushed onto the 
+stack EXACTLY once and popped AT MOST once. So the total number of push 
+operations is n, and the total number of pop operations is at most n. 
+The while loop across ALL iterations of the for loop does at most n pops 
+total. So the overall work is O(2n) = O(n)."
+
+This is called AMORTIZED analysis. Same argument applies to:
+  - Two pointer convergence
+  - Sliding window expand/shrink
+  - Union-Find with path compression
+```
+
+### Follow-Up Questions Interviewers Ask
+
+```
+Q: "Can you do this without extra space?"
+A: "Not with this approach — the stack is essential. But for some variants
+    like Trapping Rain Water, a two-pointer approach achieves O(1) space."
+
+Q: "What if the array is circular?"
+A: "Iterate 2n elements using i % n. Only push indices in the first n
+    iterations. The second pass resolves wrap-around cases."
+
+Q: "What's the difference between this and a priority queue approach?"
+A: "A priority queue gives you the global max/min in O(log n) per operation.
+    A monotonic stack gives you the NEAREST greater/smaller in O(1) amortized.
+    Different questions — 'what's the biggest?' vs 'what's the closest bigger?'"
+
+Q: "How does the histogram problem use this?"
+A: "Each bar waits in the stack. When a shorter bar arrives, it tells us the
+    right boundary of the popped bar. The new stack top is the left boundary.
+    Width = right - left - 1. Area = height × width. One pass, O(n)."
+```
+
+---
+
+## 8. Revision Strategy
+
+### Weekly Revision Plan
+
+```
+WEEK 1: Solve all 9 problems from scratch. Time yourself.
+WEEK 2: Re-solve only the ones you couldn't do in target time.
+WEEK 3: Solve LC 84 (Histogram) and LC 42 (Trapping Rain Water) from memory.
+WEEK 4: Mix with other patterns (two pointers for trap water, DP for subarray min)
+         to practice approach selection.
+```
+
+### What to Memorize vs Understand
+
+```
+MEMORIZE:
+  ✓ The 4 templates (next greater, previous smaller, histogram, greedy removal)
+  ✓ "Decreasing stack → next GREATER, Increasing stack → next SMALLER"
+  ✓ "Store INDICES, not values" (with rare exceptions)
+  ✓ "Sentinel value of 0 at end" trick for histogram cleanup
+  ✓ Asymmetric comparison rule for duplicate handling
+
+UNDERSTAND (don't memorize — derive each time):
+  ✓ WHY it's O(n) (amortized: each element pushed once, popped at most once)
+  ✓ WHY decreasing finds next greater (because we pop when something bigger comes)
+  ✓ HOW the histogram boundary calculation works (draw the picture)
+  ✓ HOW trapping rain water uses the stack (valley = floor between two walls)
+  ✓ WHY Remove K Digits uses an increasing stack (greedy: remove large before small)
+```
+
+### Signals That Indicate Mastery
+
+```
+□ You see "next greater element" and write the template in under 2 minutes
+□ You can solve LC 84 (Histogram) without looking at notes in 12 minutes
+□ You can explain why the nested while loop is still O(n) total
+□ You know when to use strict vs non-strict comparison for duplicates
+□ You can solve Trapping Rain Water BOTH ways (stack and two-pointer)
+□ You immediately recognize LC 85 as "histogram per row"
+□ You can derive the Remove Duplicate Letters solution from the Remove K Digits template
+```
+
+---
+
+## Quick Reference Card (Print This)
+
+```
+PATTERN              STACK TYPE    COMPARISON        USE CASE
+───────────────────────────────────────────────────────────────────
+Next greater         Decreasing    cur > top → pop   LC 496, 739, 503
+Next smaller         Increasing    cur < top → pop   Histogram bounds
+Previous greater     Decreasing    peek after pops   LC 901 (Stock Span)
+Previous smaller     Increasing    peek after pops   LC 907 (Subarray Min)
+Histogram area       Increasing    sentinel cleanup  LC 84, 85
+Trapped water        Decreasing    valley detection  LC 42
+Greedy removal       Increasing    pop larger prefix LC 402, 316
+
+DECISION TREE:
+  "next/prev greater/smaller?"    → monotonic stack
+  "histogram / rectangle area?"   → increasing stack + boundary calc
+  "minimize number by removal?"   → increasing stack (greedy)
+  "sliding window max/min?"       → monotonic DEQUE (not stack)
+
+KEY RULES:
+  1. Store INDICES (not values) in the stack
+  2. Decreasing stack → next GREATER | Increasing stack → next SMALLER
+  3. Each element pushed once, popped once → O(n) amortized
+  4. Width = right_boundary - left_boundary - 1 (exclusive)
+  5. Sentinel trick: append 0 to force final cleanup in histogram
+```
+
+---
+
+## Appendix: Full Solutions for Key Problems
+
+### LC 496 — Next Greater Element I
 
 ```java
 class Solution {
@@ -153,16 +578,11 @@ class Solution {
         return result;
     }
 }
+// Values are unique → storing values (not indices) is fine here.
+// Time O(n + m) | Space O(n)
 ```
 
-- **Complexity:** Time O(n + m), Space O(n) where n = nums2.length, m = nums1.length
-
-#### Problem: [Daily Temperatures](https://leetcode.com/problems/daily-temperatures/) (LeetCode #739)
-
-- **Intuition:** For each day, find the number of days until a warmer temperature. A "next greater element" problem where we need the *index* of the next greater, not the value.
-- **Brute Force:** For each day i, scan days i+1 to n-1 until finding a warmer day. Time O(n²), Space O(1).
-- **Approach:** 1) Use a monotonically decreasing stack of indices. 2) When we find a warmer day (current > stack top), pop and set result[idx] = i - idx. 3) Push current index. 4) Any remaining in stack have no warmer day (default 0).
-- **Java Solution:**
+### LC 739 — Daily Temperatures
 
 ```java
 class Solution {
@@ -181,195 +601,11 @@ class Solution {
         return result;
     }
 }
+// Classic next-greater-by-index. Result is DISTANCE, not value.
+// Time O(n) | Space O(n)
 ```
 
-- **Complexity:** Time O(n), Space O(n)
-
----
-
-### Medium (5 problems)
-
-#### Problem: [Next Greater Element II](https://leetcode.com/problems/next-greater-element-ii/) (LeetCode #503)
-
-- **Intuition:** Same as next greater, but the array is circular. For the last elements, we may need to wrap around to the start. Simulate by iterating twice (or use modulo) so every element gets a chance to find its next greater.
-- **Brute Force:** For each element, scan rightward (wrapping around if needed) until finding a greater element. Time O(n²), Space O(1).
-- **Approach:** 1) Use a monotonically decreasing stack of indices. 2) Iterate i from 0 to 2*n - 1, using num = arr[i % n]. 3) When current > stack top, pop and set result[idx] = num. 4) Only push when i < n to avoid duplicate pushes.
-- **Java Solution:**
-
-```java
-class Solution {
-    public int[] nextGreaterElements(int[] nums) {
-        int n = nums.length;
-        int[] result = new int[n];
-        Arrays.fill(result, -1);
-        Deque<Integer> stack = new ArrayDeque<>();
-
-        for (int i = 0; i < 2 * n; i++) {
-            int num = nums[i % n];
-            while (!stack.isEmpty() && nums[stack.peek()] < num) {
-                result[stack.pop()] = num;
-            }
-            if (i < n) {
-                stack.push(i);
-            }
-        }
-        return result;
-    }
-}
-```
-
-- **Complexity:** Time O(n), Space O(n)
-
-#### Problem: [Online Stock Span](https://leetcode.com/problems/online-stock-span/) (LeetCode #901)
-
-- **Intuition:** For each price, span = 1 + count of consecutive previous days with price ≤ today. This is "previous greater or equal" in reverse—we want the count of elements we "dominate" to the left.
-- **Brute Force:** For each new price, scan backwards through previous prices counting consecutive days with price ≤ current. Time O(n²) amortized, Space O(1).
-- **Approach:** 1) Use a monotonically decreasing stack storing (price, span). 2) When a larger price comes in, pop smaller prices and accumulate their spans. 3) Push (price, totalSpan). 4) Return totalSpan for each next(price).
-- **Java Solution:**
-
-```java
-class StockSpanner {
-    private Deque<int[]> stack;  // [price, span]
-
-    public StockSpanner() {
-        stack = new ArrayDeque<>();
-    }
-
-    public int next(int price) {
-        int span = 1;
-        while (!stack.isEmpty() && stack.peek()[0] <= price) {
-            span += stack.pop()[1];
-        }
-        stack.push(new int[]{price, span});
-        return span;
-    }
-}
-```
-
-- **Complexity:** Amortized O(1) per next(), Space O(n) worst case
-
-#### Problem: [Sum of Subarray Minimums](https://leetcode.com/problems/sum-of-subarray-minimums/) (LeetCode #907)
-
-- **Intuition:** For each element arr[i], count subarrays where it is the minimum. Assign each subarray to the leftmost minimum to avoid double-counting duplicates. Left extent = elements until previous ≤ arr[i]; right extent = elements until next < arr[i].
-- **Brute Force:** Enumerate all O(n²) subarrays, compute the minimum of each in O(n). Time O(n³), Space O(1).
-- **Approach:** 1) One left-to-right pass: pop when stack top > current (next smaller for popped); prevSmallerOrEqual[i] = stack.peek(). 2) For each i: left = i - prevSmallerOrEqual[i], right = nextSmaller[i] - i. 3) Sum += arr[i] * left * right, mod 10^9+7.
-- **Java Solution:**
-
-```java
-class Solution {
-    private static final int MOD = 1_000_000_007;
-
-    public int sumSubarrayMins(int[] arr) {
-        int n = arr.length;
-        int[] prevSmallerOrEqual = new int[n];
-        int[] nextSmaller = new int[n];
-        Arrays.fill(prevSmallerOrEqual, -1);
-        Arrays.fill(nextSmaller, n);
-
-        Deque<Integer> stack = new ArrayDeque<>();
-        for (int i = 0; i < n; i++) {
-            while (!stack.isEmpty() && arr[stack.peek()] > arr[i]) {
-                nextSmaller[stack.pop()] = i;
-            }
-            prevSmallerOrEqual[i] = stack.isEmpty() ? -1 : stack.peek();
-            stack.push(i);
-        }
-
-        long sum = 0;
-        for (int i = 0; i < n; i++) {
-            int left = i - prevSmallerOrEqual[i];
-            int right = nextSmaller[i] - i;
-            sum = (sum + (long) arr[i] * left * right) % MOD;
-        }
-        return (int) sum;
-    }
-}
-```
-
-- **Complexity:** Time O(n), Space O(n)
-
-#### Problem: [Remove K Digits](https://leetcode.com/problems/remove-k-digits/) (LeetCode #402)
-
-- **Intuition:** To get the smallest number by removing k digits, we want to remove larger digits that appear before smaller ones (greedy). Use an increasing stack: when we see a digit smaller than the top, pop (remove) the larger one—as long as we have removals left.
-- **Brute Force:** Try all C(n,k) combinations of k digits to remove and pick the smallest resulting number. Time O(C(n,k)), Space O(n).
-- **Approach:** 1) Use a StringBuilder as stack. 2) For each digit: while we have k > 0 and stack not empty and stack top > current digit, pop and k--. 3) Push current (skip leading zeros by not pushing if stack is empty and digit is '0'). 4) After scan, if k > 0, remove from end. 5) Handle empty result (return "0").
-- **Java Solution:**
-
-```java
-class Solution {
-    public String removeKdigits(String num, int k) {
-        if (num.length() <= k) return "0";
-
-        StringBuilder stack = new StringBuilder();
-        for (char c : num.toCharArray()) {
-            while (k > 0 && stack.length() > 0 && stack.charAt(stack.length() - 1) > c) {
-                stack.setLength(stack.length() - 1);
-                k--;
-            }
-            if (stack.length() > 0 || c != '0') {
-                stack.append(c);
-            }
-        }
-
-        while (k-- > 0 && stack.length() > 0) {
-            stack.setLength(stack.length() - 1);
-        }
-
-        return stack.length() == 0 ? "0" : stack.toString();
-    }
-}
-```
-
-- **Complexity:** Time O(n), Space O(n)
-
-#### Problem: [Asteroid Collision](https://leetcode.com/problems/asteroid-collision/) (LeetCode #735)
-
-- **Intuition:** Asteroids move in direction of sign. Opposing ones (positive right, negative left) collide. Smaller explodes; equal both explode. Use a stack to simulate: push positives; when negative appears, pop positives until one survives or stack empty.
-- **Brute Force:** Repeatedly scan for adjacent (+, -) pairs and resolve collisions until no more collisions occur. Time O(n²) worst case, Space O(n).
-- **Approach:** 1) For each asteroid: if positive, push. 2) If negative: while stack not empty and top > 0 and top < |current|, pop. 3) If stack empty or top < 0, push current. 4) If top == |current|, pop and skip (both explode). 5) Convert stack to result array.
-- **Java Solution:**
-
-```java
-class Solution {
-    public int[] asteroidCollision(int[] asteroids) {
-        Deque<Integer> stack = new ArrayDeque<>();
-
-        for (int a : asteroids) {
-            if (a > 0) {
-                stack.push(a);
-            } else {
-                while (!stack.isEmpty() && stack.peek() > 0 && stack.peek() < -a) {
-                    stack.pop();
-                }
-                if (stack.isEmpty() || stack.peek() < 0) {
-                    stack.push(a);
-                } else if (stack.peek() == -a) {
-                    stack.pop();
-                }
-            }
-        }
-
-        int[] result = new int[stack.size()];
-        for (int i = result.length - 1; i >= 0; i--) {
-            result[i] = stack.pop();
-        }
-        return result;
-    }
-}
-```
-
-- **Complexity:** Time O(n), Space O(n)
-
----
-
-### Hard (3 problems)
-
-#### Problem: [Largest Rectangle in Histogram](https://leetcode.com/problems/largest-rectangle-in-histogram/) (LeetCode #84)
-
-- **Intuition:** For each bar, the largest rectangle with that bar as height extends from "previous smaller" to "next smaller" (exclusive). Width = (nextSmaller - prevSmaller - 1). Use monotonic increasing stack to find both boundaries in one pass.
-- **Brute Force:** For each bar, expand left and right to find the first shorter bar on each side; compute area = height × width. Time O(n²), Space O(1).
-- **Approach:** 1) Maintain an increasing stack of indices. 2) When we pop (because current bar is shorter), the popped bar's right boundary = current index, left boundary = new stack top (or -1). 3) Width = right - left - 1, area = height * width. 4) After loop, pop remaining with right = n.
-- **Java Solution:**
+### LC 84 — Largest Rectangle in Histogram
 
 ```java
 class Solution {
@@ -390,28 +626,24 @@ class Solution {
         return maxArea;
     }
 }
+// Sentinel h=0 at i=n forces all remaining bars to pop.
+// On pop: right boundary = i, left boundary = stack.peek() (or -1 if empty).
+// Time O(n) | Space O(n)
 ```
 
-- **Complexity:** Time O(n), Space O(n)
-
-#### Problem: [Maximal Rectangle](https://leetcode.com/problems/maximal-rectangle/) (LeetCode #85)
-
-- **Intuition:** Treat each row as the base of a histogram: height[j] = consecutive 1's upward at column j. Then "Largest Rectangle in Histogram" per row. Use the same monotonic stack approach.
-- **Brute Force:** Try every possible top-left and bottom-right rectangle, check if all cells are '1', track max area. Time O(rows² × cols² × rows×cols) = O(m³n³), Space O(1).
-- **Approach:** 1) Build heights[] for each row (add 1 if matrix[i][j]=='1', else reset to 0). 2) For each row, compute max rectangle via histogram algorithm. 3) Return global max.
-- **Java Solution:**
+### LC 85 — Maximal Rectangle
 
 ```java
 class Solution {
     public int maximalRectangle(char[][] matrix) {
         if (matrix.length == 0 || matrix[0].length == 0) return 0;
-        int rows = matrix.length, cols = matrix[0].length;
+        int cols = matrix[0].length;
         int[] heights = new int[cols];
         int maxArea = 0;
 
-        for (int i = 0; i < rows; i++) {
+        for (char[] row : matrix) {
             for (int j = 0; j < cols; j++) {
-                heights[j] = matrix[i][j] == '1' ? heights[j] + 1 : 0;
+                heights[j] = row[j] == '1' ? heights[j] + 1 : 0;
             }
             maxArea = Math.max(maxArea, largestRectangleArea(heights));
         }
@@ -435,16 +667,12 @@ class Solution {
         return maxArea;
     }
 }
+// Row i histogram: heights[j] = consecutive 1's above (including row i).
+// Reset to 0 on '0'. Run LC 84 per row.
+// Time O(rows × cols) | Space O(cols)
 ```
 
-- **Complexity:** Time O(rows × cols), Space O(cols)
-
-#### Problem: [Trapping Rain Water](https://leetcode.com/problems/trapping-rain-water/) (LeetCode #42)
-
-- **Intuition:** Water at index i is trapped by the minimum of "max height to the left" and "max height to the right" minus height[i]. Monotonic stack approach: when we see a bar higher than stack top, the stack top is a "valley" between two higher bars—compute trapped water in that segment.
-- **Brute Force:** For each index i, scan left for max height and right for max height; water += min(leftMax, rightMax) - height[i]. Time O(n²), Space O(1).
-- **Approach:** 1) Use a decreasing stack of indices. 2) When current height > stack top, we have a "pit": pop to get the floor, then left boundary = new stack top, right = current. Water += (min(leftH, rightH) - floorH) * width. 3) Repeat until stack empty or top >= current. 4) Push current.
-- **Java Solution:**
+### LC 42 — Trapping Rain Water (Stack Approach)
 
 ```java
 class Solution {
@@ -466,34 +694,95 @@ class Solution {
         return water;
     }
 }
+// Decreasing stack. On pop: popped bar is the FLOOR of a valley.
+// Left wall = new stack top. Right wall = current index.
+// Water in this layer = (min wall height - floor height) × width.
+// Time O(n) | Space O(n)
 ```
 
-- **Complexity:** Time O(n), Space O(n)
+### LC 901 — Online Stock Span
 
----
+```java
+class StockSpanner {
+    private Deque<int[]> stack; // [price, span]
 
-## Common Mistakes & Edge Cases
+    public StockSpanner() {
+        stack = new ArrayDeque<>();
+    }
 
-| Mistake | How to Avoid |
-|---------|---------------|
-| **Strict vs non-strict comparison** | For "next greater": use `<` when popping. For "next smaller": use `>`. Using `<=`/`>=` changes behavior with duplicates—pick one convention (e.g., left boundary `>=`, right `>`) to avoid double-counting in "min in range" problems. |
-| **Forgetting to handle remaining stack** | After the main loop, elements still in the stack have no next greater/smaller. Set their result to -1, n, or 0 as appropriate. |
-| **Circular arrays** | Iterate 2× or use `i % n`. Only push indices when `i < n` to avoid duplicate entries. |
-| **Index vs value** | Store indices when you need width/distance; store values when you only need the next greater value. |
-| **Leading zeros** | In Remove K Digits, don't push '0' when the stack is empty (result would be "000"). |
-| **Empty input** | Check `n == 0` before accessing `arr[0]`. Return 0 or "0" as required. |
-| **Integer overflow** | In Sum of Subarray Minimums, use `long` for the sum and mod by 10^9+7. |
-| **Asteroid collision** | Same sign asteroids never collide. Only + then - (left to right) collide. |
+    public int next(int price) {
+        int span = 1;
+        while (!stack.isEmpty() && stack.peek()[0] <= price) {
+            span += stack.pop()[1];
+        }
+        stack.push(new int[]{price, span});
+        return span;
+    }
+}
+// Decreasing stack storing (price, accumulated span).
+// Pop ≤ prices and absorb their spans. Push (price, totalSpan).
+// Amortized O(1) per call | Space O(n) worst case
+```
 
-## Pattern Variations
+### LC 402 — Remove K Digits
 
-| Variation | Description | Example |
-|-----------|-------------|---------|
-| **Next greater/smaller (one direction)** | Standard single pass | Next Greater Element I, Daily Temperatures |
-| **Previous greater/smaller** | Process right-to-left, or use the fact that "next" from right-to-left = "previous" from left-to-right | Stock Span |
-| **Circular / 2× pass** | Iterate 2n or modulo | Next Greater Element II |
-| **Left + right boundaries** | Two stacks or two passes for prev and next smaller | Sum of Subarray Minimums, Largest Rectangle |
-| **Monotonic deque** | When you need both ends (e.g., sliding window max/min) | Often combined with sliding window |
-| **Greedy removal** | Increasing stack to keep smallest lexicographically | Remove K Digits |
-| **Simulation / collision** | Stack to model "dominance" or collision | Asteroid Collision |
-| **2D histogram** | Build heights per row and run histogram algorithm | Maximal Rectangle |
+```java
+class Solution {
+    public String removeKdigits(String num, int k) {
+        if (num.length() <= k) return "0";
+
+        StringBuilder stack = new StringBuilder();
+        for (char c : num.toCharArray()) {
+            while (k > 0 && stack.length() > 0 
+                   && stack.charAt(stack.length() - 1) > c) {
+                stack.setLength(stack.length() - 1);
+                k--;
+            }
+            if (stack.length() > 0 || c != '0') {
+                stack.append(c);
+            }
+        }
+
+        while (k-- > 0 && stack.length() > 0) {
+            stack.setLength(stack.length() - 1);
+        }
+
+        return stack.length() == 0 ? "0" : stack.toString();
+    }
+}
+// Increasing stack: pop larger preceding digits when smaller digit arrives.
+// Skip leading zeros. If k remains, trim from end (already increasing).
+// Time O(n) | Space O(n)
+```
+
+### LC 316 — Remove Duplicate Letters
+
+```java
+class Solution {
+    public String removeDuplicateLetters(String s) {
+        int[] freq = new int[26];
+        boolean[] inStack = new boolean[26];
+        for (char c : s.toCharArray()) freq[c - 'a']++;
+
+        StringBuilder stack = new StringBuilder();
+        for (char c : s.toCharArray()) {
+            freq[c - 'a']--;
+            if (inStack[c - 'a']) continue;
+
+            while (stack.length() > 0 
+                   && stack.charAt(stack.length() - 1) > c
+                   && freq[stack.charAt(stack.length() - 1) - 'a'] > 0) {
+                inStack[stack.charAt(stack.length() - 1) - 'a'] = false;
+                stack.setLength(stack.length() - 1);
+            }
+            stack.append(c);
+            inStack[c - 'a'] = true;
+        }
+        return stack.toString();
+    }
+}
+// Increasing stack + two extra constraints vs Remove K Digits:
+//   1. Each letter appears exactly once in result (inStack check)
+//   2. Only pop if the letter appears again later (freq > 0 check)
+// Time O(n) | Space O(1) — stack holds at most 26 characters
+```

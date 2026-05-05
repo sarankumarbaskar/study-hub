@@ -5,9 +5,11 @@ AWS/
 *.pdf
 Form13.pdf
 
-# Reader UIs (generated, use local server)
-index.html
-*/index.html
+# Per-topic reader UIs (use root index.html for GitHub Pages instead)
+java/index.html
+system-design/index.html
+operating-systems/index.html
+dsa-patterns/index.html
 
 # IDE and build artifacts
 .idea/

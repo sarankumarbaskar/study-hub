@@ -1,302 +1,818 @@
-# DSA Patterns Mastery Roadmap
+# DSA Master Tracker & Study Guide
 
-> **Goal:** Not "I memorized 500 LeetCode solutions" — but "I see a problem and instantly know which pattern to apply and why."
-
-**Timeline:** 12–16 weeks (realistic for a working professional doing 1.5–2 hours/day)
-
-**Total Problems:** 193 (44 Easy, 97 Medium, 52 Hard)
-
-**Estimated Effort:** ~130 hours of focused problem-solving + ~30 hours of pattern study & review = **~160 hours total**
-
-**Strategy:** Master one pattern at a time. For each pattern: understand the template (Day 1), solve Easy problems to build intuition (Day 2), then Medium/Hard to develop fluency (remaining days). Move to the next pattern only when you can recognize and apply the current one without hesitation.
+> **Profile:** 5 YoE Java Backend Engineer | Target: SDE-2 / Senior SWE
+> **Target Companies:** Amazon, Microsoft, Google, Uber, Airbnb, Atlassian, Stripe, Databricks, Rubrik, Confluent
+> **Language:** Java | **LeetCode Solved:** ~160 | **Strategy:** Master patterns, not problem count
 
 ---
 
-## Realistic Pacing Guide
+## Table of Contents
 
-| Difficulty | Avg Time per Problem | Notes |
-|-----------|---------------------|-------|
-| Easy | 15–25 min | Pattern recognition + quick implementation |
-| Medium | 35–50 min | Core of interview prep; most time spent here |
-| Hard | 60–90 min | Don't spend >90 min; read solution after that |
-| Pattern Study | 30–45 min per pattern | Read template, understand "when to use", do dry runs |
-| Review Day | 45–60 min | Re-solve 3–5 problems from previous weeks without looking |
+- [Section 1: Overview](#section-1-overview)
+- [Section 2: Pattern Guide](#section-2-pattern-guide)
+- [Section 3: Problem Tracker](#section-3-problem-tracker)
+- [Section 4: Revision Tracker](#section-4-revision-tracker)
+- [Section 5: Interview Readiness Tracker](#section-5-interview-readiness-tracker)
+- [Section 6: Mock Interview Tracker](#section-6-mock-interview-tracker)
+- [Section 7: Weakness Analysis](#section-7-weakness-analysis)
 
-### Weekly Schedule (for a working professional)
+---
+
+## Section 1: Overview
+
+### Total Problem Count: 145
+
+| Difficulty | Count | Percentage |
+|-----------|-------|------------|
+| Easy | 16 | 11.0% |
+| Medium | 96 | 66.2% |
+| Hard | 33 | 22.8% |
+
+### Pattern Distribution
+
+| Pattern | Count | Phase |
+|---------|-------|-------|
+| Arrays & Hashing | 5 | Phase 1: Foundations |
+| Two Pointers | 5 | Phase 1: Foundations |
+| Sliding Window | 10 | Phase 1: Foundations |
+| Binary Search | 10 | Phase 1: Foundations |
+| Bit Manipulation | 4 | Phase 1: Foundations |
+| Stack | 8 | Phase 2: Data Structures |
+| Heap | 7 | Phase 2: Data Structures |
+| Linked List | 7 | Phase 2: Data Structures |
+| Intervals | 4 | Phase 2: Data Structures |
+| Trees | 15 | Phase 3: Trees & Graphs |
+| Graphs | 20 | Phase 3: Trees & Graphs |
+| Dynamic Programming | 20 | Phase 4: DP + Greedy + Backtracking |
+| Greedy | 4 | Phase 4: DP + Greedy + Backtracking |
+| Backtracking | 5 | Phase 4: DP + Greedy + Backtracking |
+| Design | 10 | Phase 5: Design |
+| **Total** | **145** | |
+
+### Estimated Timeline: 10–14 Weeks
+
+| Phase | Weeks | Problems | Focus |
+|-------|-------|----------|-------|
+| Phase 1: Foundations | Weeks 1–3 | 34 | Arrays, Two Pointers, Sliding Window, Binary Search, Bits |
+| Phase 2: Data Structures | Weeks 4–6 | 26 | Stack, Heap, Linked List, Intervals |
+| Phase 3: Trees & Graphs | Weeks 7–9 | 35 | Trees, Graphs (BFS/DFS/Union-Find/Dijkstra) |
+| Phase 4: DP + Greedy + Backtracking | Weeks 10–12 | 29 | 1D/2D DP, Greedy, Backtracking |
+| Phase 5: Design | Week 13 | 10 | LRU/LFU Cache, Trie, HashMap Design |
+| Review & Mock Interviews | Week 14 | — | Revision, timed mocks, weakness drilling |
+
+### Recommended Study Order
+
+```
+Phase 1 ─── Arrays & Hashing → Two Pointers → Sliding Window → Binary Search → Bit Manipulation
+                │
+Phase 2 ─── Stack → Heap → Linked List → Intervals
+                │
+Phase 3 ─── Trees → Graphs
+                │
+Phase 4 ─── Dynamic Programming → Greedy → Backtracking
+                │
+Phase 5 ─── Design
+                │
+Final ──── Review + Mock Interviews
+```
+
+### Revision Strategy
+
+| Timing | Action | Duration |
+|--------|--------|----------|
+| Day 0 | Solve the problem | Full session |
+| Day 1 | Review solution mentally (read, don't re-solve) | 5–10 min |
+| Day 3 | Re-solve from scratch | 15–25 min |
+| Day 7 | Re-solve (should be fast) | 10–15 min |
+| Day 14 | Quick check — if instant recall, mark confident | 5 min |
+| Day 30 | Final validation — can you explain approach to someone? | 5 min |
+
+### Weekly Schedule (Working Professional)
 
 | Day | Focus | Time |
 |-----|-------|------|
 | Mon–Fri | 1–2 new problems + 1 review problem | 1.5–2 hours |
-| Saturday | 2–3 new problems (deeper focus) | 2–3 hours |
+| Saturday | 2–3 new problems (deeper focus on Hard) | 2–3 hours |
 | Sunday | Review week's problems + spaced repetition | 1–2 hours |
 
 **Realistic weekly output:** 8–12 new problems + 5–7 review solves
 
----
+### Time Estimates by Difficulty
 
-## How This Guide Is Organized
-
-Each pattern document follows a consistent structure:
-
-1. **What Is This Pattern?** — Intuition and visual explanation
-2. **When to Use / How to Identify** — Recognition signals from problem statements
-3. **Core Template** — Pseudocode + Java implementation you can adapt
-4. **Problems (Progressive)** — Easy → Medium → Hard with full solutions (Brute Force + Optimized)
-5. **Common Mistakes & Edge Cases** — Traps specific to the pattern
-6. **Pattern Variations** — Sub-patterns and related techniques
+| Difficulty | Avg Time | Total Hours |
+|-----------|----------|-------------|
+| 16 Easy × 20 min | 20 min | ~5 hours |
+| 96 Medium × 40 min | 40 min | ~64 hours |
+| 33 Hard × 70 min | 70 min | ~39 hours |
+| Pattern study (15 × 40 min) | 40 min | ~10 hours |
+| Review & spaced repetition | — | ~25 hours |
+| **Grand Total** | | **~143 hours** |
 
 ---
 
-## Phase 1: Array & String Foundations (Weeks 1–4)
+## Section 2: Pattern Guide
 
-*These are the highest-frequency patterns. Get these right and you cover ~40% of interview questions.*
+Each pattern has a dedicated deep-dive document in `internals/`.
 
-### Week 1–2: Two Pointers & Sliding Window (23 problems)
-
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 00 | Two Pointers | 12 | 5 days | Learn template (Day 1), 2 Easy (Day 2), 2–3 Medium/Hard per day (Days 3–5) |
-| 01 | Sliding Window | 11 | 4 days | Learn template (Day 1), 2 Easy (Day 2), 3 Medium (Day 3), 3 Medium+Hard (Day 4) |
-| — | **Review** | — | 1 day | Re-solve 5–6 problems from Two Pointers & Sliding Window |
-
-### Week 3–4: Prefix Sum & Hashing (19 problems)
-
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 02 | Prefix Sum | 9 | 3 days | Template + 2 Easy (Day 1), 3 Medium (Day 2), 2 Medium + 2 Hard (Day 3) |
-| 03 | Hashing | 10 | 4 days | Template + 2 Easy (Day 1), 3 Medium (Day 2–3), 2 Hard (Day 4) |
-| — | **Phase 1 Review** | — | 2 days | Re-solve 8–10 hardest problems from Weeks 1–4 |
-
-**Phase 1 checkpoint:** 42 problems done. You should be able to identify Two Pointers vs Sliding Window vs Hashing within 30 seconds of reading any array/string problem.
-
----
-
-## Phase 2: Search & Sort (Weeks 5–6)
-
-### Week 5: Binary Search (11 problems)
-
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 04 | Binary Search | 11 | 5 days | Template + classic BS (Day 1), 2 Easy (Day 2), 3 Medium (Days 3–4), 3 Hard (Day 5) |
-
-*Binary Search on answer space is a FAANG favorite — spend extra time on Koko Eating Bananas (#875), Split Array Largest Sum (#410).*
-
-### Week 6: Sorting + Fast/Slow Pointers (18 problems)
-
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 05 | Sorting Patterns | 10 | 4 days | Template (Day 1), 2 Easy (Day 2), 3 Medium (Day 3), 3 Hard (Day 4) |
-| 06 | Fast & Slow | 8 | 2 days | Template + 2 Easy (Day 1), 4 Medium + 2 Hard (Day 2) |
-| — | **Review** | — | 1 day | Re-solve 5–6 hardest from Phase 2 |
-
-**Phase 2 checkpoint:** 71 problems done. Binary search should feel automatic for "minimize the maximum" / "find boundary" problems.
+| # | Pattern | Guide | Problems |
+|---|---------|-------|----------|
+| 01 | Arrays & Hashing | [internals/01-arrays-and-hashing.md](internals/01-arrays-and-hashing.md) | 5 |
+| 02 | Two Pointers | [internals/02-two-pointers.md](internals/02-two-pointers.md) | 5 |
+| 03 | Sliding Window | [internals/03-sliding-window.md](internals/03-sliding-window.md) | 10 |
+| 04 | Binary Search | [internals/04-binary-search.md](internals/04-binary-search.md) | 10 |
+| 05 | Bit Manipulation | [internals/05-bit-manipulation.md](internals/05-bit-manipulation.md) | 4 |
+| 06 | Stack | [internals/06-stack.md](internals/06-stack.md) | 8 |
+| 07 | Heap | [internals/07-heap.md](internals/07-heap.md) | 7 |
+| 08 | Linked List | [internals/08-linked-list.md](internals/08-linked-list.md) | 7 |
+| 09 | Intervals | [internals/09-intervals.md](internals/09-intervals.md) | 4 |
+| 10 | Trees | [internals/10-trees.md](internals/10-trees.md) | 15 |
+| 11 | Graphs | [internals/11-graphs.md](internals/11-graphs.md) | 20 |
+| 12 | Dynamic Programming | [internals/12-dynamic-programming.md](internals/12-dynamic-programming.md) | 20 |
+| 13 | Greedy | [internals/13-greedy.md](internals/13-greedy.md) | 4 |
+| 14 | Backtracking | [internals/14-backtracking.md](internals/14-backtracking.md) | 5 |
+| 15 | Design | [internals/15-design.md](internals/15-design.md) | 10 |
 
 ---
 
-## Phase 3: Stacks, Trees & Graphs (Weeks 7–10)
+## Section 3: Problem Tracker
 
-*This is the hardest phase. Graph problems have the steepest learning curve. Give yourself time.*
+### Phase 1: Foundations
 
-### Week 7: Monotonic Stack + BFS (20 problems)
+#### Arrays & Hashing
 
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 07 | Monotonic Stack | 10 | 4 days | Template (Day 1), 2 Easy (Day 2), 3 Medium (Day 3), 2 Medium + 3 Hard (Day 4) |
-| 08 | BFS | 10 | 3 days | Template (Day 1), 2 Easy + 2 Medium (Day 2), 3 Medium + 3 Hard (Day 3) |
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 1 | [Two Sum](https://leetcode.com/problems/two-sum/) | 1 | Easy | Arrays & Hashing | Very High | | | | | | | |
+| 2 | [Group Anagrams](https://leetcode.com/problems/group-anagrams/) | 49 | Medium | Arrays & Hashing | Very High | | | | | | | |
+| 3 | [Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/) | 238 | Medium | Arrays & Hashing | Very High | | | | | | | |
+| 4 | [Longest Consecutive Sequence](https://leetcode.com/problems/longest-consecutive-sequence/) | 128 | Medium | Arrays & Hashing | High | | | | | | | |
+| 5 | [Top K Frequent Elements](https://leetcode.com/problems/top-k-frequent-elements/) | 347 | Medium | Arrays & Hashing | Very High | | | | | | | |
 
-### Week 8: DFS + Backtracking (21 problems)
+#### Two Pointers
 
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 09 | DFS | 11 | 4 days | Template (Day 1), 3 Easy (Day 2), 3 Medium (Day 3), 2 Medium + 3 Hard (Day 4) |
-| 10 | Backtracking | 10 | 3 days | Template (Day 1), 3 Easy+Med (Day 2), 4 Medium (Day 3), 3 Hard (Day 4 overlap) |
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 6 | [Container With Most Water](https://leetcode.com/problems/container-with-most-water/) | 11 | Medium | Two Pointers | Very High | | | | | | | |
+| 7 | [3Sum](https://leetcode.com/problems/3sum/) | 15 | Medium | Two Pointers | Very High | | | | | | | |
+| 8 | [Sort Colors](https://leetcode.com/problems/sort-colors/) | 75 | Medium | Two Pointers | High | | | | | | | |
+| 9 | [Find the Duplicate Number](https://leetcode.com/problems/find-the-duplicate-number/) | 287 | Medium | Two Pointers | High | | | | | | | |
+| 10 | [Longest Palindromic Substring](https://leetcode.com/problems/longest-palindromic-substring/) | 5 | Medium | Two Pointers | Very High | | | | | | | |
 
-### Week 9: Trie, Union-Find, Topological Sort (24 problems)
+#### Sliding Window
 
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 11 | Trie | 8 | 3 days | Template + Implement Trie (Day 1), 3 Medium (Day 2), 2 Hard (Day 3) |
-| 12 | Union-Find | 8 | 3 days | Template (Day 1), 2 Easy + 2 Medium (Day 2), 2 Medium + 2 Hard (Day 3) |
-| 13 | Topological Sort | 8 | 2 days | Template + Course Schedule (Day 1), remaining 6 (Day 2) |
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 11 | [Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/) | 3 | Medium | Sliding Window | Very High | | | | | | | |
+| 12 | [Longest Repeating Character Replacement](https://leetcode.com/problems/longest-repeating-character-replacement/) | 424 | Medium | Sliding Window | High | | | | | | | |
+| 13 | [Permutation in String](https://leetcode.com/problems/permutation-in-string/) | 567 | Medium | Sliding Window | High | | | | | | | |
+| 14 | [Find All Anagrams in a String](https://leetcode.com/problems/find-all-anagrams-in-a-string/) | 438 | Medium | Sliding Window | High | | | | | | | |
+| 15 | [Minimum Window Substring](https://leetcode.com/problems/minimum-window-substring/) | 76 | Hard | Sliding Window | Very High | | | | | | | |
+| 16 | [Fruit Into Baskets](https://leetcode.com/problems/fruit-into-baskets/) | 904 | Medium | Sliding Window | Medium | | | | | | | |
+| 17 | [Max Consecutive Ones III](https://leetcode.com/problems/max-consecutive-ones-iii/) | 1004 | Medium | Sliding Window | Medium | | | | | | | |
+| 18 | [Subarray Product Less Than K](https://leetcode.com/problems/subarray-product-less-than-k/) | 713 | Medium | Sliding Window | Medium | | | | | | | |
+| 19 | [Frequency of the Most Frequent Element](https://leetcode.com/problems/frequency-of-the-most-frequent-element/) | 1838 | Medium | Sliding Window | Medium | | | | | | | |
+| 20 | [Sliding Window Maximum](https://leetcode.com/problems/sliding-window-maximum/) | 239 | Hard | Sliding Window | Very High | | | | | | | |
 
-### Week 10: Phase 3 Review
+#### Binary Search
 
-| Day | Focus |
-|-----|-------|
-| Mon–Wed | Re-solve hardest BFS/DFS/Backtracking problems (6–8 problems) |
-| Thu–Fri | Re-solve Trie + Union-Find + Topo Sort weak spots (4–6 problems) |
-| Weekend | Mixed practice: randomly pick 5 problems across all graph patterns |
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 21 | [Search in Rotated Sorted Array](https://leetcode.com/problems/search-in-rotated-sorted-array/) | 33 | Medium | Binary Search | Very High | | | | | | | |
+| 22 | [Find Minimum in Rotated Sorted Array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/) | 153 | Medium | Binary Search | High | | | | | | | |
+| 23 | [Find Peak Element](https://leetcode.com/problems/find-peak-element/) | 162 | Medium | Binary Search | High | | | | | | | |
+| 24 | [Koko Eating Bananas](https://leetcode.com/problems/koko-eating-bananas/) | 875 | Medium | Binary Search | Very High | | | | | | | |
+| 25 | [Capacity To Ship Packages Within D Days](https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/) | 1011 | Medium | Binary Search | High | | | | | | | |
+| 26 | [Minimum Number of Days to Make m Bouquets](https://leetcode.com/problems/minimum-number-of-days-to-make-m-bouquets/) | 1482 | Medium | Binary Search | Medium | | | | | | | |
+| 27 | [Split Array Largest Sum](https://leetcode.com/problems/split-array-largest-sum/) | 410 | Hard | Binary Search | High | | | | | | | |
+| 28 | [Find First and Last Position of Element in Sorted Array](https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/) | 34 | Medium | Binary Search | Very High | | | | | | | |
+| 29 | [Median of Two Sorted Arrays](https://leetcode.com/problems/median-of-two-sorted-arrays/) | 4 | Hard | Binary Search | Very High | | | | | | | |
+| 30 | [Kth Smallest Element in a Sorted Matrix](https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/) | 378 | Medium | Binary Search | High | | | | | | | |
 
-**Phase 3 checkpoint:** 136 problems done. You should be able to decide BFS vs DFS vs Union-Find vs Topo Sort within 1 minute.
+#### Bit Manipulation
+
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 31 | [Single Number](https://leetcode.com/problems/single-number/) | 136 | Easy | Bit Manipulation | Very High | | | | | | | |
+| 32 | [Number of 1 Bits](https://leetcode.com/problems/number-of-1-bits/) | 191 | Easy | Bit Manipulation | High | | | | | | | |
+| 33 | [Counting Bits](https://leetcode.com/problems/counting-bits/) | 338 | Easy | Bit Manipulation | Medium | | | | | | | |
+| 34 | [Sum of Two Integers](https://leetcode.com/problems/sum-of-two-integers/) | 371 | Medium | Bit Manipulation | Medium | | | | | | | |
+
+### Phase 2: Data Structures
+
+#### Stack
+
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 35 | [Daily Temperatures](https://leetcode.com/problems/daily-temperatures/) | 739 | Medium | Stack | Very High | | | | | | | |
+| 36 | [Next Greater Element II](https://leetcode.com/problems/next-greater-element-ii/) | 503 | Medium | Stack | Medium | | | | | | | |
+| 37 | [Decode String](https://leetcode.com/problems/decode-string/) | 394 | Medium | Stack | High | | | | | | | |
+| 38 | [Asteroid Collision](https://leetcode.com/problems/asteroid-collision/) | 735 | Medium | Stack | High | | | | | | | |
+| 39 | [Remove K Digits](https://leetcode.com/problems/remove-k-digits/) | 402 | Medium | Stack | High | | | | | | | |
+| 40 | [Largest Rectangle in Histogram](https://leetcode.com/problems/largest-rectangle-in-histogram/) | 84 | Hard | Stack | Very High | | | | | | | |
+| 41 | [Trapping Rain Water](https://leetcode.com/problems/trapping-rain-water/) | 42 | Hard | Stack | Very High | | | | | | | |
+| 42 | [Sum of Subarray Minimums](https://leetcode.com/problems/sum-of-subarray-minimums/) | 907 | Medium | Stack | Medium | | | | | | | |
+
+#### Heap
+
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 43 | [Kth Largest Element in an Array](https://leetcode.com/problems/kth-largest-element-in-an-array/) | 215 | Medium | Heap | Very High | | | | | | | |
+| 44 | [Top K Frequent Elements](https://leetcode.com/problems/top-k-frequent-elements/) | 347 | Medium | Heap | Very High | | | | | | | |
+| 45 | [K Closest Points to Origin](https://leetcode.com/problems/k-closest-points-to-origin/) | 973 | Medium | Heap | High | | | | | | | |
+| 46 | [Find Median from Data Stream](https://leetcode.com/problems/find-median-from-data-stream/) | 295 | Hard | Heap | Very High | | | | | | | |
+| 47 | [Meeting Rooms II](https://leetcode.com/problems/meeting-rooms-ii/) | 253 | Medium | Heap | Very High | | | | | | | |
+| 48 | [Merge K Sorted Lists](https://leetcode.com/problems/merge-k-sorted-lists/) | 23 | Hard | Heap | Very High | | | | | | | |
+| 49 | [Smallest Range Covering Elements from K Lists](https://leetcode.com/problems/smallest-range-covering-elements-from-k-lists/) | 632 | Hard | Heap | Medium | | | | | | | |
+
+#### Linked List
+
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 50 | [Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/) | 206 | Easy | Linked List | Very High | | | | | | | |
+| 51 | [Linked List Cycle](https://leetcode.com/problems/linked-list-cycle/) | 141 | Easy | Linked List | Very High | | | | | | | |
+| 52 | [Reorder List](https://leetcode.com/problems/reorder-list/) | 143 | Medium | Linked List | High | | | | | | | |
+| 53 | [Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list/) | 19 | Medium | Linked List | Very High | | | | | | | |
+| 54 | [Copy List with Random Pointer](https://leetcode.com/problems/copy-list-with-random-pointer/) | 138 | Medium | Linked List | High | | | | | | | |
+| 55 | [Add Two Numbers](https://leetcode.com/problems/add-two-numbers/) | 2 | Medium | Linked List | Very High | | | | | | | |
+| 56 | [Reverse Nodes in k-Group](https://leetcode.com/problems/reverse-nodes-in-k-group/) | 25 | Hard | Linked List | High | | | | | | | |
+
+#### Intervals
+
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 57 | [Merge Intervals](https://leetcode.com/problems/merge-intervals/) | 56 | Medium | Intervals | Very High | | | | | | | |
+| 58 | [Insert Interval](https://leetcode.com/problems/insert-interval/) | 57 | Medium | Intervals | High | | | | | | | |
+| 59 | [Non-overlapping Intervals](https://leetcode.com/problems/non-overlapping-intervals/) | 435 | Medium | Intervals | High | | | | | | | |
+| 60 | [Meeting Rooms](https://leetcode.com/problems/meeting-rooms/) | 252 | Easy | Intervals | High | | | | | | | |
+
+### Phase 3: Trees & Graphs
+
+#### Trees
+
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 61 | [Binary Tree Level Order Traversal](https://leetcode.com/problems/binary-tree-level-order-traversal/) | 102 | Medium | Trees | Very High | | | | | | | |
+| 62 | [Binary Tree Right Side View](https://leetcode.com/problems/binary-tree-right-side-view/) | 199 | Medium | Trees | Very High | | | | | | | |
+| 63 | [Validate Binary Search Tree](https://leetcode.com/problems/validate-binary-search-tree/) | 98 | Medium | Trees | Very High | | | | | | | |
+| 64 | [Kth Smallest Element in a BST](https://leetcode.com/problems/kth-smallest-element-in-a-bst/) | 230 | Medium | Trees | High | | | | | | | |
+| 65 | [Construct Binary Tree from Preorder and Inorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/) | 105 | Medium | Trees | High | | | | | | | |
+| 66 | [Diameter of Binary Tree](https://leetcode.com/problems/diameter-of-binary-tree/) | 543 | Easy | Trees | Very High | | | | | | | |
+| 67 | [Balanced Binary Tree](https://leetcode.com/problems/balanced-binary-tree/) | 110 | Easy | Trees | High | | | | | | | |
+| 68 | [Lowest Common Ancestor of a BST](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/) | 235 | Medium | Trees | Very High | | | | | | | |
+| 69 | [Lowest Common Ancestor of a Binary Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/) | 236 | Medium | Trees | Very High | | | | | | | |
+| 70 | [House Robber III](https://leetcode.com/problems/house-robber-iii/) | 337 | Medium | Trees | Medium | | | | | | | |
+| 71 | [Binary Tree Maximum Path Sum](https://leetcode.com/problems/binary-tree-maximum-path-sum/) | 124 | Hard | Trees | Very High | | | | | | | |
+| 72 | [Serialize and Deserialize Binary Tree](https://leetcode.com/problems/serialize-and-deserialize-binary-tree/) | 297 | Hard | Trees | Very High | | | | | | | |
+| 73 | [All Nodes Distance K in Binary Tree](https://leetcode.com/problems/all-nodes-distance-k-in-binary-tree/) | 863 | Medium | Trees | High | | | | | | | |
+| 74 | [Find Duplicate Subtrees](https://leetcode.com/problems/find-duplicate-subtrees/) | 652 | Medium | Trees | Medium | | | | | | | |
+| 75 | [Flatten Binary Tree to Linked List](https://leetcode.com/problems/flatten-binary-tree-to-linked-list/) | 114 | Medium | Trees | High | | | | | | | |
+
+#### Graphs
+
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 76 | [Number of Islands](https://leetcode.com/problems/number-of-islands/) | 200 | Medium | Graphs | Very High | | | | | | | |
+| 77 | [Max Area of Island](https://leetcode.com/problems/max-area-of-island/) | 695 | Medium | Graphs | High | | | | | | | |
+| 78 | [Rotting Oranges](https://leetcode.com/problems/rotting-oranges/) | 994 | Medium | Graphs | Very High | | | | | | | |
+| 79 | [Pacific Atlantic Water Flow](https://leetcode.com/problems/pacific-atlantic-water-flow/) | 417 | Medium | Graphs | High | | | | | | | |
+| 80 | [Course Schedule](https://leetcode.com/problems/course-schedule/) | 207 | Medium | Graphs | Very High | | | | | | | |
+| 81 | [Course Schedule II](https://leetcode.com/problems/course-schedule-ii/) | 210 | Medium | Graphs | Very High | | | | | | | |
+| 82 | [Clone Graph](https://leetcode.com/problems/clone-graph/) | 133 | Medium | Graphs | High | | | | | | | |
+| 83 | [Number of Provinces](https://leetcode.com/problems/number-of-provinces/) | 547 | Medium | Graphs | High | | | | | | | |
+| 84 | [Redundant Connection](https://leetcode.com/problems/redundant-connection/) | 684 | Medium | Graphs | Medium | | | | | | | |
+| 85 | [Accounts Merge](https://leetcode.com/problems/accounts-merge/) | 721 | Medium | Graphs | High | | | | | | | |
+| 86 | [Network Delay Time](https://leetcode.com/problems/network-delay-time/) | 743 | Medium | Graphs | High | | | | | | | |
+| 87 | [Cheapest Flights Within K Stops](https://leetcode.com/problems/cheapest-flights-within-k-stops/) | 787 | Medium | Graphs | High | | | | | | | |
+| 88 | [Path With Minimum Effort](https://leetcode.com/problems/path-with-minimum-effort/) | 1631 | Medium | Graphs | Medium | | | | | | | |
+| 89 | [Word Ladder](https://leetcode.com/problems/word-ladder/) | 127 | Hard | Graphs | Very High | | | | | | | |
+| 90 | [Graph Valid Tree](https://leetcode.com/problems/graph-valid-tree/) | 261 | Medium | Graphs | High | | | | | | | |
+| 91 | [Critical Connections in a Network](https://leetcode.com/problems/critical-connections-in-a-network/) | 1192 | Hard | Graphs | Medium | | | | | | | |
+| 92 | [Min Cost to Connect All Points](https://leetcode.com/problems/min-cost-to-connect-all-points/) | 1584 | Medium | Graphs | Medium | | | | | | | |
+| 93 | [Number of Connected Components in an Undirected Graph](https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/) | 323 | Medium | Graphs | High | | | | | | | |
+| 94 | [Find Eventual Safe States](https://leetcode.com/problems/find-eventual-safe-states/) | 802 | Medium | Graphs | Medium | | | | | | | |
+| 95 | [Alien Dictionary](https://leetcode.com/problems/alien-dictionary/) | 269 | Hard | Graphs | Very High | | | | | | | |
+
+### Phase 4: DP + Greedy + Backtracking
+
+#### Dynamic Programming
+
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 96 | [House Robber](https://leetcode.com/problems/house-robber/) | 198 | Medium | DP | Very High | | | | | | | |
+| 97 | [House Robber II](https://leetcode.com/problems/house-robber-ii/) | 213 | Medium | DP | High | | | | | | | |
+| 98 | [Decode Ways](https://leetcode.com/problems/decode-ways/) | 91 | Medium | DP | Very High | | | | | | | |
+| 99 | [Coin Change](https://leetcode.com/problems/coin-change/) | 322 | Medium | DP | Very High | | | | | | | |
+| 100 | [Coin Change II](https://leetcode.com/problems/coin-change-ii/) | 518 | Medium | DP | High | | | | | | | |
+| 101 | [Partition Equal Subset Sum](https://leetcode.com/problems/partition-equal-subset-sum/) | 416 | Medium | DP | High | | | | | | | |
+| 102 | [Target Sum](https://leetcode.com/problems/target-sum/) | 494 | Medium | DP | High | | | | | | | |
+| 103 | [Word Break](https://leetcode.com/problems/word-break/) | 139 | Medium | DP | Very High | | | | | | | |
+| 104 | [Longest Common Subsequence](https://leetcode.com/problems/longest-common-subsequence/) | 1143 | Medium | DP | Very High | | | | | | | |
+| 105 | [Edit Distance](https://leetcode.com/problems/edit-distance/) | 72 | Medium | DP | Very High | | | | | | | |
+| 106 | [Longest Palindromic Subsequence](https://leetcode.com/problems/longest-palindromic-subsequence/) | 516 | Medium | DP | Medium | | | | | | | |
+| 107 | [Unique Paths](https://leetcode.com/problems/unique-paths/) | 62 | Medium | DP | Very High | | | | | | | |
+| 108 | [Minimum Path Sum](https://leetcode.com/problems/minimum-path-sum/) | 64 | Medium | DP | High | | | | | | | |
+| 109 | [Maximal Square](https://leetcode.com/problems/maximal-square/) | 221 | Medium | DP | High | | | | | | | |
+| 110 | [Longest Increasing Subsequence](https://leetcode.com/problems/longest-increasing-subsequence/) | 300 | Medium | DP | Very High | | | | | | | |
+| 111 | [Russian Doll Envelopes](https://leetcode.com/problems/russian-doll-envelopes/) | 354 | Hard | DP | Medium | | | | | | | |
+| 112 | [Best Time to Buy and Sell Stock III](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/) | 123 | Hard | DP | High | | | | | | | |
+| 113 | [Best Time to Buy and Sell Stock with Cooldown](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/) | 309 | Medium | DP | High | | | | | | | |
+| 114 | [Burst Balloons](https://leetcode.com/problems/burst-balloons/) | 312 | Hard | DP | High | | | | | | | |
+| 115 | [Different Ways to Add Parentheses](https://leetcode.com/problems/different-ways-to-add-parentheses/) | 241 | Medium | DP | Medium | | | | | | | |
+
+#### Greedy
+
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 116 | [Jump Game](https://leetcode.com/problems/jump-game/) | 55 | Medium | Greedy | Very High | | | | | | | |
+| 117 | [Jump Game II](https://leetcode.com/problems/jump-game-ii/) | 45 | Medium | Greedy | Very High | | | | | | | |
+| 118 | [Gas Station](https://leetcode.com/problems/gas-station/) | 134 | Medium | Greedy | High | | | | | | | |
+| 119 | [Task Scheduler](https://leetcode.com/problems/task-scheduler/) | 621 | Medium | Greedy | Very High | | | | | | | |
+
+#### Backtracking
+
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 120 | [Combination Sum](https://leetcode.com/problems/combination-sum/) | 39 | Medium | Backtracking | Very High | | | | | | | |
+| 121 | [Permutations](https://leetcode.com/problems/permutations/) | 46 | Medium | Backtracking | Very High | | | | | | | |
+| 122 | [Generate Parentheses](https://leetcode.com/problems/generate-parentheses/) | 22 | Medium | Backtracking | Very High | | | | | | | |
+| 123 | [Word Search](https://leetcode.com/problems/word-search/) | 79 | Medium | Backtracking | Very High | | | | | | | |
+| 124 | [N-Queens](https://leetcode.com/problems/n-queens/) | 51 | Hard | Backtracking | High | | | | | | | |
+
+### Phase 5: Design
+
+| # | Problem | LC# | Difficulty | Pattern | Frequency | Attempted | Solved | Rev 1 | Rev 2 | Rev 3 | Confidence (1-5) | Notes |
+|---|---------|-----|-----------|---------|-----------|-----------|--------|-------|-------|-------|-------------------|-------|
+| 125 | [LRU Cache](https://leetcode.com/problems/lru-cache/) | 146 | Medium | Design | Very High | | | | | | | |
+| 126 | [LFU Cache](https://leetcode.com/problems/lfu-cache/) | 460 | Hard | Design | High | | | | | | | |
+| 127 | [Implement Trie (Prefix Tree)](https://leetcode.com/problems/implement-trie-prefix-tree/) | 208 | Medium | Design | Very High | | | | | | | |
+| 128 | [Design Add and Search Words Data Structure](https://leetcode.com/problems/design-add-and-search-words-data-structure/) | 211 | Medium | Design | High | | | | | | | |
+| 129 | [Time Based Key-Value Store](https://leetcode.com/problems/time-based-key-value-store/) | 981 | Medium | Design | High | | | | | | | |
+| 130 | [Design HashMap](https://leetcode.com/problems/design-hashmap/) | 706 | Easy | Design | High | | | | | | | |
+| 131 | [Insert Delete GetRandom O(1)](https://leetcode.com/problems/insert-delete-getrandom-o1/) | 380 | Medium | Design | Very High | | | | | | | |
+| 132 | [Snapshot Array](https://leetcode.com/problems/snapshot-array/) | 1146 | Medium | Design | Medium | | | | | | | |
+| 133 | [Stock Price Fluctuation](https://leetcode.com/problems/stock-price-fluctuation/) | 2034 | Medium | Design | Medium | | | | | | | |
+| 134 | [Design Search Autocomplete System](https://leetcode.com/problems/design-search-autocomplete-system/) | 642 | Hard | Design | High | | | | | | | |
 
 ---
 
-## Phase 4: Dynamic Programming (Weeks 11–13)
+## Section 4: Revision Tracker (Spaced Repetition)
 
-*DP is the #1 pattern for Hard problems. This phase needs the most patience.*
+### How to Use
 
-### Week 11: 1D DP (11 problems)
+1. After solving a problem, record the **Date Solved** below
+2. Calculate your revision dates using the schedule: **Day 1 → Day 3 → Day 7 → Day 14 → Day 30**
+3. On each revision day, re-solve from scratch without looking at your previous solution
+4. Mark each revision with a checkmark (✅) or cross (❌)
+5. If you fail a revision (❌), reset the spaced repetition cycle from Day 1
 
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 14 | 1D DP | 11 | 5 days | Template + Climbing Stairs (Day 1), 2 Easy (Day 2), 3 Medium (Day 3), 3 Medium (Day 4), 3 Hard (Day 5) |
+### Phase 1: Foundations
 
-*Key milestone: after this week, "define state → recurrence → base case" should be muscle memory.*
+| # | Problem | Date Solved | Day 1 | Day 3 | Day 7 | Day 14 | Day 30 | Status |
+|---|---------|-------------|-------|-------|-------|--------|--------|--------|
+| 1 | Two Sum | | | | | | | |
+| 2 | Group Anagrams | | | | | | | |
+| 3 | Product of Array Except Self | | | | | | | |
+| 4 | Longest Consecutive Sequence | | | | | | | |
+| 5 | Top K Frequent Elements | | | | | | | |
+| 6 | Container With Most Water | | | | | | | |
+| 7 | 3Sum | | | | | | | |
+| 8 | Sort Colors | | | | | | | |
+| 9 | Find the Duplicate Number | | | | | | | |
+| 10 | Longest Palindromic Substring | | | | | | | |
+| 11 | Longest Substring Without Repeating Characters | | | | | | | |
+| 12 | Longest Repeating Character Replacement | | | | | | | |
+| 13 | Permutation in String | | | | | | | |
+| 14 | Find All Anagrams in a String | | | | | | | |
+| 15 | Minimum Window Substring | | | | | | | |
+| 16 | Fruit Into Baskets | | | | | | | |
+| 17 | Max Consecutive Ones III | | | | | | | |
+| 18 | Subarray Product Less Than K | | | | | | | |
+| 19 | Frequency of the Most Frequent Element | | | | | | | |
+| 20 | Sliding Window Maximum | | | | | | | |
+| 21 | Search in Rotated Sorted Array | | | | | | | |
+| 22 | Find Minimum in Rotated Sorted Array | | | | | | | |
+| 23 | Find Peak Element | | | | | | | |
+| 24 | Koko Eating Bananas | | | | | | | |
+| 25 | Capacity To Ship Packages Within D Days | | | | | | | |
+| 26 | Minimum Number of Days to Make m Bouquets | | | | | | | |
+| 27 | Split Array Largest Sum | | | | | | | |
+| 28 | Find First and Last Position of Element in Sorted Array | | | | | | | |
+| 29 | Median of Two Sorted Arrays | | | | | | | |
+| 30 | Kth Smallest Element in a Sorted Matrix | | | | | | | |
+| 31 | Single Number | | | | | | | |
+| 32 | Number of 1 Bits | | | | | | | |
+| 33 | Counting Bits | | | | | | | |
+| 34 | Sum of Two Integers | | | | | | | |
 
-### Week 12: 2D DP (10 problems)
+### Phase 2: Data Structures
 
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 15 | 2D DP | 10 | 5 days | Template + Unique Paths (Day 1), 2 Easy (Day 2), 3 Medium (Day 3), 2 Medium (Day 4), 3 Hard (Day 5) |
+| # | Problem | Date Solved | Day 1 | Day 3 | Day 7 | Day 14 | Day 30 | Status |
+|---|---------|-------------|-------|-------|-------|--------|--------|--------|
+| 35 | Daily Temperatures | | | | | | | |
+| 36 | Next Greater Element II | | | | | | | |
+| 37 | Decode String | | | | | | | |
+| 38 | Asteroid Collision | | | | | | | |
+| 39 | Remove K Digits | | | | | | | |
+| 40 | Largest Rectangle in Histogram | | | | | | | |
+| 41 | Trapping Rain Water | | | | | | | |
+| 42 | Sum of Subarray Minimums | | | | | | | |
+| 43 | Kth Largest Element in an Array | | | | | | | |
+| 44 | Top K Frequent Elements | | | | | | | |
+| 45 | K Closest Points to Origin | | | | | | | |
+| 46 | Find Median from Data Stream | | | | | | | |
+| 47 | Meeting Rooms II | | | | | | | |
+| 48 | Merge K Sorted Lists | | | | | | | |
+| 49 | Smallest Range Covering Elements from K Lists | | | | | | | |
+| 50 | Reverse Linked List | | | | | | | |
+| 51 | Linked List Cycle | | | | | | | |
+| 52 | Reorder List | | | | | | | |
+| 53 | Remove Nth Node From End of List | | | | | | | |
+| 54 | Copy List with Random Pointer | | | | | | | |
+| 55 | Add Two Numbers | | | | | | | |
+| 56 | Reverse Nodes in k-Group | | | | | | | |
+| 57 | Merge Intervals | | | | | | | |
+| 58 | Insert Interval | | | | | | | |
+| 59 | Non-overlapping Intervals | | | | | | | |
+| 60 | Meeting Rooms | | | | | | | |
 
-### Week 13: Interval/State Machine DP + DP Review (9 problems)
+### Phase 3: Trees & Graphs
 
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 16 | Interval/State DP | 9 | 4 days | Template + Stock I (Day 1), Stock II–IV + Cooldown + Fee (Days 2–3), Burst Balloons + LPS (Day 4) |
-| — | **DP Review** | — | 3 days | Re-solve 8–10 hardest DP problems across 1D/2D/Interval |
+| # | Problem | Date Solved | Day 1 | Day 3 | Day 7 | Day 14 | Day 30 | Status |
+|---|---------|-------------|-------|-------|-------|--------|--------|--------|
+| 61 | Binary Tree Level Order Traversal | | | | | | | |
+| 62 | Binary Tree Right Side View | | | | | | | |
+| 63 | Validate Binary Search Tree | | | | | | | |
+| 64 | Kth Smallest Element in a BST | | | | | | | |
+| 65 | Construct Binary Tree from Preorder and Inorder | | | | | | | |
+| 66 | Diameter of Binary Tree | | | | | | | |
+| 67 | Balanced Binary Tree | | | | | | | |
+| 68 | Lowest Common Ancestor of a BST | | | | | | | |
+| 69 | Lowest Common Ancestor of a Binary Tree | | | | | | | |
+| 70 | House Robber III | | | | | | | |
+| 71 | Binary Tree Maximum Path Sum | | | | | | | |
+| 72 | Serialize and Deserialize Binary Tree | | | | | | | |
+| 73 | All Nodes Distance K in Binary Tree | | | | | | | |
+| 74 | Find Duplicate Subtrees | | | | | | | |
+| 75 | Flatten Binary Tree to Linked List | | | | | | | |
+| 76 | Number of Islands | | | | | | | |
+| 77 | Max Area of Island | | | | | | | |
+| 78 | Rotting Oranges | | | | | | | |
+| 79 | Pacific Atlantic Water Flow | | | | | | | |
+| 80 | Course Schedule | | | | | | | |
+| 81 | Course Schedule II | | | | | | | |
+| 82 | Clone Graph | | | | | | | |
+| 83 | Number of Provinces | | | | | | | |
+| 84 | Redundant Connection | | | | | | | |
+| 85 | Accounts Merge | | | | | | | |
+| 86 | Network Delay Time | | | | | | | |
+| 87 | Cheapest Flights Within K Stops | | | | | | | |
+| 88 | Path With Minimum Effort | | | | | | | |
+| 89 | Word Ladder | | | | | | | |
+| 90 | Graph Valid Tree | | | | | | | |
+| 91 | Critical Connections in a Network | | | | | | | |
+| 92 | Min Cost to Connect All Points | | | | | | | |
+| 93 | Number of Connected Components in an Undirected Graph | | | | | | | |
+| 94 | Find Eventual Safe States | | | | | | | |
+| 95 | Alien Dictionary | | | | | | | |
 
-**Phase 4 checkpoint:** 166 problems done. DP should no longer feel like "magic" — you see state transitions.
+### Phase 4: DP + Greedy + Backtracking
+
+| # | Problem | Date Solved | Day 1 | Day 3 | Day 7 | Day 14 | Day 30 | Status |
+|---|---------|-------------|-------|-------|-------|--------|--------|--------|
+| 96 | House Robber | | | | | | | |
+| 97 | House Robber II | | | | | | | |
+| 98 | Decode Ways | | | | | | | |
+| 99 | Coin Change | | | | | | | |
+| 100 | Coin Change II | | | | | | | |
+| 101 | Partition Equal Subset Sum | | | | | | | |
+| 102 | Target Sum | | | | | | | |
+| 103 | Word Break | | | | | | | |
+| 104 | Longest Common Subsequence | | | | | | | |
+| 105 | Edit Distance | | | | | | | |
+| 106 | Longest Palindromic Subsequence | | | | | | | |
+| 107 | Unique Paths | | | | | | | |
+| 108 | Minimum Path Sum | | | | | | | |
+| 109 | Maximal Square | | | | | | | |
+| 110 | Longest Increasing Subsequence | | | | | | | |
+| 111 | Russian Doll Envelopes | | | | | | | |
+| 112 | Best Time to Buy and Sell Stock III | | | | | | | |
+| 113 | Best Time to Buy and Sell Stock with Cooldown | | | | | | | |
+| 114 | Burst Balloons | | | | | | | |
+| 115 | Different Ways to Add Parentheses | | | | | | | |
+| 116 | Jump Game | | | | | | | |
+| 117 | Jump Game II | | | | | | | |
+| 118 | Gas Station | | | | | | | |
+| 119 | Task Scheduler | | | | | | | |
+| 120 | Combination Sum | | | | | | | |
+| 121 | Permutations | | | | | | | |
+| 122 | Generate Parentheses | | | | | | | |
+| 123 | Word Search | | | | | | | |
+| 124 | N-Queens | | | | | | | |
+
+### Phase 5: Design
+
+| # | Problem | Date Solved | Day 1 | Day 3 | Day 7 | Day 14 | Day 30 | Status |
+|---|---------|-------------|-------|-------|-------|--------|--------|--------|
+| 125 | LRU Cache | | | | | | | |
+| 126 | LFU Cache | | | | | | | |
+| 127 | Implement Trie (Prefix Tree) | | | | | | | |
+| 128 | Design Add and Search Words Data Structure | | | | | | | |
+| 129 | Time Based Key-Value Store | | | | | | | |
+| 130 | Design HashMap | | | | | | | |
+| 131 | Insert Delete GetRandom O(1) | | | | | | | |
+| 132 | Snapshot Array | | | | | | | |
+| 133 | Stock Price Fluctuation | | | | | | | |
+| 134 | Design Search Autocomplete System | | | | | | | |
 
 ---
 
-## Phase 5: Greedy, Intervals & Bits (Weeks 14–15)
+## Section 5: Interview Readiness Tracker
 
-*These patterns are quicker to learn. Good for building momentum before final review.*
+### Readiness Levels
 
-### Week 14: Greedy + Intervals (19 problems)
+| Level | Description | What It Means |
+|-------|-------------|---------------|
+| **1** | Can solve with hints | You need external help (editorial, discussion, hints) to arrive at a solution |
+| **2** | Can solve independently | You can solve it on your own but may take longer than interview time limits |
+| **3** | Can explain optimization | You can articulate why the optimal approach works, trade-offs, and alternatives |
+| **4** | Can code in Java without mistakes | Clean, bug-free Java implementation within interview time (25–40 min) |
+| **5** | Can solve variants unseen before | You recognize the pattern and can adapt to modified/harder versions on the spot |
 
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 17 | Greedy | 10 | 3 days | Template + 2 Easy (Day 1), 3 Medium (Day 2), 2 Medium + 3 Hard (Day 3) |
-| 18 | Intervals | 9 | 3 days | Template + Meeting Rooms (Day 1), 3 Medium (Day 2), 3 Medium + 2 Hard (Day 3) |
-| — | **Review** | — | 1 day | Re-solve 4–5 from Greedy + Intervals |
+### Readiness Assessment by Pattern
 
-### Week 15: Bit Manipulation + Final Review (8 problems)
+| Pattern | Level (1-5) | Weak Areas | Action Items |
+|---------|-------------|------------|-------------|
+| Arrays & Hashing | | | |
+| Two Pointers | | | |
+| Sliding Window | | | |
+| Binary Search | | | |
+| Bit Manipulation | | | |
+| Stack | | | |
+| Heap | | | |
+| Linked List | | | |
+| Intervals | | | |
+| Trees | | | |
+| Graphs | | | |
+| Dynamic Programming | | | |
+| Greedy | | | |
+| Backtracking | | | |
+| Design | | | |
 
-| # | Pattern | Problems | Est. Days | Daily Load |
-|---|---------|----------|-----------|------------|
-| 19 | Bit Manipulation | 8 | 2 days | Template + 2 Easy (Day 1), 4 Medium + 2 Hard (Day 2) |
-| — | **Full Review** | — | 5 days | See "Final Review Strategy" below |
+### Readiness Assessment by Problem
 
-**Phase 5 checkpoint:** All 193 problems done.
+| # | Problem | Level (1-5) | Last Assessed | Next Review |
+|---|---------|-------------|---------------|-------------|
+| 1 | Two Sum | | | |
+| 2 | Group Anagrams | | | |
+| 3 | Product of Array Except Self | | | |
+| 4 | Longest Consecutive Sequence | | | |
+| 5 | Top K Frequent Elements | | | |
+| 6 | Container With Most Water | | | |
+| 7 | 3Sum | | | |
+| 8 | Sort Colors | | | |
+| 9 | Find the Duplicate Number | | | |
+| 10 | Longest Palindromic Substring | | | |
+| 11 | Longest Substring Without Repeating Characters | | | |
+| 12 | Longest Repeating Character Replacement | | | |
+| 13 | Permutation in String | | | |
+| 14 | Find All Anagrams in a String | | | |
+| 15 | Minimum Window Substring | | | |
+| 16 | Fruit Into Baskets | | | |
+| 17 | Max Consecutive Ones III | | | |
+| 18 | Subarray Product Less Than K | | | |
+| 19 | Frequency of the Most Frequent Element | | | |
+| 20 | Sliding Window Maximum | | | |
+| 21 | Search in Rotated Sorted Array | | | |
+| 22 | Find Minimum in Rotated Sorted Array | | | |
+| 23 | Find Peak Element | | | |
+| 24 | Koko Eating Bananas | | | |
+| 25 | Capacity To Ship Packages Within D Days | | | |
+| 26 | Minimum Number of Days to Make m Bouquets | | | |
+| 27 | Split Array Largest Sum | | | |
+| 28 | Find First and Last Position of Element in Sorted Array | | | |
+| 29 | Median of Two Sorted Arrays | | | |
+| 30 | Kth Smallest Element in a Sorted Matrix | | | |
+| 31 | Single Number | | | |
+| 32 | Number of 1 Bits | | | |
+| 33 | Counting Bits | | | |
+| 34 | Sum of Two Integers | | | |
+| 35 | Daily Temperatures | | | |
+| 36 | Next Greater Element II | | | |
+| 37 | Decode String | | | |
+| 38 | Asteroid Collision | | | |
+| 39 | Remove K Digits | | | |
+| 40 | Largest Rectangle in Histogram | | | |
+| 41 | Trapping Rain Water | | | |
+| 42 | Sum of Subarray Minimums | | | |
+| 43 | Kth Largest Element in an Array | | | |
+| 44 | Top K Frequent Elements | | | |
+| 45 | K Closest Points to Origin | | | |
+| 46 | Find Median from Data Stream | | | |
+| 47 | Meeting Rooms II | | | |
+| 48 | Merge K Sorted Lists | | | |
+| 49 | Smallest Range Covering Elements from K Lists | | | |
+| 50 | Reverse Linked List | | | |
+| 51 | Linked List Cycle | | | |
+| 52 | Reorder List | | | |
+| 53 | Remove Nth Node From End of List | | | |
+| 54 | Copy List with Random Pointer | | | |
+| 55 | Add Two Numbers | | | |
+| 56 | Reverse Nodes in k-Group | | | |
+| 57 | Merge Intervals | | | |
+| 58 | Insert Interval | | | |
+| 59 | Non-overlapping Intervals | | | |
+| 60 | Meeting Rooms | | | |
+| 61 | Binary Tree Level Order Traversal | | | |
+| 62 | Binary Tree Right Side View | | | |
+| 63 | Validate Binary Search Tree | | | |
+| 64 | Kth Smallest Element in a BST | | | |
+| 65 | Construct Binary Tree from Preorder and Inorder Traversal | | | |
+| 66 | Diameter of Binary Tree | | | |
+| 67 | Balanced Binary Tree | | | |
+| 68 | Lowest Common Ancestor of a BST | | | |
+| 69 | Lowest Common Ancestor of a Binary Tree | | | |
+| 70 | House Robber III | | | |
+| 71 | Binary Tree Maximum Path Sum | | | |
+| 72 | Serialize and Deserialize Binary Tree | | | |
+| 73 | All Nodes Distance K in Binary Tree | | | |
+| 74 | Find Duplicate Subtrees | | | |
+| 75 | Flatten Binary Tree to Linked List | | | |
+| 76 | Number of Islands | | | |
+| 77 | Max Area of Island | | | |
+| 78 | Rotting Oranges | | | |
+| 79 | Pacific Atlantic Water Flow | | | |
+| 80 | Course Schedule | | | |
+| 81 | Course Schedule II | | | |
+| 82 | Clone Graph | | | |
+| 83 | Number of Provinces | | | |
+| 84 | Redundant Connection | | | |
+| 85 | Accounts Merge | | | |
+| 86 | Network Delay Time | | | |
+| 87 | Cheapest Flights Within K Stops | | | |
+| 88 | Path With Minimum Effort | | | |
+| 89 | Word Ladder | | | |
+| 90 | Graph Valid Tree | | | |
+| 91 | Critical Connections in a Network | | | |
+| 92 | Min Cost to Connect All Points | | | |
+| 93 | Number of Connected Components in an Undirected Graph | | | |
+| 94 | Find Eventual Safe States | | | |
+| 95 | Alien Dictionary | | | |
+| 96 | House Robber | | | |
+| 97 | House Robber II | | | |
+| 98 | Decode Ways | | | |
+| 99 | Coin Change | | | |
+| 100 | Coin Change II | | | |
+| 101 | Partition Equal Subset Sum | | | |
+| 102 | Target Sum | | | |
+| 103 | Word Break | | | |
+| 104 | Longest Common Subsequence | | | |
+| 105 | Edit Distance | | | |
+| 106 | Longest Palindromic Subsequence | | | |
+| 107 | Unique Paths | | | |
+| 108 | Minimum Path Sum | | | |
+| 109 | Maximal Square | | | |
+| 110 | Longest Increasing Subsequence | | | |
+| 111 | Russian Doll Envelopes | | | |
+| 112 | Best Time to Buy and Sell Stock III | | | |
+| 113 | Best Time to Buy and Sell Stock with Cooldown | | | |
+| 114 | Burst Balloons | | | |
+| 115 | Different Ways to Add Parentheses | | | |
+| 116 | Jump Game | | | |
+| 117 | Jump Game II | | | |
+| 118 | Gas Station | | | |
+| 119 | Task Scheduler | | | |
+| 120 | Combination Sum | | | |
+| 121 | Permutations | | | |
+| 122 | Generate Parentheses | | | |
+| 123 | Word Search | | | |
+| 124 | N-Queens | | | |
+| 125 | LRU Cache | | | |
+| 126 | LFU Cache | | | |
+| 127 | Implement Trie (Prefix Tree) | | | |
+| 128 | Design Add and Search Words Data Structure | | | |
+| 129 | Time Based Key-Value Store | | | |
+| 130 | Design HashMap | | | |
+| 131 | Insert Delete GetRandom O(1) | | | |
+| 132 | Snapshot Array | | | |
+| 133 | Stock Price Fluctuation | | | |
+| 134 | Design Search Autocomplete System | | | |
 
 ---
 
-## Week 16: Mock Interview Week
+## Section 6: Mock Interview Tracker
 
-| Day | Activity |
-|-----|----------|
-| Mon | Timed mock: 2 random Medium problems (45 min each) |
-| Tue | Timed mock: 1 Easy + 1 Hard (20 min + 60 min) |
-| Wed | Review weak patterns — re-solve 5 problems from weakest area |
-| Thu | Timed mock: 2 Medium from different patterns (45 min each) |
-| Fri | Company-specific practice (see focus areas below) |
-| Weekend | Rest + light review of templates only |
+### Mock Interview Log
+
+| Date | Company | Question | Pattern | Difficulty | Time Taken | Outcome | Mistakes | Follow-up Questions |
+|------|---------|----------|---------|-----------|------------|---------|----------|---------------------|
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+| | | | | | | | | |
+
+### Outcome Legend
+
+| Symbol | Meaning |
+|--------|---------|
+| ✅ Solved | Solved optimally within time |
+| ⚠️ Partial | Had the right approach but made implementation errors |
+| 🔄 Hints | Needed hints to arrive at the approach |
+| ❌ Failed | Could not solve — needs re-study |
+
+### Mock Interview Schedule Template
+
+| Week | Day | Type | Duration | Focus |
+|------|-----|------|----------|-------|
+| Any | Monday | Timed Mock | 45 min × 2 | 2 random Medium problems |
+| Any | Wednesday | Timed Mock | 20 + 60 min | 1 Easy + 1 Hard |
+| Any | Friday | Company-Specific | 90 min | 2 problems tagged for target company |
 
 ---
 
-## Final Review Strategy (Week 15, Days 3–7)
+## Section 7: Weakness Analysis
 
-1. **Shuffle all 193 problems** — can you identify the pattern from just the problem title?
-2. **Speed rounds:** For each pattern, re-solve the 1 easiest and 1 hardest problem (40 problems total, aim for 2–3 min per Easy, 15 min per Hard)
-3. **Template recall:** Write all 20 pattern templates from memory on a whiteboard/paper
-4. **Weakness audit:** Any pattern where you need >30 seconds to recall the template = revisit that pattern's document
+### Pattern-Wise Accuracy
 
----
+| Pattern | Total | Attempted | Solved First Try | Accuracy % | Avg Time | Weakness Level |
+|---------|-------|-----------|-----------------|------------|----------|---------------|
+| Arrays & Hashing | 5 | | | | | |
+| Two Pointers | 5 | | | | | |
+| Sliding Window | 10 | | | | | |
+| Binary Search | 10 | | | | | |
+| Bit Manipulation | 4 | | | | | |
+| Stack | 8 | | | | | |
+| Heap | 7 | | | | | |
+| Linked List | 7 | | | | | |
+| Intervals | 4 | | | | | |
+| Trees | 15 | | | | | |
+| Graphs | 20 | | | | | |
+| Dynamic Programming | 20 | | | | | |
+| Greedy | 4 | | | | | |
+| Backtracking | 5 | | | | | |
+| Design | 10 | | | | | |
 
-## Company-Specific Focus Areas
+**Weakness Levels:** 🟢 Strong (>80%) | 🟡 Moderate (50–80%) | 🔴 Weak (<50%)
+
+### Difficulty-Wise Accuracy
+
+| Difficulty | Total | Attempted | Solved First Try | Accuracy % | Avg Time | Target Time |
+|-----------|-------|-----------|-----------------|------------|----------|-------------|
+| Easy | 16 | | | | | < 15 min |
+| Medium | 96 | | | | | < 30 min |
+| Hard | 33 | | | | | < 45 min |
+
+### Most Forgotten Problems (Reset During Revision)
+
+| # | Problem | Pattern | Times Forgotten | Last Failed Revision | Root Cause |
+|---|---------|---------|----------------|---------------------|------------|
+| | | | | | |
+| | | | | | |
+| | | | | | |
+| | | | | | |
+| | | | | | |
+| | | | | | |
+| | | | | | |
+| | | | | | |
+| | | | | | |
+| | | | | | |
+
+### Topics Needing Revision (Update Weekly)
+
+| Priority | Pattern / Topic | Specific Weakness | Action Plan | Target Date | Status |
+|----------|----------------|-------------------|-------------|-------------|--------|
+| 🔴 Critical | | | | | |
+| 🔴 Critical | | | | | |
+| 🟡 Moderate | | | | | |
+| 🟡 Moderate | | | | | |
+| 🟢 Polish | | | | | |
+| 🟢 Polish | | | | | |
+
+### Company-Specific Focus Areas
 
 | Company | Top Patterns | Must-Solve Problems |
 |---------|-------------|---------------------|
-| **Google** | Binary Search, DFS/BFS, DP (all), Backtracking | Median of Two Sorted Arrays, Word Search II, Burst Balloons, Trapping Rain Water |
-| **Amazon** | BFS, Greedy, Two Pointers, Hashing, Sorting | Number of Islands, Task Scheduler, Two Sum, Meeting Rooms II, Kth Largest |
-| **Meta** | Two Pointers, Sliding Window, Trees (DFS/BFS), Hashing | 3Sum, Minimum Window Substring, Binary Tree Max Path Sum, Valid Palindrome |
-| **Apple** | Arrays, Trees, Sorting, Hashing | Merge Intervals, LCA, Sort Colors, Group Anagrams |
+| **Amazon** | BFS, Greedy, Two Pointers, Hashing | Number of Islands, Task Scheduler, Two Sum, Meeting Rooms II |
+| **Google** | Binary Search, DFS/BFS, DP, Backtracking | Median of Two Sorted Arrays, Word Search, Burst Balloons, Trapping Rain Water |
 | **Microsoft** | DP, Trees, Graphs, Hashing | LIS, Coin Change, Course Schedule, Serialize/Deserialize Tree |
-| **Netflix/Uber** | Graphs, DP, Intervals, Greedy | Alien Dictionary, Edit Distance, Employee Free Time, Jump Game II |
+| **Uber** | Graphs, DP, Intervals, Greedy | Alien Dictionary, Edit Distance, Merge Intervals, Jump Game II |
+| **Airbnb** | Graphs, Backtracking, Design | Word Search, N-Queens, LRU Cache, Alien Dictionary |
+| **Atlassian** | Design, Trees, Hashing | LRU Cache, Trie, Group Anagrams, Binary Tree Level Order |
+| **Stripe** | Design, Arrays, Sliding Window | Design HashMap, Insert Delete GetRandom, Minimum Window Substring |
+| **Databricks** | DP, Binary Search, Graphs | Edit Distance, Median of Two Sorted Arrays, Course Schedule |
+| **Rubrik** | Design, Graphs, DP | LRU Cache, Number of Islands, Coin Change |
+| **Confluent** | Design, Graphs, Intervals | Time Based Key-Value Store, Course Schedule II, Merge Intervals |
 
 ---
 
-## How to Practice Effectively
-
-### The 30-Minute Rule
-- Read the problem. Think for **5 minutes** max without coding.
-- If you have an approach, code it. If not, read the intuition hint in this guide.
-- If stuck after **30 minutes total**, read the full solution. Understand it. Then close it and solve from scratch.
-- **Never spend 2 hours on one problem.** That's not learning; that's suffering.
-
-### The Pattern Recognition Loop
-1. **Solve** the problem using this guide's template
-2. **Tag** it mentally: "this is a sliding window because..."
-3. **Revisit** after 3 days — can you still recognize and solve it?
-4. **Vary** — solve a related problem from the same pattern
-
-### Spaced Repetition Schedule
-| Day | Action |
-|-----|--------|
-| Day 0 | Solve the problem |
-| Day 1 | Review your solution (read, don't re-solve) |
-| Day 3 | Re-solve from scratch |
-| Day 7 | Re-solve (should be fast now) |
-| Day 14 | Final check — if instant, move on |
-
-### Time Management for Working Professionals
-- **Don't sacrifice sleep.** Tired practice is wasted practice.
-- **Lunch breaks:** Read one pattern template (30 min) — no coding needed.
-- **Commute:** Mentally trace through a problem you solved yesterday.
-- **Weekday evenings:** 1–2 focused problems (1.5 hours max).
-- **Weekends:** Longer sessions (2–3 hours) for Hard problems and review.
-
----
-
-## Problem Count Summary
-
-| Pattern | Easy | Medium | Hard | Total |
-|---------|------|--------|------|-------|
-| Two Pointers | 3 | 6 | 3 | 12 |
-| Sliding Window | 2 | 6 | 3 | 11 |
-| Prefix Sum | 2 | 5 | 2 | 9 |
-| Hashing | 3 | 5 | 2 | 10 |
-| Binary Search | 2 | 6 | 3 | 11 |
-| Sorting Patterns | 2 | 5 | 3 | 10 |
-| Fast & Slow Pointers | 2 | 4 | 2 | 8 |
-| Monotonic Stack | 2 | 5 | 3 | 10 |
-| BFS | 2 | 5 | 3 | 10 |
-| DFS | 3 | 5 | 3 | 11 |
-| Backtracking | 2 | 5 | 3 | 10 |
-| Trie | 2 | 4 | 2 | 8 |
-| Union-Find | 2 | 4 | 2 | 8 |
-| Topological Sort | 2 | 4 | 2 | 8 |
-| 1D DP | 3 | 5 | 3 | 11 |
-| 2D DP | 2 | 5 | 3 | 10 |
-| Interval/State DP | 2 | 4 | 3 | 9 |
-| Greedy | 2 | 5 | 3 | 10 |
-| Intervals | 2 | 5 | 2 | 9 |
-| Bit Manipulation | 2 | 4 | 2 | 8 |
-| **Total** | **44** | **97** | **52** | **193** |
-
-**Time estimate by difficulty:**
-- 44 Easy × 20 min avg = **~15 hours**
-- 97 Medium × 40 min avg = **~65 hours**
-- 52 Hard × 70 min avg = **~60 hours**
-- Pattern study (20 patterns × 40 min) = **~13 hours**
-- Review & spaced repetition = **~25 hours**
-- **Grand total: ~160–180 hours**
-
----
-
-## Resources
-
-| Resource | Type | Best For |
-|----------|------|----------|
-| **NeetCode 150** | Problem List | Curated pattern-based list, great overlap with this guide |
-| **Blind 75** | Problem List | The original "minimum viable" interview prep list |
-| **LeetCode Discuss** | Forum | Company-tagged problems and recent interview questions |
-| **Grokking the Coding Interview** | Course | Pattern-based teaching (similar approach to this guide) |
-| **Competitive Programmer's Handbook** | Book | Free PDF; excellent for advanced techniques |
-| **Algorithms by Sedgewick** | Book | Deep understanding of data structures and algorithms |
-
----
-
-*After completing this roadmap: you don't memorize solutions — you recognize patterns. When an interviewer gives you a new problem, you see the structure, pick the right tool, and build the solution in minutes. That's not luck. That's preparation.*
+*This document is the master index. Pattern-specific deep dives are in `internals/`. Progress is tracked here. Update weekly.*

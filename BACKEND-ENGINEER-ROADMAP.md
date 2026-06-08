@@ -1,0 +1,597 @@
+# Backend Engineer Roadmap (6–8 Months)
+
+> **Goal:** Become interview-ready for SDE-2 / Senior Backend Engineer roles at top product companies.
+> **Profile:** 5 YoE Java Backend Engineer | Target: Amazon, Microsoft, Google, Uber, Airbnb, Atlassian, Stripe, Databricks, Rubrik, Confluent
+> **Outcome:** Strong in Java Backend, System Design, Distributed Systems, Cloud & Platform concepts. Foundation for Top 10% Backend Engineer.
+
+---
+
+## Table of Contents
+
+- [Weekly Time Allocation](#weekly-time-allocation)
+- [Track 1 — DSA (30%)](#track-1--dsa-30)
+- [Track 2 — Java & Backend (25%)](#track-2--java--backend-25)
+- [Track 3 — Distributed Systems & System Design (25%)](#track-3--distributed-systems--system-design-25)
+- [Track 4 — Kafka & Redis (10%)](#track-4--kafka--redis-10)
+- [Track 5 — Cloud, Containers & Platform Engineering (10%)](#track-5--cloud-containers--platform-engineering-10)
+- [Engineering Blogs](#engineering-blogs-read-weekly)
+- [Books To Finish](#books-to-finish-in-8-months)
+- [Success Criteria](#success-criteria-after-8-months)
+- [Progress Tracker](#progress-tracker)
+
+---
+
+## Weekly Time Allocation
+
+| Track | Weight | ~Hours/Week (15h total) |
+|-------|--------|------------------------|
+| DSA | 30% | ~4.5 hours |
+| Java & Backend | 25% | ~3.75 hours |
+| Distributed Systems & System Design | 25% | ~3.75 hours |
+| Kafka & Redis | 10% | ~1.5 hours |
+| Cloud, Containers & CI/CD | 10% | ~1.5 hours |
+
+---
+
+## Track 1 — DSA (30%)
+
+### Goal
+- Complete curated 145 problems ([DSA Master Tracker](dsa-patterns/DSA-PATTERNS-ROADMAP.md))
+- Reach 150–200 total solved problems on LeetCode
+- Master pattern recognition, not problem count
+
+### Resources
+
+| Type | Resource | Link |
+|------|----------|------|
+| Primary | NeetCode Roadmap | [neetcode.io](https://neetcode.io/roadmap) |
+| Primary | LeetCode | [leetcode.com](https://leetcode.com) |
+| Video | NeetCode YouTube | [youtube.com/@NeetCode](https://youtube.com/@NeetCode) |
+| Video | Take U Forward (Striver) | [youtube.com/@takeUforward](https://youtube.com/@takeUforward) |
+
+### Practice Strategy
+- 1–2 problems daily (weekdays), 2–3 on weekends
+- Revisit old problems using spaced repetition (Day 1 → 3 → 7 → 14 → 30)
+- Focus on **pattern recognition** — identify the pattern within 30 seconds of reading
+
+### Topics Covered
+
+| Topic | Key Patterns |
+|-------|-------------|
+| Arrays & Hashing | HashMap lookup, frequency counting, prefix/suffix |
+| Two Pointers | Opposite-end, same-direction, Dutch flag |
+| Sliding Window | Variable/fixed window, character frequency tracking |
+| Binary Search | Standard, on answer space, rotated arrays |
+| Bit Manipulation | XOR, Kernighan's, carry-free arithmetic |
+| Stack | Monotonic stack, nested structure parsing |
+| Heap | Top K, two heaps, merge K sorted |
+| Linked List | Reversal, cycle detection, two-pointer |
+| Intervals | Sort + merge, greedy selection |
+| Trees | BFS/DFS, BST properties, LCA, serialization |
+| Graphs | BFS/DFS, topological sort, Union-Find, Dijkstra |
+| Dynamic Programming | 1D, 2D, knapsack, interval DP, state machine |
+| Greedy | Jump games, scheduling, exchange argument |
+| Backtracking | Combinations, permutations, constraint satisfaction |
+| Design | LRU/LFU cache, Trie, HashMap design |
+
+---
+
+## Track 2 — Java & Backend (25%)
+
+### 2.1 Effective Java
+
+**Goal:** Become interview-ready in modern Java idioms and best practices.
+
+| Type | Resource |
+|------|----------|
+| Book | *Effective Java* — Joshua Bloch |
+
+<details>
+<summary><strong>Focus Areas</strong></summary>
+
+| Topic | Key Items |
+|-------|-----------|
+| Generics | Bounded wildcards, type erasure, PECS principle |
+| Collections | Choosing the right collection, immutable collections |
+| Enums | Enum with behavior, EnumSet, EnumMap |
+| Lambdas & Streams | Functional interfaces, stream pipeline, collectors |
+| Immutability | Immutable classes, defensive copies |
+| equals/hashCode | Contract, consistent implementation |
+| Best Practices | Builder pattern, try-with-resources, Optional, method design |
+
+</details>
+
+### 2.2 Design Patterns
+
+**Goal:** Know when and why to apply each pattern — not just the UML diagram.
+
+| Type | Resource |
+|------|----------|
+| Book | *Head First Design Patterns* |
+| Website | [Refactoring Guru](https://refactoring.guru/design-patterns) |
+| Video | Christopher Okhravi (YouTube) |
+| Video | Daily Code Buffer Design Patterns Playlist |
+
+<details>
+<summary><strong>Patterns to Master</strong></summary>
+
+| Pattern | When to Use | Real-World Example |
+|---------|-------------|-------------------|
+| **Strategy** | Swap algorithms at runtime | Payment processing (CreditCard, PayPal, UPI) |
+| **Observer** | Event-driven notifications | Event listeners, pub-sub systems |
+| **Factory** | Decouple object creation | Database driver instantiation |
+| **Singleton** | Exactly one instance needed | Configuration manager, connection pool |
+| **Command** | Encapsulate requests as objects | Task queues, undo/redo |
+| **Adapter** | Incompatible interface bridging | Legacy API integration |
+| **Decorator** | Add behavior dynamically | Java I/O streams, middleware chains |
+
+</details>
+
+### 2.3 Spring Boot Deep Dive
+
+**Goal:** Go from "I use Spring Boot" to "I understand Spring Boot."
+
+| Type | Resource |
+|------|----------|
+| Docs | [Spring Official Documentation](https://docs.spring.io/spring-boot/docs/current/reference/html/) |
+| Book | *Spring Start Here* |
+| Book | *Spring Security in Action* |
+| Video | Java Brains |
+| Video | Dan Vega |
+| Video | Amigoscode |
+
+<details>
+<summary><strong>Must-Know Topics</strong></summary>
+
+**Core**
+| Topic | What to Understand |
+|-------|--------------------|
+| Dependency Injection | Constructor vs field vs setter injection, @Qualifier, @Primary |
+| Bean Lifecycle | @PostConstruct, @PreDestroy, init/destroy methods, scopes |
+| Auto Configuration | How @SpringBootApplication works, conditional beans |
+| Profiles | Environment-specific config, @Profile, application-{profile}.yml |
+
+**Data**
+| Topic | What to Understand |
+|-------|--------------------|
+| Transactions | @Transactional, propagation levels, isolation levels, rollback |
+| JPA Basics | Entity mapping, relationships, N+1 problem, query optimization |
+
+**Security**
+| Topic | What to Understand |
+|-------|--------------------|
+| Authentication | Form login, Basic auth, custom UserDetailsService |
+| Authorization | Role-based, method-level security, @PreAuthorize |
+| OAuth2 | Authorization code flow, resource server, token validation |
+| JWT | Token structure, signing, stateless auth, refresh tokens |
+
+</details>
+
+---
+
+## Track 3 — Distributed Systems & System Design (25%)
+
+### 3.1 DDIA (Designing Data-Intensive Applications)
+
+**Goal:** Build deep understanding of distributed systems fundamentals — the "why" behind every design decision.
+
+| Type | Resource |
+|------|----------|
+| Book | *Designing Data-Intensive Applications* — Martin Kleppmann |
+| Video | ByteByteGo |
+| Video | Hussein Nasser |
+
+<details>
+<summary><strong>Chapters to Complete</strong></summary>
+
+| # | Chapter | Key Concepts |
+|---|---------|-------------|
+| 1 | Reliable, Scalable, Maintainable Applications | Reliability vs availability, latency percentiles, load parameters |
+| 2 | Data Models and Query Languages | Relational vs document vs graph, schema-on-read vs schema-on-write |
+| 3 | Storage and Retrieval | LSM-trees vs B-trees, SSTables, write amplification |
+| 4 | Encoding and Evolution | Avro/Protobuf/Thrift, schema evolution, backward/forward compatibility |
+| 5 | Replication | Leader-follower, multi-leader, leaderless, quorum reads/writes |
+| 6 | Partitioning | Hash vs range partitioning, rebalancing, secondary indexes |
+| 7 | Transactions | ACID, isolation levels, serializability, 2PC |
+| 8 | The Trouble with Distributed Systems | Partial failures, unreliable clocks, Byzantine faults |
+| 9 | Consistency and Consensus | Linearizability, causality, total order broadcast, Raft/Paxos |
+
+</details>
+
+### 3.2 System Design
+
+**Goal:** Confidently design scalable systems end-to-end in 45-minute interviews.
+
+| Type | Resource |
+|------|----------|
+| Book | *System Design Interview* — Alex Xu |
+| Website | [Hello Interview](https://www.hellointerview.com/) |
+| Website | [ByteByteGo](https://bytebytego.com/) |
+| Video | Gaurav Sen |
+| Video | Jordan Has No Life |
+| Video | ByteByteGo |
+
+<details>
+<summary><strong>Weekly Design Practice</strong></summary>
+
+| Week | System | Key Concepts |
+|------|--------|-------------|
+| 1 | URL Shortener | Hashing, base62 encoding, read-heavy design, caching |
+| 2 | Rate Limiter | Token bucket, sliding window, distributed rate limiting |
+| 3 | Notification System | Push vs pull, fanout, message queues, delivery guarantees |
+| 4 | Inventory Service | Consistency, distributed locking, stock reservation patterns |
+| 5 | Order Management | Saga pattern, state machines, idempotency |
+| 6 | Payment System | Exactly-once processing, reconciliation, ledger design |
+| 7 | Search Service | Inverted index, Elasticsearch, ranking, autocomplete |
+| 8 | Distributed Cache | Consistent hashing, eviction policies, cache coherence |
+
+</details>
+
+<details>
+<summary><strong>Design Document Template</strong></summary>
+
+For **every** design, document:
+
+| Section | What to Cover |
+|---------|---------------|
+| Requirements | Functional + non-functional, scale estimates |
+| Capacity Estimation | QPS, storage, bandwidth, memory |
+| APIs | REST/gRPC endpoints, request/response schemas |
+| Database | Schema design, SQL vs NoSQL choice with justification |
+| Cache | What to cache, eviction policy, consistency strategy |
+| Messaging | Async flows, Kafka/SQS, retry and DLQ strategy |
+| Security | AuthN/AuthZ, encryption at rest/transit, rate limiting |
+| Observability | Metrics, logging, tracing, alerting |
+| Tradeoffs | CAP theorem decisions, consistency vs availability choices |
+
+</details>
+
+---
+
+## Track 4 — Kafka & Redis (10%)
+
+### 4.1 Kafka
+
+**Goal:** Go from "I've used Kafka" to "I can design reliable event-driven systems."
+
+| Type | Resource |
+|------|----------|
+| Docs | [Apache Kafka Documentation](https://kafka.apache.org/documentation/) |
+| Blog | [Confluent Blog](https://www.confluent.io/blog/) |
+| Course | Confluent Kafka Courses (Free) |
+| Course | Stephane Maarek Kafka Course (Udemy) |
+| Video | Confluent YouTube |
+| Video | Hussein Nasser |
+
+<details>
+<summary><strong>Topics to Master</strong></summary>
+
+**Fundamentals**
+| Topic | What to Understand |
+|-------|--------------------|
+| Topics | Partitioning strategy, naming conventions, compacted topics |
+| Brokers | Leader election, ISR (In-Sync Replicas), controller |
+| Partitions | Key-based routing, ordering guarantees, partition count tradeoffs |
+| Replication | Replication factor, acks=all vs acks=1, min.insync.replicas |
+
+**Consumers**
+| Topic | What to Understand |
+|-------|--------------------|
+| Consumer Groups | Parallel consumption, group coordinator, partition assignment |
+| Rebalancing | Eager vs cooperative rebalancing, static membership |
+| Offset Management | Auto vs manual commit, at-least-once vs at-most-once |
+
+**Reliability**
+| Topic | What to Understand |
+|-------|--------------------|
+| Retry | Retry topics, exponential backoff, max retries |
+| DLQ | Dead letter queue design, monitoring, reprocessing |
+| Idempotency | Producer idempotency, enable.idempotence=true, PID/sequence |
+| Exactly Once | Transactional producer, read-process-write pattern, EOS guarantees |
+
+</details>
+
+### 4.2 Redis
+
+**Goal:** Understand Redis as more than a cache — it's a distributed systems primitive.
+
+| Type | Resource |
+|------|----------|
+| Docs | [Redis Documentation](https://redis.io/docs/) |
+| Video | Hussein Nasser |
+| Video | ByteByteGo Redis Videos |
+
+<details>
+<summary><strong>Topics to Master</strong></summary>
+
+| Topic | What to Understand |
+|-------|--------------------|
+| Cache Aside | Read-through pattern, lazy population, consistency tradeoffs |
+| TTL | Time-based expiry, volatile vs non-volatile keys, memory management |
+| Cache Stampede | Thundering herd problem, probabilistic early expiration, locking |
+| Distributed Locking | Redlock algorithm, SETNX + TTL, fencing tokens |
+| Rate Limiting | Token bucket with Redis, sliding window with sorted sets |
+
+</details>
+
+---
+
+## Track 5 — Cloud, Containers & Platform Engineering (10%)
+
+### 5.1 Docker
+
+**Goal:** Containerize any Spring Boot application confidently.
+
+| Type | Resource |
+|------|----------|
+| Book | *Docker Deep Dive* — Nigel Poulton |
+| Video | TechWorld with Nana Docker Course |
+| Docs | [Docker Official Docs](https://docs.docker.com/) |
+
+<details>
+<summary><strong>Topics to Master</strong></summary>
+
+| Topic | What to Understand |
+|-------|--------------------|
+| Images | Dockerfile, base images, layer caching, image size optimization |
+| Containers | Container lifecycle, process isolation, resource limits |
+| Layers | Union filesystem, layer reuse, .dockerignore |
+| Volumes | Bind mounts vs named volumes, data persistence |
+| Networks | Bridge, host, overlay; container-to-container communication |
+| Multi-stage Builds | Separate build and runtime stages, minimal production images |
+
+</details>
+
+### 5.2 Kubernetes
+
+**Goal:** Understand modern application deployment and orchestration.
+
+| Type | Resource |
+|------|----------|
+| Video | TechWorld with Nana Kubernetes Course |
+| Docs | [Kubernetes Official Documentation](https://kubernetes.io/docs/) |
+| Interactive | [Killercoda Kubernetes Labs](https://killercoda.com/playgrounds/scenario/kubernetes) |
+
+<details>
+<summary><strong>Topics to Master</strong></summary>
+
+| Topic | What to Understand |
+|-------|--------------------|
+| Pods | Pod lifecycle, init containers, sidecar pattern |
+| Deployments | Rolling updates, rollback, replica management |
+| Services | ClusterIP, NodePort, LoadBalancer, service discovery |
+| ConfigMaps | Externalized configuration, environment injection |
+| Secrets | Sensitive data management, encryption at rest |
+| HPA | Horizontal Pod Autoscaler, CPU/memory-based scaling |
+| Readiness Probes | Traffic gating, startup delays, endpoint health |
+| Liveness Probes | Crash detection, automatic restart, deadlock recovery |
+
+</details>
+
+### 5.3 OpenShift
+
+| Type | Resource |
+|------|----------|
+| Docs | [Red Hat OpenShift Documentation](https://docs.openshift.com/) |
+| Video | Red Hat Developers YouTube |
+
+<details>
+<summary><strong>Topics to Master</strong></summary>
+
+| Topic | What to Understand |
+|-------|--------------------|
+| Routes | Ingress routing, TLS termination, path-based routing |
+| Deployments | DeploymentConfig vs Deployment, triggers, strategies |
+| Security Contexts | SCCs, pod security, non-root containers |
+| OpenShift Pipelines | Tekton-based CI/CD, PipelineRun, TaskRun |
+
+</details>
+
+### 5.4 CI/CD
+
+| Type | Resource |
+|------|----------|
+| Docs | [GitLab CI/CD Documentation](https://docs.gitlab.com/ee/ci/) |
+| Video | TechWorld with Nana CI/CD |
+
+<details>
+<summary><strong>Topics to Master</strong></summary>
+
+| Topic | What to Understand |
+|-------|--------------------|
+| Pipelines | .gitlab-ci.yml structure, pipeline triggers, artifacts |
+| Stages | Build → test → deploy, parallel jobs, dependencies |
+| Jobs | Script execution, runners, caching, variables |
+| Rollbacks | Rollback strategies, version pinning, database migrations |
+| Blue-Green Deployment | Zero-downtime switches, traffic routing, smoke tests |
+| Canary Deployment | Gradual rollout, metrics-based promotion, auto-rollback |
+
+</details>
+
+### 5.5 AWS Fundamentals
+
+**Goal:** Understand cloud services referenced in System Design interviews.
+
+| Type | Resource |
+|------|----------|
+| Course | Stephane Maarek AWS Solutions Architect Associate |
+| Docs | [AWS Official Documentation](https://docs.aws.amazon.com/) |
+
+<details>
+<summary><strong>Services to Know</strong></summary>
+
+| Category | Service | What to Understand |
+|----------|---------|-------------------|
+| **Compute** | EC2 | Instance types, auto-scaling groups, AMIs |
+| | ECS | Task definitions, services, Fargate vs EC2 launch |
+| | Lambda | Event-driven compute, cold starts, concurrency limits |
+| **Storage** | S3 | Storage classes, lifecycle policies, presigned URLs |
+| **Database** | RDS | Multi-AZ, read replicas, automated backups |
+| | DynamoDB | Partition keys, GSI/LSI, capacity modes, single-table design |
+| **Messaging** | SQS | Standard vs FIFO, visibility timeout, DLQ |
+| | SNS | Topic-based pub-sub, fanout pattern, message filtering |
+| **Networking** | VPC | Subnets, security groups, NAT gateway, VPC peering |
+| | Load Balancer | ALB vs NLB, target groups, health checks, path-based routing |
+| **Monitoring** | CloudWatch | Metrics, alarms, log groups, dashboards |
+
+</details>
+
+---
+
+## Engineering Blogs (Read Weekly)
+
+**Goal:** Read 2–3 articles per week. Focus on architecture, scalability, reliability, and production incidents.
+
+| Blog | Focus Areas | Link |
+|------|-------------|------|
+| Uber Engineering | Microservices, real-time systems, scale | [eng.uber.com](https://eng.uber.com/) |
+| Netflix Tech Blog | Resilience, chaos engineering, streaming | [netflixtechblog.com](https://netflixtechblog.com/) |
+| Cloudflare Blog | Networking, edge computing, security | [blog.cloudflare.com](https://blog.cloudflare.com/) |
+| Stripe Engineering | Payment systems, API design, reliability | [stripe.com/blog/engineering](https://stripe.com/blog/engineering) |
+| LinkedIn Engineering | Data infrastructure, distributed systems | [engineering.linkedin.com](https://engineering.linkedin.com/blog) |
+| Confluent Blog | Kafka, event streaming, real-time data | [confluent.io/blog](https://www.confluent.io/blog/) |
+
+### Reading Strategy
+
+| When | What |
+|------|------|
+| Weekday commute/lunch | Skim 1 article — note the architecture diagram and key decisions |
+| Weekend | Deep read 1–2 articles — take notes on patterns you can apply |
+| Monthly | Revisit notes — connect blog learnings to DDIA/System Design prep |
+
+---
+
+## Books To Finish In 8 Months
+
+| # | Book | Track | Target Completion |
+|---|------|-------|-------------------|
+| 1 | *Effective Java* — Joshua Bloch | Java & Backend | Month 3 |
+| 2 | *Head First Design Patterns* | Java & Backend | Month 4 |
+| 3 | *DDIA* (Chapters 1–9) — Martin Kleppmann | Distributed Systems | Month 6 |
+
+### Reading Pace
+
+| Book | Strategy |
+|------|----------|
+| Effective Java | 2–3 items per week, take notes on Java-specific interview implications |
+| Head First Design Patterns | 1 chapter per week, implement each pattern in a small Java project |
+| DDIA | 1 chapter every 2 weeks, pair with ByteByteGo/Hussein Nasser videos |
+
+---
+
+## Success Criteria After 8 Months
+
+### DSA
+- [ ] 150–200 problems solved on LeetCode
+- [ ] All 15 patterns mastered (can identify pattern in <30 seconds)
+- [ ] Confidence level 4+ on 80% of curated problems
+
+### Java
+- [ ] Effective Java completed — can explain any item in interview context
+- [ ] Spring Boot internals understood (DI, transactions, security, auto-config)
+- [ ] Can explain Bean lifecycle, @Transactional propagation, JWT flow from memory
+
+### Design Patterns
+- [ ] Head First Design Patterns completed
+- [ ] Can identify which pattern to apply to a given problem
+- [ ] Can implement Strategy, Observer, Factory, Decorator in Java without reference
+
+### Distributed Systems
+- [ ] DDIA Chapters 1–9 completed with notes
+- [ ] Can explain replication strategies, partitioning, consistency models
+- [ ] Can discuss CAP theorem tradeoffs for specific systems
+
+### System Design
+- [ ] Can confidently design these systems end-to-end in 45 minutes:
+  - [ ] URL Shortener
+  - [ ] Rate Limiter
+  - [ ] Notification Service
+  - [ ] Inventory Service
+  - [ ] Payment System
+
+### Kafka
+- [ ] Can explain: Partitions, Consumer Groups, Rebalancing, Retry, DLQ, Exactly Once
+- [ ] Can design an event-driven pipeline with reliability guarantees
+
+### Redis
+- [ ] Can explain: Cache Aside, TTL, Cache Stampede, Distributed Locking
+- [ ] Can design a caching strategy for a high-traffic service
+
+### Platform Engineering
+- [ ] Can containerize a Spring Boot app with multi-stage Docker builds
+- [ ] Can deploy to Kubernetes/OpenShift and explain the resource model
+- [ ] Can explain CI/CD pipeline flow and deployment strategies
+- [ ] Can explain core AWS services and when to use each
+
+---
+
+## Progress Tracker
+
+### Monthly Milestones
+
+| Month | DSA | Java & Backend | System Design | Kafka/Redis | Cloud/Platform |
+|-------|-----|----------------|---------------|-------------|----------------|
+| 1 | Phase 1 (Arrays, Two Pointers, Sliding Window) | Effective Java started | DDIA Ch 1–2 | Kafka fundamentals | Docker basics |
+| 2 | Phase 1–2 (Binary Search, Stack, Heap) | Effective Java (50%) | DDIA Ch 3–4 | Kafka consumers | Docker multi-stage |
+| 3 | Phase 2 (Linked List, Intervals) | Effective Java done | DDIA Ch 5 + URL Shortener | Kafka reliability | Kubernetes basics |
+| 4 | Phase 3 (Trees) | Design Patterns started | DDIA Ch 6 + Rate Limiter | Redis fundamentals | Kubernetes probes/HPA |
+| 5 | Phase 3 (Graphs) | Design Patterns (50%) | DDIA Ch 7 + Notification System | Redis locking | OpenShift basics |
+| 6 | Phase 4 (DP) | Design Patterns done | DDIA Ch 8–9 + Inventory Service | Integration practice | CI/CD pipelines |
+| 7 | Phase 4–5 (Greedy, Backtracking, Design) | Spring Boot deep dive | Payment System + Search Service | End-to-end design | AWS fundamentals |
+| 8 | Review + Mock Interviews | Spring Security | Distributed Cache + Review | Mock interviews | Mock interviews |
+
+### Weekly Log
+
+| Week | DSA Problems | Java/Backend | System Design | Kafka/Redis | Cloud/Platform | Blog Articles |
+|------|-------------|--------------|---------------|-------------|----------------|---------------|
+| 1 | | | | | | |
+| 2 | | | | | | |
+| 3 | | | | | | |
+| 4 | | | | | | |
+| 5 | | | | | | |
+| 6 | | | | | | |
+| 7 | | | | | | |
+| 8 | | | | | | |
+| 9 | | | | | | |
+| 10 | | | | | | |
+| 11 | | | | | | |
+| 12 | | | | | | |
+| 13 | | | | | | |
+| 14 | | | | | | |
+| 15 | | | | | | |
+| 16 | | | | | | |
+| 17 | | | | | | |
+| 18 | | | | | | |
+| 19 | | | | | | |
+| 20 | | | | | | |
+| 21 | | | | | | |
+| 22 | | | | | | |
+| 23 | | | | | | |
+| 24 | | | | | | |
+| 25 | | | | | | |
+| 26 | | | | | | |
+| 27 | | | | | | |
+| 28 | | | | | | |
+| 29 | | | | | | |
+| 30 | | | | | | |
+| 31 | | | | | | |
+| 32 | | | | | | |
+
+---
+
+## The Golden Rule
+
+> For every technology, learn:
+>
+> 1. **Why it exists** — what problem does it solve?
+> 2. **How it works internally** — not just the API surface
+> 3. **How it scales** — what happens at 10x, 100x, 1000x?
+> 4. **How it fails** — failure modes, blast radius, recovery
+> 5. **How to monitor it** — metrics, alerts, dashboards
+> 6. **When NOT to use it** — alternatives, anti-patterns, over-engineering
+>
+> *That mindset is what separates Senior Engineers from developers who only know frameworks.*
+
+---
+
+*This roadmap pairs with the [DSA Master Tracker](dsa-patterns/DSA-PATTERNS-ROADMAP.md) for the complete interview preparation system.*

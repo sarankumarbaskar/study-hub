@@ -50,3 +50,5 @@
 | 3 | Product of Array Except Self | 238 | Medium | Very High |
 | 4 | Longest Consecutive Sequence | 128 | Medium | High |
 | 5 | Top K Frequent Elements | 347 | Medium | Very High |
+| 6 | Rotate Image | 48 | Medium | Very High |
+| 7 | Spiral Matrix | 54 | Medium | Very High |

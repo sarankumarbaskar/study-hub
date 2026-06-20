@@ -20,21 +20,21 @@
 
 ## Section 1: Overview
 
-### Total Problem Count: 145
+### Total Problem Count: 142
 
 | Difficulty | Count | Percentage |
 |-----------|-------|------------|
-| Easy | 16 | 11.0% |
-| Medium | 96 | 66.2% |
-| Hard | 33 | 22.8% |
+| Easy | 11 | 7.7% |
+| Medium | 98 | 69.0% |
+| Hard | 33 | 23.2% |
 
 ### Pattern Distribution
 
 | Pattern | Count | Phase |
 |---------|-------|-------|
-| Arrays & Hashing | 5 | Phase 1: Foundations |
+| Arrays & Hashing | 7 | Phase 1: Foundations |
 | Two Pointers | 5 | Phase 1: Foundations |
-| Sliding Window | 10 | Phase 1: Foundations |
+| Sliding Window | 11 | Phase 1: Foundations |
 | Binary Search | 10 | Phase 1: Foundations |
 | Bit Manipulation | 4 | Phase 1: Foundations |
 | Stack | 8 | Phase 2: Data Structures |
@@ -43,21 +43,21 @@
 | Intervals | 4 | Phase 2: Data Structures |
 | Trees | 15 | Phase 3: Trees & Graphs |
 | Graphs | 20 | Phase 3: Trees & Graphs |
-| Dynamic Programming | 20 | Phase 4: DP + Greedy + Backtracking |
-| Greedy | 4 | Phase 4: DP + Greedy + Backtracking |
-| Backtracking | 5 | Phase 4: DP + Greedy + Backtracking |
-| Design | 10 | Phase 5: Design |
-| **Total** | **145** | |
+| Dynamic Programming | 22 | Phase 4: DP + Greedy + Backtracking |
+| Greedy | 5 | Phase 4: DP + Greedy + Backtracking |
+| Backtracking | 6 | Phase 4: DP + Greedy + Backtracking |
+| Design | 11 | Phase 5: Design |
+| **Total** | **142** | |
 
 ### Estimated Timeline: 10–14 Weeks
 
 | Phase | Weeks | Problems | Focus |
 |-------|-------|----------|-------|
-| Phase 1: Foundations | Weeks 1–3 | 34 | Arrays, Two Pointers, Sliding Window, Binary Search, Bits |
+| Phase 1: Foundations | Weeks 1–3 | 37 | Arrays, Two Pointers, Sliding Window, Binary Search, Bits |
 | Phase 2: Data Structures | Weeks 4–6 | 26 | Stack, Heap, Linked List, Intervals |
 | Phase 3: Trees & Graphs | Weeks 7–9 | 35 | Trees, Graphs (BFS/DFS/Union-Find/Dijkstra) |
-| Phase 4: DP + Greedy + Backtracking | Weeks 10–12 | 29 | 1D/2D DP, Greedy, Backtracking |
-| Phase 5: Design | Week 13 | 10 | LRU/LFU Cache, Trie, HashMap Design |
+| Phase 4: DP + Greedy + Backtracking | Weeks 10–12 | 33 | 1D/2D DP, Greedy, Backtracking |
+| Phase 5: Design | Week 13 | 11 | LRU/LFU Cache, Trie, HashMap Design |
 | Review & Mock Interviews | Week 14 | — | Revision, timed mocks, weakness drilling |
 
 ### Recommended Study Order
@@ -101,8 +101,8 @@ Final ──── Review + Mock Interviews
 
 | Difficulty | Avg Time | Total Hours |
 |-----------|----------|-------------|
-| 16 Easy × 20 min | 20 min | ~5 hours |
-| 96 Medium × 40 min | 40 min | ~64 hours |
+| 11 Easy × 20 min | 20 min | ~4 hours |
+| 98 Medium × 40 min | 40 min | ~65 hours |
 | 33 Hard × 70 min | 70 min | ~39 hours |
 | Pattern study (15 × 40 min) | 40 min | ~10 hours |
 | Review & spaced repetition | — | ~25 hours |
@@ -116,9 +116,9 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 
 | # | Pattern | Guide | Problems |
 |---|---------|-------|----------|
-| 01 | Arrays & Hashing | [internals/01-arrays-and-hashing.md](internals/01-arrays-and-hashing.md) | 5 |
+| 01 | Arrays & Hashing | [internals/01-arrays-and-hashing.md](internals/01-arrays-and-hashing.md) | 7 |
 | 02 | Two Pointers | [internals/02-two-pointers.md](internals/02-two-pointers.md) | 5 |
-| 03 | Sliding Window | [internals/03-sliding-window.md](internals/03-sliding-window.md) | 10 |
+| 03 | Sliding Window | [internals/03-sliding-window.md](internals/03-sliding-window.md) | 11 |
 | 04 | Binary Search | [internals/04-binary-search.md](internals/04-binary-search.md) | 10 |
 | 05 | Bit Manipulation | [internals/05-bit-manipulation.md](internals/05-bit-manipulation.md) | 4 |
 | 06 | Stack | [internals/06-stack.md](internals/06-stack.md) | 8 |
@@ -127,10 +127,10 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 09 | Intervals | [internals/09-intervals.md](internals/09-intervals.md) | 4 |
 | 10 | Trees | [internals/10-trees.md](internals/10-trees.md) | 15 |
 | 11 | Graphs | [internals/11-graphs.md](internals/11-graphs.md) | 20 |
-| 12 | Dynamic Programming | [internals/12-dynamic-programming.md](internals/12-dynamic-programming.md) | 20 |
-| 13 | Greedy | [internals/13-greedy.md](internals/13-greedy.md) | 4 |
-| 14 | Backtracking | [internals/14-backtracking.md](internals/14-backtracking.md) | 5 |
-| 15 | Design | [internals/15-design.md](internals/15-design.md) | 10 |
+| 12 | Dynamic Programming | [internals/12-dynamic-programming.md](internals/12-dynamic-programming.md) | 22 |
+| 13 | Greedy | [internals/13-greedy.md](internals/13-greedy.md) | 5 |
+| 14 | Backtracking | [internals/14-backtracking.md](internals/14-backtracking.md) | 6 |
+| 15 | Design | [internals/15-design.md](internals/15-design.md) | 11 |
 
 ---
 
@@ -147,6 +147,8 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 3 | [Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/) | 238 | Medium | Arrays & Hashing | Very High | | | | | | | |
 | 4 | [Longest Consecutive Sequence](https://leetcode.com/problems/longest-consecutive-sequence/) | 128 | Medium | Arrays & Hashing | High | | | | | | | |
 | 5 | [Top K Frequent Elements](https://leetcode.com/problems/top-k-frequent-elements/) | 347 | Medium | Arrays & Hashing | Very High | | | | | | | |
+| 135 | [Rotate Image](https://leetcode.com/problems/rotate-image/) | 48 | Medium | Arrays & Hashing | Very High | | | | | | | |
+| 136 | [Spiral Matrix](https://leetcode.com/problems/spiral-matrix/) | 54 | Medium | Arrays & Hashing | Very High | | | | | | | |
 
 #### Two Pointers
 
@@ -172,6 +174,7 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 18 | [Subarray Product Less Than K](https://leetcode.com/problems/subarray-product-less-than-k/) | 713 | Medium | Sliding Window | Medium | | | | | | | |
 | 19 | [Frequency of the Most Frequent Element](https://leetcode.com/problems/frequency-of-the-most-frequent-element/) | 1838 | Medium | Sliding Window | Medium | | | | | | | |
 | 20 | [Sliding Window Maximum](https://leetcode.com/problems/sliding-window-maximum/) | 239 | Hard | Sliding Window | Very High | | | | | | | |
+| 137 | [Best Time to Buy and Sell Stock](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/) | 121 | Easy | Sliding Window | Very High | | | | | | | |
 
 #### Binary Search
 
@@ -318,6 +321,8 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 113 | [Best Time to Buy and Sell Stock with Cooldown](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/) | 309 | Medium | DP | High | | | | | | | |
 | 114 | [Burst Balloons](https://leetcode.com/problems/burst-balloons/) | 312 | Hard | DP | High | | | | | | | |
 | 115 | [Different Ways to Add Parentheses](https://leetcode.com/problems/different-ways-to-add-parentheses/) | 241 | Medium | DP | Medium | | | | | | | |
+| 138 | [Maximum Product Subarray](https://leetcode.com/problems/maximum-product-subarray/) | 152 | Medium | DP | Very High | | | | | | | |
+| 139 | [Longest Increasing Path in a Matrix](https://leetcode.com/problems/longest-increasing-path-in-a-matrix/) | 329 | Hard | DP | Very High | | | | | | | |
 
 #### Greedy
 
@@ -327,6 +332,7 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 117 | [Jump Game II](https://leetcode.com/problems/jump-game-ii/) | 45 | Medium | Greedy | Very High | | | | | | | |
 | 118 | [Gas Station](https://leetcode.com/problems/gas-station/) | 134 | Medium | Greedy | High | | | | | | | |
 | 119 | [Task Scheduler](https://leetcode.com/problems/task-scheduler/) | 621 | Medium | Greedy | Very High | | | | | | | |
+| 140 | [Maximum Subarray](https://leetcode.com/problems/maximum-subarray/) | 53 | Medium | Greedy | Very High | | | | | | | |
 
 #### Backtracking
 
@@ -337,6 +343,7 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 122 | [Generate Parentheses](https://leetcode.com/problems/generate-parentheses/) | 22 | Medium | Backtracking | Very High | | | | | | | |
 | 123 | [Word Search](https://leetcode.com/problems/word-search/) | 79 | Medium | Backtracking | Very High | | | | | | | |
 | 124 | [N-Queens](https://leetcode.com/problems/n-queens/) | 51 | Hard | Backtracking | High | | | | | | | |
+| 141 | [Subsets](https://leetcode.com/problems/subsets/) | 78 | Medium | Backtracking | Very High | | | | | | | |
 
 ### Phase 5: Design
 
@@ -352,6 +359,7 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 132 | [Snapshot Array](https://leetcode.com/problems/snapshot-array/) | 1146 | Medium | Design | Medium | | | | | | | |
 | 133 | [Stock Price Fluctuation](https://leetcode.com/problems/stock-price-fluctuation/) | 2034 | Medium | Design | Medium | | | | | | | |
 | 134 | [Design Search Autocomplete System](https://leetcode.com/problems/design-search-autocomplete-system/) | 642 | Hard | Design | High | | | | | | | |
+| 142 | [Word Search II](https://leetcode.com/problems/word-search-ii/) | 212 | Hard | Design | Very High | | | | | | | |
 
 ---
 
@@ -374,6 +382,8 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 3 | Product of Array Except Self | | | | | | | |
 | 4 | Longest Consecutive Sequence | | | | | | | |
 | 5 | Top K Frequent Elements | | | | | | | |
+| 135 | Rotate Image | | | | | | | |
+| 136 | Spiral Matrix | | | | | | | |
 | 6 | Container With Most Water | | | | | | | |
 | 7 | 3Sum | | | | | | | |
 | 8 | Sort Colors | | | | | | | |
@@ -389,6 +399,7 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 18 | Subarray Product Less Than K | | | | | | | |
 | 19 | Frequency of the Most Frequent Element | | | | | | | |
 | 20 | Sliding Window Maximum | | | | | | | |
+| 137 | Best Time to Buy and Sell Stock | | | | | | | |
 | 21 | Search in Rotated Sorted Array | | | | | | | |
 | 22 | Find Minimum in Rotated Sorted Array | | | | | | | |
 | 23 | Find Peak Element | | | | | | | |
@@ -499,15 +510,19 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 113 | Best Time to Buy and Sell Stock with Cooldown | | | | | | | |
 | 114 | Burst Balloons | | | | | | | |
 | 115 | Different Ways to Add Parentheses | | | | | | | |
+| 138 | Maximum Product Subarray | | | | | | | |
+| 139 | Longest Increasing Path in a Matrix | | | | | | | |
 | 116 | Jump Game | | | | | | | |
 | 117 | Jump Game II | | | | | | | |
 | 118 | Gas Station | | | | | | | |
 | 119 | Task Scheduler | | | | | | | |
+| 140 | Maximum Subarray | | | | | | | |
 | 120 | Combination Sum | | | | | | | |
 | 121 | Permutations | | | | | | | |
 | 122 | Generate Parentheses | | | | | | | |
 | 123 | Word Search | | | | | | | |
 | 124 | N-Queens | | | | | | | |
+| 141 | Subsets | | | | | | | |
 
 ### Phase 5: Design
 
@@ -523,6 +538,7 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 132 | Snapshot Array | | | | | | | |
 | 133 | Stock Price Fluctuation | | | | | | | |
 | 134 | Design Search Autocomplete System | | | | | | | |
+| 142 | Word Search II | | | | | | | |
 
 ---
 
@@ -567,6 +583,8 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 3 | Product of Array Except Self | | | |
 | 4 | Longest Consecutive Sequence | | | |
 | 5 | Top K Frequent Elements | | | |
+| 135 | Rotate Image | | | |
+| 136 | Spiral Matrix | | | |
 | 6 | Container With Most Water | | | |
 | 7 | 3Sum | | | |
 | 8 | Sort Colors | | | |
@@ -582,6 +600,7 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 18 | Subarray Product Less Than K | | | |
 | 19 | Frequency of the Most Frequent Element | | | |
 | 20 | Sliding Window Maximum | | | |
+| 137 | Best Time to Buy and Sell Stock | | | |
 | 21 | Search in Rotated Sorted Array | | | |
 | 22 | Find Minimum in Rotated Sorted Array | | | |
 | 23 | Find Peak Element | | | |
@@ -677,15 +696,19 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 113 | Best Time to Buy and Sell Stock with Cooldown | | | |
 | 114 | Burst Balloons | | | |
 | 115 | Different Ways to Add Parentheses | | | |
+| 138 | Maximum Product Subarray | | | |
+| 139 | Longest Increasing Path in a Matrix | | | |
 | 116 | Jump Game | | | |
 | 117 | Jump Game II | | | |
 | 118 | Gas Station | | | |
 | 119 | Task Scheduler | | | |
+| 140 | Maximum Subarray | | | |
 | 120 | Combination Sum | | | |
 | 121 | Permutations | | | |
 | 122 | Generate Parentheses | | | |
 | 123 | Word Search | | | |
 | 124 | N-Queens | | | |
+| 141 | Subsets | | | |
 | 125 | LRU Cache | | | |
 | 126 | LFU Cache | | | |
 | 127 | Implement Trie (Prefix Tree) | | | |
@@ -696,6 +719,7 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | 132 | Snapshot Array | | | |
 | 133 | Stock Price Fluctuation | | | |
 | 134 | Design Search Autocomplete System | | | |
+| 142 | Word Search II | | | |
 
 ---
 
@@ -746,9 +770,9 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 
 | Pattern | Total | Attempted | Solved First Try | Accuracy % | Avg Time | Weakness Level |
 |---------|-------|-----------|-----------------|------------|----------|---------------|
-| Arrays & Hashing | 5 | | | | | |
+| Arrays & Hashing | 7 | | | | | |
 | Two Pointers | 5 | | | | | |
-| Sliding Window | 10 | | | | | |
+| Sliding Window | 11 | | | | | |
 | Binary Search | 10 | | | | | |
 | Bit Manipulation | 4 | | | | | |
 | Stack | 8 | | | | | |
@@ -757,10 +781,10 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 | Intervals | 4 | | | | | |
 | Trees | 15 | | | | | |
 | Graphs | 20 | | | | | |
-| Dynamic Programming | 20 | | | | | |
-| Greedy | 4 | | | | | |
-| Backtracking | 5 | | | | | |
-| Design | 10 | | | | | |
+| Dynamic Programming | 22 | | | | | |
+| Greedy | 5 | | | | | |
+| Backtracking | 6 | | | | | |
+| Design | 11 | | | | | |
 
 **Weakness Levels:** 🟢 Strong (>80%) | 🟡 Moderate (50–80%) | 🔴 Weak (<50%)
 
@@ -768,8 +792,8 @@ Each pattern has a dedicated deep-dive document in `internals/`.
 
 | Difficulty | Total | Attempted | Solved First Try | Accuracy % | Avg Time | Target Time |
 |-----------|-------|-----------|-----------------|------------|----------|-------------|
-| Easy | 16 | | | | | < 15 min |
-| Medium | 96 | | | | | < 30 min |
+| Easy | 11 | | | | | < 15 min |
+| Medium | 98 | | | | | < 30 min |
 | Hard | 33 | | | | | < 45 min |
 
 ### Most Forgotten Problems (Reset During Revision)

@@ -76,3 +76,5 @@
 | 18 | Best Time to Buy and Sell Stock with Cooldown | 309 | Medium | High |
 | 19 | Burst Balloons | 312 | Hard | High |
 | 20 | Different Ways to Add Parentheses | 241 | Medium | Medium |
+| 21 | Maximum Product Subarray | 152 | Medium | Very High |
+| 22 | Longest Increasing Path in a Matrix | 329 | Hard | Very High |

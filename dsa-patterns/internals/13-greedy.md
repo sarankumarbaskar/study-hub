@@ -47,3 +47,4 @@
 | 2 | Jump Game II | 45 | Medium | Very High |
 | 3 | Gas Station | 134 | Medium | High |
 | 4 | Task Scheduler | 621 | Medium | Very High |
+| 5 | Maximum Subarray | 53 | Medium | Very High |

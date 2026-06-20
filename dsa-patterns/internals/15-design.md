@@ -66,3 +66,4 @@
 | 8 | Snapshot Array | 1146 | Medium | Medium |
 | 9 | Stock Price Fluctuation | 2034 | Medium | Medium |
 | 10 | Design Search Autocomplete System | 642 | Hard | High |
+| 11 | Word Search II | 212 | Hard | Very High |

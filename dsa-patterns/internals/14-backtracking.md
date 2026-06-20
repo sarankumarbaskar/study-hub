@@ -53,3 +53,4 @@
 | 3 | Generate Parentheses | 22 | Medium | Very High |
 | 4 | Word Search | 79 | Medium | Very High |
 | 5 | N-Queens | 51 | Hard | High |
+| 6 | Subsets | 78 | Medium | Very High |

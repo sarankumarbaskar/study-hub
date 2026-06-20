@@ -56,3 +56,4 @@
 | 8 | Subarray Product Less Than K | 713 | Medium | Medium |
 | 9 | Frequency of the Most Frequent Element | 1838 | Medium | Medium |
 | 10 | Sliding Window Maximum | 239 | Hard | Very High |
+| 11 | Best Time to Buy and Sell Stock | 121 | Easy | Very High |

@@ -503,6 +503,58 @@ kbd {
 .conf-4 { color: var(--green); }
 .conf-5 { color: var(--accent); }
 
+/* ── Sync bar ── */
+.sync-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 12px; padding: 8px 10px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 11px;
+}
+.sync-status { display: flex; align-items: center; gap: 6px; color: var(--text-muted); font-weight: 500; }
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; transition: background 0.3s; }
+.sync-dot.local { background: var(--yellow); }
+.sync-dot.synced { background: var(--green); box-shadow: 0 0 6px rgba(52,211,153,0.4); }
+.sync-dot.syncing { background: var(--accent); animation: syncPulse 1s ease-in-out infinite; }
+.sync-dot.error { background: var(--red); }
+@keyframes syncPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+.sync-btn {
+  display: flex; align-items: center; gap: 4px; background: none;
+  border: 1px solid var(--border); color: var(--text-muted); padding: 3px 10px;
+  border-radius: 4px; cursor: pointer; font-size: 11px; font-family: inherit;
+  transition: all var(--transition);
+}
+.sync-btn:hover { color: var(--text); border-color: var(--accent); background: var(--accent-bg); }
+.sync-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.sync-btn.syncing svg { animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* PAT modal */
+.pat-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 200; align-items: center; justify-content: center; backdrop-filter: blur(6px);
+}
+.pat-overlay.visible { display: flex; }
+.pat-modal {
+  background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 28px; max-width: 420px; width: 90%; box-shadow: var(--shadow-lg);
+}
+.pat-modal h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+.pat-modal p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+.pat-modal input {
+  width: 100%; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text); font-size: 13px; font-family: inherit;
+  margin-bottom: 12px;
+}
+.pat-modal input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-bg); }
+.pat-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.pat-modal-actions button {
+  padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px;
+  font-family: inherit; cursor: pointer; transition: all var(--transition); border: none;
+}
+.pat-modal-actions .pat-cancel { background: var(--bg-tertiary); color: var(--text-muted); border: 1px solid var(--border); }
+.pat-modal-actions .pat-cancel:hover { color: var(--text); border-color: var(--text-muted); }
+.pat-modal-actions .pat-save { background: var(--accent); color: #fff; font-weight: 600; }
+.pat-modal-actions .pat-save:hover { filter: brightness(1.1); }
+
 /* Responsive */
 @media (max-width: 1100px) { .toc { display: none; } }
 @media (max-width: 768px) {
@@ -555,6 +607,16 @@ kbd {
       <span id="totalProgressText">0 / 0 sections</span>
       <span id="totalDocsComplete">0 docs done</span>
     </div>
+    <div class="sync-bar" id="syncBar">
+      <div class="sync-status" id="syncStatus">
+        <span class="sync-dot" id="syncDot"></span>
+        <span id="syncText">Local</span>
+      </div>
+      <button class="sync-btn" id="syncBtn" onclick="manualSync()" title="Sync to GitHub">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Sync
+      </button>
+    </div>
     <div class="keyboard-hints">
       <span><kbd>/</kbd> search</span>
       <span><kbd>Esc</kbd> close</span>
@@ -583,6 +645,18 @@ kbd {
       <button class="search-results-close" onclick="closeSearch()">Close <kbd>Esc</kbd></button>
     </div>
     <div id="searchResultsList"></div>
+  </div>
+</div>
+
+<div class="pat-overlay" id="patOverlay">
+  <div class="pat-modal">
+    <h3>Connect to GitHub</h3>
+    <p>Enter a Personal Access Token with <strong>repo</strong> scope to sync your progress. Generate one at <a href="https://github.com/settings/tokens/new?scopes=repo&description=StudyHub+Tracker" target="_blank" style="color:var(--accent)">github.com/settings/tokens</a>.</p>
+    <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    <div class="pat-modal-actions">
+      <button class="pat-cancel" onclick="closePatModal()">Cancel</button>
+      <button class="pat-save" onclick="savePatAndSync()">Connect & Sync</button>
+    </div>
   </div>
 </div>
 
@@ -1177,9 +1251,95 @@ document.getElementById('searchInput').addEventListener('input', e => {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 let trackerData = JSON.parse(localStorage.getItem('studyhub-tracker') || '{}');
+let syncTimer = null;
+const REPO_OWNER = 'sarankumarbaskar';
+const REPO_NAME = 'study-hub';
+const TRACKER_FILE = 'tracker-data.json';
 
 function saveTracker() {
   localStorage.setItem('studyhub-tracker', JSON.stringify(trackerData));
+  scheduleSyncToGitHub();
+}
+
+function setSyncUI(state, text) {
+  const dot = document.getElementById('syncDot');
+  const txt = document.getElementById('syncText');
+  const btn = document.getElementById('syncBtn');
+  dot.className = 'sync-dot ' + state;
+  txt.textContent = text;
+  if (state === 'syncing') { btn.classList.add('syncing'); btn.disabled = true; }
+  else { btn.classList.remove('syncing'); btn.disabled = false; }
+}
+
+function getGitHubPAT() { return localStorage.getItem('studyhub-github-pat') || ''; }
+
+function showPatModal() { document.getElementById('patOverlay').classList.add('visible'); document.getElementById('patInput').focus(); }
+function closePatModal() { document.getElementById('patOverlay').classList.remove('visible'); }
+function savePatAndSync() {
+  const pat = document.getElementById('patInput').value.trim();
+  if (!pat) return;
+  localStorage.setItem('studyhub-github-pat', pat);
+  closePatModal();
+  pushToGitHub();
+}
+
+function scheduleSyncToGitHub() {
+  setSyncUI('local', 'Unsaved');
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    if (getGitHubPAT()) pushToGitHub();
+  }, 4000);
+}
+
+async function pullFromGitHub() {
+  try {
+    const resp = await fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${TRACKER_FILE}?t=${Date.now()}`);
+    if (!resp.ok) return;
+    const remote = await resp.json();
+    if (remote && typeof remote === 'object') {
+      const local = JSON.parse(localStorage.getItem('studyhub-tracker') || '{}');
+      const merged = { ...remote, ...local };
+      trackerData = merged;
+      localStorage.setItem('studyhub-tracker', JSON.stringify(merged));
+      setSyncUI('synced', 'Synced');
+    }
+  } catch (e) {
+    setSyncUI('local', 'Local only');
+  }
+}
+
+async function pushToGitHub() {
+  const pat = getGitHubPAT();
+  if (!pat) { showPatModal(); return; }
+  setSyncUI('syncing', 'Syncing...');
+  try {
+    const apiBase = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${TRACKER_FILE}`;
+    const headers = { Authorization: 'Bearer ' + pat, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+    let sha = '';
+    try {
+      const existing = await fetch(apiBase, { headers });
+      if (existing.ok) { const data = await existing.json(); sha = data.sha; }
+    } catch (e) {}
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(trackerData, null, 2))));
+    const body = { message: 'Update tracker progress', content, ...(sha ? { sha } : {}) };
+    const resp = await fetch(apiBase, { method: 'PUT', headers, body: JSON.stringify(body) });
+    if (resp.ok) {
+      setSyncUI('synced', 'Synced');
+    } else if (resp.status === 401) {
+      localStorage.removeItem('studyhub-github-pat');
+      setSyncUI('error', 'Auth failed');
+      showPatModal();
+    } else {
+      setSyncUI('error', 'Sync failed');
+    }
+  } catch (e) {
+    setSyncUI('error', 'Offline');
+  }
+}
+
+function manualSync() {
+  if (!getGitHubPAT()) { showPatModal(); return; }
+  pushToGitHub();
 }
 
 function trackerKey(topicId, docId, problemId, field) {
@@ -1315,6 +1475,8 @@ function makeTrackersInteractive() {
   }
 
   showWelcome();
+  setSyncUI(getGitHubPAT() ? 'syncing' : 'local', getGitHubPAT() ? 'Loading...' : 'Local only');
+  await pullFromGitHub();
 
   await Promise.all(TOPICS.map(t => loadAllDocsForTopic(t)));
 

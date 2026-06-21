@@ -481,6 +481,28 @@ kbd {
 .skeleton-line.shorter { width: 50%; }
 @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
 
+/* ── Interactive Tracker Controls ── */
+.tracker-check { appearance: none; width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 50%; cursor: pointer; position: relative; transition: all var(--transition); background: transparent; display: block; margin: 0 auto; flex-shrink: 0; }
+.tracker-check:hover { border-color: var(--topic-color); }
+.tracker-check:checked { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px rgba(52,211,153,0.3); }
+.tracker-check:checked::after { content: ''; position: absolute; left: 5px; top: 2px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.tracker-select { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-muted); font-size: 12px; font-family: inherit; padding: 4px 6px; cursor: pointer; width: 100%; min-width: 44px; text-align: center; transition: all var(--transition); appearance: none; -webkit-appearance: none; }
+.tracker-select:hover { border-color: var(--topic-color); color: var(--text); }
+.tracker-select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-bg); outline: none; }
+.tracker-select option { background: var(--bg-secondary); color: var(--text); }
+.tracker-input { background: transparent; border: 1px solid transparent; border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 12px; font-family: inherit; padding: 4px 6px; width: 100%; min-width: 80px; transition: all var(--transition); }
+.tracker-input:hover { border-color: var(--border); }
+.tracker-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-bg); outline: none; background: var(--bg); }
+.tracker-input::placeholder { color: var(--text-muted); opacity: 0.5; }
+.tracker-date { background: transparent; border: 1px solid transparent; border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 11px; font-family: inherit; padding: 3px 5px; width: 100%; min-width: 90px; transition: all var(--transition); color-scheme: dark; }
+.tracker-date:hover { border-color: var(--border); }
+.tracker-date:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-bg); outline: none; background: var(--bg); }
+.conf-1 { color: var(--red); }
+.conf-2 { color: var(--orange); }
+.conf-3 { color: var(--yellow); }
+.conf-4 { color: var(--green); }
+.conf-5 { color: var(--accent); }
+
 /* Responsive */
 @media (max-width: 1100px) { .toc { display: none; } }
 @media (max-width: 768px) {
@@ -979,6 +1001,7 @@ function renderDoc(docId) {
     if (typeof hljs !== 'undefined') {
       document.querySelectorAll('pre code:not(.hljs)').forEach(b => hljs.highlightElement(b));
     }
+    makeTrackersInteractive();
     requestAnimationFrame(() => contentEl.classList.remove('loading'));
   }, 80);
 }
@@ -1148,6 +1171,135 @@ document.getElementById('searchInput').addEventListener('input', e => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => performSearch(e.target.value), 250);
 });
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   INTERACTIVE TRACKERS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+let trackerData = JSON.parse(localStorage.getItem('studyhub-tracker') || '{}');
+
+function saveTracker() {
+  localStorage.setItem('studyhub-tracker', JSON.stringify(trackerData));
+}
+
+function trackerKey(topicId, docId, problemId, field) {
+  return topicId + '::' + docId + '::' + problemId + '::' + field;
+}
+
+function getTrackerVal(key) { return trackerData[key] || ''; }
+function setTrackerVal(key, val) {
+  if (val === '' || val === false) delete trackerData[key]; else trackerData[key] = val;
+  saveTracker();
+}
+
+function makeTrackersInteractive() {
+  if (!currentTopic || !currentDocId) return;
+  const tables = document.querySelectorAll('#contentArea table');
+
+  tables.forEach(table => {
+    const headers = Array.from(table.querySelectorAll('thead th, tr:first-child th'));
+    if (!headers.length) return;
+    const hTexts = headers.map(h => h.textContent.trim().toLowerCase());
+
+    const CHECKBOX_COLS = ['attempted', 'solved', 'rev 1', 'rev 2', 'rev 3', 'day 1', 'day 3', 'day 7', 'day 14', 'day 30'];
+    const CONFIDENCE_COLS = ['confidence (1-5)', 'level (1-5)'];
+    const NOTES_COLS = ['notes', 'status', 'root cause', 'action items', 'weak areas', 'specific weakness', 'action plan', 'mistakes', 'outcome', 'follow-up questions'];
+    const DATE_COLS = ['date solved', 'date', 'last assessed', 'next review', 'target date', 'last failed revision'];
+    const SELECT_COLS = ['weakness level', 'priority'];
+
+    const colMap = {};
+    hTexts.forEach((h, i) => {
+      if (CHECKBOX_COLS.includes(h)) colMap[i] = 'checkbox';
+      else if (CONFIDENCE_COLS.includes(h)) colMap[i] = 'confidence';
+      else if (NOTES_COLS.includes(h)) colMap[i] = 'text';
+      else if (DATE_COLS.includes(h)) colMap[i] = 'date';
+      else if (SELECT_COLS.includes(h)) colMap[i] = 'select';
+    });
+
+    if (Object.keys(colMap).length === 0) return;
+
+    const idCol = hTexts.indexOf('#');
+    const nameCol = hTexts.indexOf('problem') !== -1 ? hTexts.indexOf('problem') : hTexts.indexOf('question');
+
+    const rows = table.querySelectorAll('tbody tr, tr:not(:first-child)');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (!cells.length) return;
+
+      let rowId = '';
+      if (idCol >= 0 && cells[idCol]) rowId = cells[idCol].textContent.trim();
+      else if (nameCol >= 0 && cells[nameCol]) rowId = cells[nameCol].textContent.trim().substring(0, 30);
+      else rowId = row.rowIndex + '';
+      if (!rowId) return;
+
+      Object.entries(colMap).forEach(([colIdx, type]) => {
+        const ci = parseInt(colIdx);
+        if (ci >= cells.length) return;
+        const cell = cells[ci];
+        const fieldName = hTexts[ci];
+        const key = trackerKey(currentTopic.id, currentDocId, rowId, fieldName);
+        const saved = getTrackerVal(key);
+
+        if (type === 'checkbox') {
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.className = 'tracker-check';
+          cb.checked = !!saved;
+          cb.onchange = function() { setTrackerVal(key, this.checked ? true : false); };
+          cell.innerHTML = '';
+          cell.appendChild(cb);
+        } else if (type === 'confidence') {
+          const sel = document.createElement('select');
+          sel.className = 'tracker-select';
+          ['', '1', '2', '3', '4', '5'].forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v; opt.textContent = v || '—';
+            if (v === saved) opt.selected = true;
+            sel.appendChild(opt);
+          });
+          if (saved) sel.className = 'tracker-select conf-' + saved;
+          sel.onchange = function() {
+            setTrackerVal(key, this.value);
+            this.className = 'tracker-select' + (this.value ? ' conf-' + this.value : '');
+          };
+          cell.innerHTML = '';
+          cell.appendChild(sel);
+        } else if (type === 'date') {
+          const inp = document.createElement('input');
+          inp.type = 'date';
+          inp.className = 'tracker-date';
+          inp.value = saved || '';
+          inp.onchange = function() { setTrackerVal(key, this.value); };
+          cell.innerHTML = '';
+          cell.appendChild(inp);
+        } else if (type === 'select') {
+          const sel = document.createElement('select');
+          sel.className = 'tracker-select';
+          const opts = fieldName === 'priority' ? ['', 'Critical', 'Moderate', 'Polish'] : ['', 'Strong', 'Moderate', 'Weak'];
+          opts.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v; opt.textContent = v || '—';
+            if (v === saved) opt.selected = true;
+            sel.appendChild(opt);
+          });
+          sel.onchange = function() { setTrackerVal(key, this.value); };
+          cell.innerHTML = '';
+          cell.appendChild(sel);
+        } else if (type === 'text') {
+          const existingText = cell.textContent.trim();
+          const inp = document.createElement('input');
+          inp.type = 'text';
+          inp.className = 'tracker-input';
+          inp.value = saved || existingText || '';
+          inp.placeholder = '...';
+          inp.onchange = function() { setTrackerVal(key, this.value); };
+          cell.innerHTML = '';
+          cell.appendChild(inp);
+        }
+      });
+    });
+  });
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    INIT

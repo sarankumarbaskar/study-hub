@@ -104,17 +104,49 @@ CHECKLISTS = {
     "Design Problems": ["LRU/LFU cache","HashMap from scratch","Trie-based design","Random O(1) insert/delete","Snapshot versioning","Time-based key-value","Stream processing","Iterator design"],
 }
 
+if "Pattern Mastery" in wb.sheetnames:
+    del wb["Pattern Mastery"]
+
+REPR_PROBLEMS = {
+    "Arrays & Hashing": ("7", "LC 1, 49, 238, 128, 347, 48, 54"),
+    "Prefix Sum": ("—", "LC 303, 560, 974, 1314"),
+    "Two Pointers": ("5", "LC 11, 15, 75, 287, 5"),
+    "Sliding Window": ("11", "LC 3, 76, 424, 438, 567, 239, 121"),
+    "Binary Search": ("10", "LC 33, 875, 410, 4, 34, 153, 378"),
+    "Bit Manipulation": ("4", "LC 136, 191, 338, 371"),
+    "Stack": ("8", "LC 739, 84, 42, 394, 402, 907"),
+    "Monotonic Stack": ("—", "LC 739, 84, 503, 907, 901"),
+    "Queue": ("—", "LC 239, 622, 346"),
+    "Heap / Priority Queue": ("7", "LC 215, 295, 253, 23, 632, 973"),
+    "Linked List": ("7", "LC 206, 141, 19, 2, 25, 143, 138"),
+    "Fast & Slow Pointer": ("—", "LC 141, 142, 287, 876, 202"),
+    "Trees (DFS)": ("15", "LC 124, 543, 297, 236, 105, 114"),
+    "Trees (BFS)": ("—", "LC 102, 199, 863, 637"),
+    "Binary Search Tree": ("—", "LC 98, 230, 235, 701"),
+    "Graph DFS": ("20", "LC 200, 695, 417, 207, 133, 802"),
+    "Graph BFS": ("—", "LC 994, 127, 286, 1091"),
+    "Topological Sort": ("—", "LC 207, 210, 269, 2115"),
+    "Union Find (Disjoint Set)": ("—", "LC 547, 684, 721, 323, 1584"),
+    "Trie": ("—", "LC 208, 211, 212, 642"),
+    "Backtracking": ("6", "LC 39, 46, 78, 79, 22, 51"),
+    "Greedy": ("5", "LC 55, 45, 53, 621, 134"),
+    "Dynamic Programming": ("22", "LC 322, 72, 300, 1143, 198, 312, 152, 329"),
+    "Interval Problems": ("4", "LC 56, 57, 435, 252, 253"),
+    "Matrix Problems": ("—", "LC 48, 54, 73, 74"),
+    "Design Problems": ("11", "LC 146, 460, 208, 380, 981, 706, 642, 212"),
+}
+
 ws = wb.create_sheet("Pattern Mastery", 1)
 ws.sheet_properties.tabColor = C_PURPLE
 N_PAT = len(PATTERNS)
-MAIN_COLS = 10
+MAIN_COLS = 11
 
 # ═══════════════════════════════════════════════════════════════════════════
 # SECTION 1: TITLE
 # ═══════════════════════════════════════════════════════════════════════════
-ws.merge_cells("A1:J1")
+ws.merge_cells("A1:K1")
 cl = ws.cell(1,1); cl.value="PATTERN MASTERY — Interview Readiness Assessment"; cl.font=FT; cl.fill=FILL_BG; cl.alignment=AC
-ws.merge_cells("A2:J2")
+ws.merge_cells("A2:K2")
 cl = ws.cell(2,1); cl.value='"If an interviewer gives me a brand-new problem from this pattern, can I derive the optimal solution without memorization?"'; cl.font=FM; cl.fill=FILL_BG; cl.alignment=Alignment(horizontal="center",vertical="center",wrap_text=True); cl.font=Font("Calibri",italic=True,size=10,color=C_MUTED)
 ws.row_dimensions[2].height = 28
 
@@ -175,10 +207,10 @@ sec_title(ws, r, MAIN_COLS, "RECOGNITION SCALE: 1=Never recognize  2=Need hints 
 # SECTION 4: MAIN TRACKER TABLE (row 9 onwards)
 # ═══════════════════════════════════════════════════════════════════════════
 r = 9
-main_headers = ["Pattern","Problems Solved","Recognition (1-5)","Can Solve Without Hints",
+main_headers = ["Pattern","Mastered / Total","Recognition (1-5)","Can Solve Without Hints",
                 "Can Explain Intuition","Can Explain Complexity","Can Solve Variants",
-                "Confidence (1-5)","Weak Areas","Notes"]
-main_widths = [26,15,16,20,18,20,16,15,28,28]
+                "Confidence (1-5)","Weak Areas","Notes","Representative Problems"]
+main_widths = [26,15,16,20,18,20,16,15,26,26,38]
 widths(ws, main_widths)
 for i, h in enumerate(main_headers, 1):
     ws.cell(r, i, value=h)
@@ -186,9 +218,14 @@ hdr(ws, r, MAIN_COLS)
 
 for idx, pat in enumerate(PATTERNS):
     rw = DATA_START + idx
+    total, repr_probs = REPR_PROBLEMS.get(pat, ("—", ""))
     ws.cell(rw, 1, value=pat)
+    ws.cell(rw, 2, value=f"— / {total}" if total != "—" else "—")
+    ws.cell(rw, 11, value=repr_probs)
     body(ws, rw, MAIN_COLS, alt=idx%2==0)
     ws.cell(rw, 1).alignment = AL
+    ws.cell(rw, 11).alignment = AL
+    ws.cell(rw, 11).font = Font("Calibri", size=10, color=C_CYAN)
 
 pe = DATA_END
 dv(ws, "C", DATA_START, pe, ["1","2","3","4","5"])

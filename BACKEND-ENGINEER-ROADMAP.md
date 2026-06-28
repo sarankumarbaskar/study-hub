@@ -23,13 +23,29 @@
 
 ## Weekly Time Allocation
 
-| Track | Weight | ~Hours/Week (15h total) |
-|-------|--------|------------------------|
-| DSA | 30% | ~4.5 hours |
-| Java & Backend | 25% | ~3.75 hours |
-| Distributed Systems & System Design | 25% | ~3.75 hours |
-| Kafka & Redis | 10% | ~1.5 hours |
-| Cloud, Containers & CI/CD | 10% | ~1.5 hours |
+### Phase 1: DSA-Heavy (Months 1–4)
+
+DSA is the gating round at Tier-1 companies — front-load it.
+
+| Track | Weight | ~Hours/Week (15h total) | Focus |
+|-------|--------|------------------------|-------|
+| DSA | 45% | ~6.75 hours | 142 problems — highest interview impact |
+| Distributed Systems & System Design | 25% | ~3.75 hours | DDIA Ch 1-6 + 3 HLD designs |
+| Java & Backend | 15% | ~2.25 hours | Effective Java + Design Patterns started |
+| Kafka & Redis | 10% | ~1.5 hours | Kafka fundamentals + consumers |
+| Cloud, Containers & CI/CD | 5% | ~0.75 hours | Docker basics |
+
+### Phase 2: Balanced (Months 5–8)
+
+After DSA patterns are solid, shift toward system design and backend depth.
+
+| Track | Weight | ~Hours/Week (15h total) | Focus |
+|-------|--------|------------------------|-------|
+| DSA | 20% | ~3 hours | Revision + hard problems + mock interviews |
+| Distributed Systems & System Design | 30% | ~4.5 hours | DDIA Ch 7-9 + 5 HLD designs + mocks |
+| Java & Backend | 25% | ~3.75 hours | Design Patterns done + Spring Boot deep dive |
+| Kafka & Redis | 15% | ~2.25 hours | Kafka reliability + Redis patterns |
+| Cloud, Containers & CI/CD | 10% | ~1.5 hours | K8s, OpenShift, CI/CD, AWS |
 
 ---
 

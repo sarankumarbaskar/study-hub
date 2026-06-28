@@ -213,19 +213,28 @@ widths(ws, [26,14,14,14,14,14,14,14,14,14,14])
 ws.merge_cells("A1:K1"); c=ws["A1"]; c.value="INTERVIEW PREPARATION TRACKER"; c.font=FT; c.fill=FILL_BG; c.alignment=AC
 ws.merge_cells("A2:K2"); c=ws["A2"]; c.value="5 YoE Java Backend @ Red Hat  |  Target: SDE-2 / Senior SWE  |  40+ LPA  |  8-Month Plan"; c.font=FM; c.fill=FILL_BG; c.alignment=AC
 
-r=4; ws.cell(r,1,value="TRACK ALLOCATION").font=FS; ws.cell(r,1).fill=FILL_BG
-tracks=[("DSA","30%","~4.5h","142 problems"),("Java & Backend","25%","~3.75h","3 sub-tracks"),("System Design + DDIA","25%","~3.75h","9 chapters + 8 designs"),("Kafka & Redis","10%","~1.5h","11 + 5 topics"),("Cloud & Platform","10%","~1.5h","5 technologies")]
-for i,h in enumerate(["Track","Weight","Hrs/Wk","Scope"]): ws.cell(5,1+i,value=h)
+r=4; ws.cell(r,1,value="PHASE 1: DSA-HEAVY (Months 1–4) — DSA is the gating round at Tier-1 companies").font=FS; ws.cell(r,1).fill=FILL_BG
+p1=[("DSA","45%","~6.75h","142 problems — highest interview impact"),("System Design + DDIA","25%","~3.75h","DDIA Ch 1-6 + 3 HLD designs"),("Java & Backend","15%","~2.25h","Effective Java + Design Patterns started"),("Kafka & Redis","10%","~1.5h","Kafka fundamentals + consumers"),("Cloud & Platform","5%","~0.75h","Docker basics")]
+for i,h in enumerate(["Track","Weight","Hrs/Wk","Focus"]): ws.cell(5,1+i,value=h)
 hdr(ws,5,4)
-for j,(t,w,h,s) in enumerate(tracks):
+for j,(t,w,h,s) in enumerate(p1):
     rw=6+j
     for ci,v in enumerate([t,w,h,s],1): ws.cell(rw,ci,value=v)
     row_style(ws,rw,4,j%2==0)
 
-r=12; ws.cell(r,1,value="MONTHLY MILESTONES").font=FS; ws.cell(r,1).fill=FILL_BG
+r=12; ws.cell(r,1,value="PHASE 2: BALANCED (Months 5–8) — After DSA patterns are solid").font=FS; ws.cell(r,1).fill=FILL_BG
+p2=[("DSA","20%","~3h","Revision + hard problems + mock interviews"),("System Design + DDIA","30%","~4.5h","DDIA Ch 7-9 + 5 HLD designs + mocks"),("Java & Backend","25%","~3.75h","Design Patterns done + Spring Boot deep dive"),("Kafka & Redis","15%","~2.25h","Kafka reliability + Redis patterns"),("Cloud & Platform","10%","~1.5h","K8s, OpenShift, CI/CD, AWS")]
+for i,h in enumerate(["Track","Weight","Hrs/Wk","Focus"]): ws.cell(13,1+i,value=h)
+hdr(ws,13,4)
+for j,(t,w,h,s) in enumerate(p2):
+    rw=14+j
+    for ci,v in enumerate([t,w,h,s],1): ws.cell(rw,ci,value=v)
+    row_style(ws,rw,4,j%2==0)
+
+r=20; ws.cell(r,1,value="MONTHLY MILESTONES").font=FS; ws.cell(r,1).fill=FILL_BG
 mm_h=["Month","DSA","Java & Backend","System Design","Kafka/Redis","Cloud/Platform"]
-for i,h in enumerate(mm_h): ws.cell(13,1+i,value=h)
-hdr(ws,13,6)
+for i,h in enumerate(mm_h): ws.cell(21,1+i,value=h)
+hdr(ws,21,6)
 milestones=[
     ("Month 1","Phase 1: Arrays, Two Pointers, SW","Effective Java started","DDIA Ch 1-2","Kafka fundamentals","Docker basics"),
     ("Month 2","Phase 1-2: BS, Stack, Heap","Effective Java 50%","DDIA Ch 3-4","Kafka consumers","Docker multi-stage"),
@@ -237,7 +246,7 @@ milestones=[
     ("Month 8","Review + Mocks","Spring Security","Dist Cache + Review","Mock interviews","Mock interviews"),
 ]
 for j,row_data in enumerate(milestones):
-    rw=14+j
+    rw=22+j
     for ci,v in enumerate(row_data,1): ws.cell(rw,ci,value=v)
     row_style(ws,rw,6,j%2==0); ws.cell(rw,1).font=FS2
 

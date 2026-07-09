@@ -1,60 +1,75 @@
 # Backend Engineer Roadmap (6–8 Months)
 
-> **Goal:** Become interview-ready for SDE-2 / Senior Backend Engineer roles at top product companies.
-> **Profile:** 5 YoE Java Backend Engineer | Target: Amazon, Microsoft, Google, Uber, Airbnb, Atlassian, Stripe, Databricks, Rubrik, Confluent
-> **Outcome:** Strong in Java Backend, System Design, Distributed Systems, Cloud & Platform concepts. Foundation for Top 10% Backend Engineer.
+> **Goal:** Become interview-ready for Senior Backend Engineer roles at international product companies.
+> **Profile:** 5 YoE Java Backend Engineer @ Red Hat
+> **Primary Target:** International — Netherlands, Denmark, Sweden, Germany, Ireland
+> **Long-term Target:** Google, Meta, Uber, Databricks, Stripe, Confluent, Snowflake
+> **Outcome:** Strong in Java Backend, System Design, Distributed Systems. Interview-ready by end of August 2026.
 
 ---
 
 ## Table of Contents
 
+- [Current Mission](#current-mission-julyaugust-2026)
 - [Weekly Time Allocation](#weekly-time-allocation)
-- [Track 1 — DSA (30%)](#track-1--dsa-30)
-- [Track 2 — Java & Backend (25%)](#track-2--java--backend-25)
-- [Track 3 — Distributed Systems & System Design (25%)](#track-3--distributed-systems--system-design-25)
-- [Track 4 — Kafka & Redis (10%)](#track-4--kafka--redis-10)
-- [Track 5 — Cloud, Containers & Platform Engineering (10%)](#track-5--cloud-containers--platform-engineering-10)
+- [Track 1 — DSA (40%)](#track-1--dsa-40)
+- [Track 2 — Java & Backend (30%)](#track-2--java--backend-30)
+- [Track 3 — Distributed Systems & System Design (20%)](#track-3--distributed-systems--system-design-20)
+- [Track 4 — Kafka & Redis](#track-4--kafka--redis)
+- [Track 5 — Cloud, Containers & Platform Engineering](#track-5--cloud-containers--platform-engineering)
 - [Engineering Blogs](#engineering-blogs-read-weekly)
-- [Books To Finish](#books-to-finish-in-8-months)
-- [Success Criteria](#success-criteria-after-8-months)
+- [Books To Finish](#books-to-finish)
+- [Success Criteria](#success-criteria--interview-ready)
+- [Weekly Review](#weekly-review)
 - [Progress Tracker](#progress-tracker)
+- [AI Mentor Instructions](#ai-mentor-instructions)
+
+---
+
+## Current Mission (July–August 2026)
+
+My only objective is to become **interview-ready**.
+
+Everything I study must improve one of these:
+- DSA pattern mastery
+- Java backend depth
+- System design confidence
+- Resume & interview skills
+
+Anything outside these objectives is postponed.
+
+**Target:** Begin interviewing by end of August 2026.
 
 ---
 
 ## Weekly Time Allocation
 
-### Phase 1: DSA-Heavy (Months 1–4)
+### Available Study Time
 
-DSA is the gating round at Tier-1 companies — front-load it.
+| Day | Hours |
+|-----|-------|
+| Monday–Friday | 4–5 hours/day |
+| Saturday | 8 hours |
+| Sunday | 8 hours |
+| **Total** | **36–40 focused hours/week** |
 
-| Track | Weight | ~Hours/Week (15h total) | Focus |
-|-------|--------|------------------------|-------|
-| DSA | 45% | ~6.75 hours | 142 problems — highest interview impact |
-| Distributed Systems & System Design | 25% | ~3.75 hours | DDIA Ch 1-6 + 3 HLD designs |
-| Java & Backend | 15% | ~2.25 hours | Effective Java + Design Patterns started |
-| Kafka & Redis | 10% | ~1.5 hours | Kafka fundamentals + consumers |
-| Cloud, Containers & CI/CD | 5% | ~0.75 hours | Docker basics |
+### Current Priority Distribution
 
-### Phase 2: Balanced (Months 5–8)
-
-After DSA patterns are solid, shift toward system design and backend depth.
-
-| Track | Weight | ~Hours/Week (15h total) | Focus |
-|-------|--------|------------------------|-------|
-| DSA | 20% | ~3 hours | Revision + hard problems + mock interviews |
-| Distributed Systems & System Design | 30% | ~4.5 hours | DDIA Ch 7-9 + 5 HLD designs + mocks |
-| Java & Backend | 25% | ~3.75 hours | Design Patterns done + Spring Boot deep dive |
-| Kafka & Redis | 15% | ~2.25 hours | Kafka reliability + Redis patterns |
-| Cloud, Containers & CI/CD | 10% | ~1.5 hours | K8s, OpenShift, CI/CD, AWS |
+| Track | Weight | Hours/Week | Goal |
+|-------|--------|-----------|------|
+| DSA | 40% | 15–16 hrs | Pattern mastery + interview readiness |
+| Java Backend | 30% | 11–12 hrs | Backend depth + Java interviews |
+| Distributed Systems & System Design | 20% | 7–8 hrs | DDIA + HLD |
+| Career Preparation | 10% | 3–4 hrs | Resume, LinkedIn, applications |
 
 ---
 
-## Track 1 — DSA (30%)
+## Track 1 — DSA (40%)
 
 ### Goal
-- Complete curated 145 problems ([DSA Master Tracker](dsa-patterns/DSA-PATTERNS-ROADMAP.md))
-- Reach 150–200 total solved problems on LeetCode
-- Master pattern recognition, not problem count
+- Complete curated 142 problems ([DSA Master Tracker](dsa-patterns/DSA-PATTERNS-ROADMAP.md))
+- Master pattern recognition — not problem count
+- Be able to solve unseen problems from any pattern
 
 ### Resources
 
@@ -65,10 +80,21 @@ After DSA patterns are solid, shift toward system design and backend depth.
 | Video | NeetCode YouTube | [youtube.com/@NeetCode](https://youtube.com/@NeetCode) |
 | Video | Take U Forward (Striver) | [youtube.com/@takeUforward](https://youtube.com/@takeUforward) |
 
-### Practice Strategy
-- 1–2 problems daily (weekdays), 2–3 on weekends
-- Revisit old problems using spaced repetition (Day 1 → 3 → 7 → 14 → 30)
-- Focus on **pattern recognition** — identify the pattern within 30 seconds of reading
+### Practice Philosophy
+
+Every problem is considered **completed** only if I can explain:
+- Brute force approach
+- Optimal solution
+- Why the optimal solution works (intuition, not memorization)
+- Time complexity with proof
+- Space complexity
+- Pattern recognition — which pattern and why
+- Similar problems that use the same technique
+- Variations and follow-ups
+
+**Pattern recognition is more important than problem count.**
+
+Previously solved problems must be revisited using spaced repetition (Day 1 → 3 → 7 → 14 → 30).
 
 ### Topics Covered
 
@@ -92,7 +118,7 @@ After DSA patterns are solid, shift toward system design and backend depth.
 
 ---
 
-## Track 2 — Java & Backend (25%)
+## Track 2 — Java & Backend (30%)
 
 ### 2.1 Effective Java
 
@@ -183,9 +209,50 @@ After DSA patterns are solid, shift toward system design and backend depth.
 
 </details>
 
+### 2.4 Java Interview Notebook
+
+For every Java topic, maintain interview-ready notes covering internals, edge cases, and common questions.
+
+<details>
+<summary><strong>Topics to Document</strong></summary>
+
+| Topic | What to Cover |
+|-------|--------------|
+| HashMap | Internal working, collision handling, resize, load factor, treeification, complexity, thread safety |
+| Collections | ArrayList vs LinkedList internals, ConcurrentHashMap, CopyOnWriteArrayList, when to use which |
+| Generics | Type erasure, bounded wildcards, PECS, generic methods, raw types pitfalls |
+| Streams | Lazy evaluation, intermediate vs terminal ops, parallel streams, stateful vs stateless |
+| JVM | Class loading, memory model (heap/stack/metaspace), JIT compilation |
+| Garbage Collection | G1GC, ZGC, GC roots, generational hypothesis, tuning flags |
+| Concurrency | synchronized vs ReentrantLock, volatile, CompletableFuture, thread pools, deadlock prevention |
+| Spring Core | Bean lifecycle, DI internals, AOP proxying, auto-configuration |
+| Transactions | Propagation levels, isolation levels, distributed transactions, @Transactional pitfalls |
+| Security | Filter chain, SecurityContext, OAuth2 flow, JWT validation |
+| Kafka | Consumer internals, rebalancing, offset commit strategies, exactly-once |
+| Database | Connection pooling (HikariCP), N+1 problem, query optimization, indexing strategy |
+
+</details>
+
+### 2.5 Coding Practice
+
+Theory alone is not enough. Every week, implement at least one production-quality Java project:
+
+| Project | What It Tests |
+|---------|--------------|
+| LRU Cache | LinkedHashMap or DLL + HashMap, O(1) operations |
+| Custom HashMap | Hashing, collision handling, resize, generics |
+| Thread Pool | ExecutorService internals, work queue, thread lifecycle |
+| Producer-Consumer | BlockingQueue, wait/notify, concurrent patterns |
+| Rate Limiter | Token bucket / sliding window, thread safety |
+| REST API | Spring Boot end-to-end, validation, error handling |
+| Kafka Producer/Consumer | Serialization, error handling, idempotency |
+| Circuit Breaker | Resilience patterns, state machine, fallback |
+
+The objective is to write **production-quality Java** — clean, tested, well-structured.
+
 ---
 
-## Track 3 — Distributed Systems & System Design (25%)
+## Track 3 — Distributed Systems & System Design (20%)
 
 ### 3.1 DDIA (Designing Data-Intensive Applications)
 
@@ -495,49 +562,72 @@ For **every** design, document:
 
 ---
 
-## Success Criteria After 8 Months
+## Success Criteria — Interview Ready
 
-### DSA
-- [ ] 150–200 problems solved on LeetCode
-- [ ] All 15 patterns mastered (can identify pattern in <30 seconds)
-- [ ] Confidence level 4+ on 80% of curated problems
+The goal is not "X problems solved" or "Y books finished." The goal is:
 
-### Java
-- [ ] Effective Java completed — can explain any item in interview context
-- [ ] Spring Boot internals understood (DI, transactions, security, auto-config)
-- [ ] Can explain Bean lifecycle, @Transactional propagation, JWT flow from memory
+> **I can walk into any Senior Backend Engineer interview and perform.**
 
-### Design Patterns
-- [ ] Head First Design Patterns completed
-- [ ] Can identify which pattern to apply to a given problem
-- [ ] Can implement Strategy, Observer, Factory, Decorator in Java without reference
+### Coding Interviews
+- [ ] Can solve unseen Medium problems in 25 minutes
+- [ ] Can solve unseen Hard problems in 40 minutes
+- [ ] Can identify the correct pattern within 30 seconds of reading any problem
+- [ ] Can explain brute force → optimal → complexity for every solution
+- [ ] Can code clean, bug-free Java under pressure
 
-### Distributed Systems
-- [ ] DDIA Chapters 1–9 completed with notes
-- [ ] Can explain replication strategies, partitioning, consistency models
-- [ ] Can discuss CAP theorem tradeoffs for specific systems
+### Java & Backend Interviews
+- [ ] Can explain Java internals (HashMap, JVM, GC, concurrency) at depth
+- [ ] Can explain Spring Boot internals (DI, Bean lifecycle, transactions, security)
+- [ ] Can write production-quality Java without IDE auto-complete
+- [ ] Can discuss design patterns with real-world examples
 
-### System Design
-- [ ] Can confidently design these systems end-to-end in 45 minutes:
+### System Design Interviews
+- [ ] Can design these systems end-to-end in 45 minutes:
   - [ ] URL Shortener
   - [ ] Rate Limiter
   - [ ] Notification Service
   - [ ] Inventory Service
   - [ ] Payment System
+- [ ] Can explain trade-offs (CAP, consistency vs availability, SQL vs NoSQL)
+- [ ] Can discuss Kafka, Redis, caching, and messaging in design context
 
-### Kafka
-- [ ] Can explain: Partitions, Consumer Groups, Rebalancing, Retry, DLQ, Exactly Once
-- [ ] Can design an event-driven pipeline with reliability guarantees
+### Behavioral / Career
+- [ ] Resume updated and tailored for international roles
+- [ ] LinkedIn optimized for Netherlands/EU visibility
+- [ ] Can articulate "why this company" and "why me" for each target
+- [ ] Can discuss past projects with STAR format
 
-### Redis
-- [ ] Can explain: Cache Aside, TTL, Cache Stampede, Distributed Locking
-- [ ] Can design a caching strategy for a high-traffic service
+---
 
-### Platform Engineering
-- [ ] Can containerize a Spring Boot app with multi-stage Docker builds
-- [ ] Can deploy to Kubernetes/OpenShift and explain the resource model
-- [ ] Can explain CI/CD pipeline flow and deployment strategies
-- [ ] Can explain core AWS services and when to use each
+## Weekly Review
+
+Every Sunday, review and plan:
+
+### DSA
+- Patterns mastered this week
+- Weak patterns identified
+- Problems requiring revision (failed spaced repetition)
+- Next week's target problems
+
+### Java & Backend
+- Topics understood deeply
+- Topics requiring coding practice
+- Interview notebook entries added
+- Coding projects completed
+
+### System Design
+- Concepts mastered
+- Concepts requiring revision
+- HLD designs practiced
+- DDIA chapters completed
+
+### Career
+- Resume updates made
+- LinkedIn updates / posts
+- Applications sent
+- Networking connections made
+
+**Plan the following week based on weaknesses, not strengths.**
 
 ---
 
@@ -611,3 +701,41 @@ For **every** design, document:
 ---
 
 *This roadmap pairs with the [DSA Master Tracker](dsa-patterns/DSA-PATTERNS-ROADMAP.md) for the complete interview preparation system.*
+
+---
+
+## AI Mentor Instructions
+
+Act as my **FAANG and International Career Mentor**.
+
+Do NOT behave like a generic tutor.
+
+### Your Responsibilities
+- Review weekly progress and identify gaps
+- Adjust study plan based on actual performance
+- Increase difficulty gradually as patterns are mastered
+- Keep me accountable — call out procrastination
+- Focus on deep understanding, not surface-level coverage
+- Prioritize interview readiness above all else
+
+### Never Optimize For
+- Course completion percentage
+- Number of videos watched
+- Number of LeetCode problems solved
+- Finishing books cover-to-cover
+
+### Always Optimize For
+- Interview offers
+- Interview success rate
+- Backend engineering depth
+- Pattern mastery and recognition speed
+- Java expertise at staff-level depth
+- System design excellence
+
+### Adaptive Rules
+- If I fall behind → create a recovery plan
+- If I finish early → increase difficulty
+- If I become interview-ready → tell me to begin applications immediately
+- Never let me procrastinate waiting for "perfect preparation"
+
+> *Perfect preparation doesn't exist. Interview-ready preparation does.*

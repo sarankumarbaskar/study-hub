@@ -21,7 +21,7 @@
 - [Books To Finish](#books-to-finish)
 - [Success Criteria](#success-criteria--interview-ready)
 - [Weekly Review](#weekly-review)
-- [Progress Tracker](#progress-tracker)
+- [Aligned Weekly Plan](#aligned-weekly-plan-8-weeks--july-10-to-august-31-2026)
 - [AI Mentor Instructions](#ai-mentor-instructions)
 
 ---
@@ -631,57 +631,134 @@ Every Sunday, review and plan:
 
 ---
 
-## Progress Tracker
+## Aligned Weekly Plan (8 Weeks — July 10 to August 31, 2026)
 
-### Monthly Milestones
+> Every track reinforces every other track. Java topics are chosen because the DSA pattern that week uses them. System Design topics build on DDIA chapters that explain the same distributed primitives. Nothing is studied in isolation.
 
-| Month | DSA | Java & Backend | System Design | Kafka/Redis | Cloud/Platform |
-|-------|-----|----------------|---------------|-------------|----------------|
-| 1 | Phase 1 (Arrays, Two Pointers, Sliding Window) | Effective Java started | DDIA Ch 1–2 | Kafka fundamentals | Docker basics |
-| 2 | Phase 1–2 (Binary Search, Stack, Heap) | Effective Java (50%) | DDIA Ch 3–4 | Kafka consumers | Docker multi-stage |
-| 3 | Phase 2 (Linked List, Intervals) | Effective Java done | DDIA Ch 5 + URL Shortener | Kafka reliability | Kubernetes basics |
-| 4 | Phase 3 (Trees) | Design Patterns started | DDIA Ch 6 + Rate Limiter | Redis fundamentals | Kubernetes probes/HPA |
-| 5 | Phase 3 (Graphs) | Design Patterns (50%) | DDIA Ch 7 + Notification System | Redis locking | OpenShift basics |
-| 6 | Phase 4 (DP) | Design Patterns done | DDIA Ch 8–9 + Inventory Service | Integration practice | CI/CD pipelines |
-| 7 | Phase 4–5 (Greedy, Backtracking, Design) | Spring Boot deep dive | Payment System + Search Service | End-to-end design | AWS fundamentals |
-| 8 | Review + Mock Interviews | Spring Security | Distributed Cache + Review | Mock interviews | Mock interviews |
+### Daily Structure (Weekday — 4–5 hrs)
 
-### Weekly Log
+| Block | Time | What |
+|-------|------|------|
+| DSA | 2 hrs | 2–3 new problems from current pattern + code in Java |
+| Java Internals | 1 hr | Paired Java topic — read internals + code examples |
+| System Design / DDIA | 45 min | Read chapter or practice one HLD |
+| DSA Revision | 30 min | Spaced repetition re-solves |
+| Reflection | 15 min | Interview notes, postmortem, explain out loud |
 
-| Week | DSA Problems | Java/Backend | System Design | Kafka/Redis | Cloud/Platform | Blog Articles |
-|------|-------------|--------------|---------------|-------------|----------------|---------------|
-| 1 | | | | | | |
-| 2 | | | | | | |
-| 3 | | | | | | |
-| 4 | | | | | | |
-| 5 | | | | | | |
-| 6 | | | | | | |
-| 7 | | | | | | |
-| 8 | | | | | | |
-| 9 | | | | | | |
-| 10 | | | | | | |
-| 11 | | | | | | |
-| 12 | | | | | | |
-| 13 | | | | | | |
-| 14 | | | | | | |
-| 15 | | | | | | |
-| 16 | | | | | | |
-| 17 | | | | | | |
-| 18 | | | | | | |
-| 19 | | | | | | |
-| 20 | | | | | | |
-| 21 | | | | | | |
-| 22 | | | | | | |
-| 23 | | | | | | |
-| 24 | | | | | | |
-| 25 | | | | | | |
-| 26 | | | | | | |
-| 27 | | | | | | |
-| 28 | | | | | | |
-| 29 | | | | | | |
-| 30 | | | | | | |
-| 31 | | | | | | |
-| 32 | | | | | | |
+### Daily Structure (Weekend — 8 hrs)
+
+| Block | Time | What |
+|-------|------|------|
+| DSA | 3 hrs | 3–4 problems (include 1 Hard) |
+| Java Deep Dive | 2 hrs | Build something: Custom HashMap, Thread Pool, LRU Cache |
+| System Design | 1.5 hrs | Full HLD practice or DDIA deep read |
+| Kafka / Redis | 1 hr | One focused topic with hands-on |
+| Career | 30 min | Resume, LinkedIn, or 1 application |
+
+---
+
+### Week 1 (Jul 10–16) — Arrays & Hashing + HashMap Internals
+
+| Track | Focus | Why It Connects |
+|-------|-------|-----------------|
+| **DSA** | Arrays & Hashing (7 problems) | Foundation pattern — every company tests this |
+| **Java** | `equals`/`hashCode` contract, HashMap internals (buckets, collisions, treeification, load factor), `int[]` vs `String` as key | Every hashing problem uses HashMap. Key correctness is a Java interview favorite. |
+| **System Design** | DDIA Ch 1 — Reliability, Scalability, Maintainability | Vocabulary for every SD interview: load parameters, latency percentiles, fault tolerance |
+| **Kafka/Redis** | Kafka fundamentals: topics, partitions, brokers | Kafka partition key = hashing. Same concept as HashMap bucket assignment. |
+| **Career** | Update resume with Red Hat projects using STAR format | Start early — don't wait until Week 8 |
+| **Blog** | Stripe API design blog | API design principles for SD interviews |
+
+### Week 2 (Jul 17–23) — Two Pointers & Sliding Window + String Internals
+
+| Track | Focus | Why It Connects |
+|-------|-------|-----------------|
+| **DSA** | Two Pointers (5) + Sliding Window (11) | These patterns operate heavily on strings and arrays |
+| **Java** | String internals (pool, immutability, compact strings), `StringBuilder` vs concatenation, `char[]`, `toCharArray()` | Sliding window on strings requires understanding String internals and `char` manipulation |
+| **System Design** | DDIA Ch 2 — Data Models + Query Languages | Relational vs document vs graph — foundational for "which DB?" questions |
+| **Kafka/Redis** | Kafka consumers: consumer groups, rebalancing, offset management | Consumer group = sliding window over a stream of events |
+| **Career** | LinkedIn headline + summary optimized for EU/international | |
+| **Blog** | Netflix resilience engineering blog | Fault tolerance patterns |
+
+### Week 3 (Jul 24–30) — Binary Search & Bits + Primitives & Overflow
+
+| Track | Focus | Why It Connects |
+|-------|-------|-----------------|
+| **DSA** | Binary Search (10) + Bit Manipulation (4) | Math-heavy patterns using primitives |
+| **Java** | Primitives vs wrappers, autoboxing, `Integer` caching (-128 to 127), `int` overflow, `Math.multiplyExact()`, `Comparable`/`Comparator` | Binary search on answer space requires understanding overflow (`(lo + hi) / 2` trap). Bit manipulation requires knowing Java's signed integers. |
+| **System Design** | DDIA Ch 3 — Storage & Retrieval (LSM-trees, B-trees) + **URL Shortener HLD** | URL shortener uses base62 encoding — connects to bit manipulation and hashing |
+| **Kafka/Redis** | Kafka reliability: idempotency, acks, exactly-once semantics | Distributed reliability = DDIA Ch 3 storage guarantees applied to messaging |
+| **Career** | Identify 10 target companies + research their interview formats | |
+| **Blog** | Uber engineering: real-time systems at scale | |
+
+### Week 4 (Jul 31–Aug 6) — Stack & Heap (PQ) + Collections Internals
+
+| Track | Focus | Why It Connects |
+|-------|-------|-----------------|
+| **DSA** | Stack (8) + Heap/PriorityQueue (7) | Data structure-heavy problems |
+| **Java** | Collections deep dive: `ArrayDeque` vs `Stack`, `PriorityQueue` internals (binary heap), `Comparator` contract (transitivity, consistency with equals), `TreeMap` | Stack problems use `Deque`. Heap problems use `PriorityQueue`. Broken comparators cause `TimSort` crashes. |
+| **System Design** | DDIA Ch 4 — Encoding & Evolution + **Rate Limiter HLD** | Rate limiter = priority queue / token bucket. Schema evolution = backward/forward compatibility. |
+| **Kafka/Redis** | Redis fundamentals: data types, TTL, cache-aside pattern | Rate limiter is commonly implemented with Redis |
+| **Career** | Send first 3 applications | |
+| **Blog** | Cloudflare: edge computing and rate limiting | |
+
+### Week 5 (Aug 7–13) — Linked List & Intervals + Generics & List Internals
+
+| Track | Focus | Why It Connects |
+|-------|-------|-----------------|
+| **DSA** | Linked List (7) + Intervals (4) | Pointer manipulation + sorting-based patterns |
+| **Java** | Generics deep dive: type erasure, PECS, bounded wildcards, bridge methods. `ArrayList` vs `LinkedList` internals, `List<int[]>` sorting with `Comparator` | Linked list problems expose generics. Interval problems sort `List<int[]>` with custom comparators — must understand type erasure and array sorting. |
+| **System Design** | DDIA Ch 5 — Replication + **Notification System HLD** | Leader-follower replication. Notification fanout = pub-sub = push vs pull tradeoff. |
+| **Kafka/Redis** | Redis distributed locking: Redlock, SETNX + TTL, fencing tokens | Distributed lock = consistency primitive from DDIA Ch 5 replication context |
+| **Career** | Mock behavioral interview: prepare 5 STAR stories | |
+| **Blog** | LinkedIn engineering: distributed systems at scale | |
+
+### Week 6 (Aug 14–20) — Trees + Recursion & Queue Internals
+
+| Track | Focus | Why It Connects |
+|-------|-------|-----------------|
+| **DSA** | Trees (15 problems — largest pattern block) | DFS = recursion = call stack. BFS = Queue. |
+| **Java** | Recursion internals: stack frames, `StackOverflowError`, tail recursion (Java doesn't optimize it). `Queue`/`Deque` for BFS. `LinkedList` as `Queue`. Immutability patterns for tree node design. | Every tree DFS is a recursive call. Understanding stack frames prevents mysterious stack overflows on deep trees. |
+| **System Design** | DDIA Ch 6 — Partitioning + **Inventory Service HLD** | Hash vs range partitioning. Inventory = consistency + distributed locking under partition. |
+| **Kafka/Redis** | Kafka partitioning strategy: key-based routing, partition count tradeoffs | Kafka partitioning = DDIA Ch 6 partitioning. Same concepts, applied to event streams. |
+| **Career** | Send 5 more applications. Follow up on Week 4 applications. | |
+| **Blog** | Confluent: Kafka partitioning best practices | |
+
+### Week 7 (Aug 21–27) — Graphs + Map/Set Internals & Concurrency Basics
+
+| Track | Focus | Why It Connects |
+|-------|-------|-----------------|
+| **DSA** | Graphs (20 problems — BFS, DFS, topological sort, Union-Find, Dijkstra) | Adjacency list = `Map<Integer, List<Integer>>`. Union-Find = array-backed. Dijkstra = PriorityQueue. |
+| **Java** | `Map<K, List<V>>` patterns, `HashSet` internals (backed by `HashMap`), `ConcurrentHashMap` basics (CAS + synchronized per-node in Java 8+), thread safety overview | Graph algorithms use maps, sets, and queues concurrently. `ConcurrentHashMap` is the #1 asked concurrent collection in interviews. |
+| **System Design** | DDIA Ch 7 — Transactions + **Payment System HLD** | ACID, isolation levels, 2PC. Payment = exactly-once processing + distributed transactions. Graph of service calls. |
+| **Kafka/Redis** | Kafka transactions: transactional producer, read-process-write, EOS guarantees | Kafka EOS = DDIA transactions applied to event streaming |
+| **Career** | Mock coding interview (timed, 2 problems, 45 min) | |
+| **Blog** | Stripe: payment system reliability | |
+
+### Week 8 (Aug 28–31 + overflow) — DP, Greedy, Backtracking, Design + Review
+
+| Track | Focus | Why It Connects |
+|-------|-------|-----------------|
+| **DSA** | DP (22) + Greedy (5) + Backtracking (6) + Design (11) — prioritize high-frequency problems | Final push. DP = arrays + memoization. Design = Java OOP + data structures combined. |
+| **Java** | DP: `int[]` vs `Integer[]` memory, 2D array allocation. Greedy: `Comparator` sorting. Design: `LinkedHashMap` (LRU), Trie implementation, OOP design patterns (Strategy, Factory, Observer). Concurrency: `synchronized`, `volatile`, `ExecutorService` basics. | LRU Cache IS a Java internals question. Design problems test OOP + collections mastery. Concurrency basics appear in Senior Backend rounds. |
+| **System Design** | DDIA Ch 8–9 — Distributed Systems Trouble + Consensus. **Distributed Cache HLD** + full review of all previous designs. | Final chapters tie everything together: partial failures, linearizability, consensus algorithms. |
+| **Kafka/Redis** | End-to-end: design a Kafka-backed event-driven system with Redis caching | Integration of all Kafka + Redis knowledge into one design |
+| **Career** | Mock system design interview (45 min). Mock Java backend interview (30 min). Final resume review. | |
+| **Blog** | Review notes from all 8 weeks of blog reading | |
+
+---
+
+### Weekly Progress Log
+
+| Week | Dates | DSA Done | Java Topic | System Design | Kafka/Redis | Career | Status |
+|------|-------|----------|------------|---------------|-------------|--------|--------|
+| 1 | Jul 10–16 | | | | | | |
+| 2 | Jul 17–23 | | | | | | |
+| 3 | Jul 24–30 | | | | | | |
+| 4 | Jul 31–Aug 6 | | | | | | |
+| 5 | Aug 7–13 | | | | | | |
+| 6 | Aug 14–20 | | | | | | |
+| 7 | Aug 21–27 | | | | | | |
+| 8 | Aug 28–31 | | | | | | |
 
 ---
 

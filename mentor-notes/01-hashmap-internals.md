@@ -529,3 +529,301 @@ Write this yourself without looking:
 7. Verify it returns the correct price
 8. Remove the `hashCode()` override and observe it breaks
 9. Bonus: mutate the `id` field after insertion and observe lookup failure
+
+---
+
+## Interview Q&A — 46 Questions
+
+### Level 1: Basics
+
+**Q1. What is a HashMap?**
+
+A hash table implementation that stores key-value pairs. Internally it uses an array of buckets where each bucket holds a linked list or Red-Black Tree of nodes.
+
+**Q2. Why do we need HashMap?**
+
+Without HashMap, finding an element requires scanning every entry — O(n). HashMap computes a bucket index using `hashCode()` so it jumps directly to the correct bucket, making lookups O(1) on average.
+
+**Q3. Is HashMap ordered?**
+
+No. It does not maintain insertion order or sorted order. Use `LinkedHashMap` for insertion order, `TreeMap` for sorted order.
+
+**Q4. Does HashMap allow null?**
+
+Yes. One null key (always stored in bucket 0) and multiple null values.
+
+**Q5. Is HashMap synchronized?**
+
+No. It is not thread-safe. Use `ConcurrentHashMap` for concurrent access.
+
+---
+
+### Internal Structure
+
+**Q6. What is inside a HashMap?**
+
+```
+Node<K,V>[] table  →  Buckets  →  Linked List  →  Tree (after 8 collisions)
+```
+
+**Q7. What is a bucket?**
+
+One slot in the internal `Node[]` array. `table[5]` is bucket 5.
+
+**Q8. What is Node?**
+
+```java
+static class Node<K,V> {
+    final int hash;      // cached hash — never recomputed
+    final K key;
+    V value;
+    Node<K,V> next;      // chain pointer
+}
+```
+
+---
+
+### put()
+
+**Q9. Explain put() step by step.**
+
+1. Compute `key.hashCode()`
+2. Spread hash: `hash = h ^ (h >>> 16)`
+3. Calculate bucket index: `hash & (capacity - 1)`
+4. If bucket empty → insert new Node
+5. If bucket occupied → traverse chain, check `equals()` for each key
+6. If key exists → update value
+7. If key not found → append new Node
+8. If chain length > 8 and capacity >= 64 → treeify
+9. If `size > threshold` → resize
+
+**Q10. Why store hash inside Node?**
+
+Hash comparison (`node.hash == hash`) is a cheap integer check. HashMap does this first before calling the expensive `equals()` method. If hashes differ, `equals()` is skipped entirely.
+
+---
+
+### get()
+
+**Q11. Explain get() step by step.**
+
+1. Compute hash
+2. Find bucket: `hash & (capacity - 1)`
+3. Traverse bucket chain
+4. For each node: compare hash first, then `equals()`
+5. If match → return value
+6. If end of chain → return null
+
+**Q12. Why doesn't HashMap search every element?**
+
+Hashing directly identifies the bucket. Only nodes in that single bucket are searched, not the entire map.
+
+---
+
+### hashCode()
+
+**Q13. Why is hashCode() needed?**
+
+`hashCode()` tells HashMap which bucket to store or search. Without it, every lookup would require scanning all entries — O(n).
+
+**Q14. Does every class have hashCode()?**
+
+Yes. Every class extends `Object`, which defines `hashCode()`. Default implementation returns a value derived from the object's memory address.
+
+**Q15. Does String override hashCode()?**
+
+Yes. Formula: `h = 31 * h + c` for each character `c`.
+
+**Q16. Why 31?**
+
+- It's an odd prime — good hash distribution
+- JVM optimizes `31 * x` to `(x << 5) - x` (bit shift is faster than multiplication)
+
+**Q17. Can two different objects have the same hashCode()?**
+
+Yes. That's called a **collision**. They land in the same bucket and form a chain.
+
+**Q18. Can two equal objects have different hashCode()?**
+
+No. That **breaks** HashMap. If `a.equals(b)` is true but `a.hashCode() != b.hashCode()`, they go to different buckets and `get()` can never find one using the other.
+
+---
+
+### equals()
+
+**Q19. Why is equals() needed?**
+
+`hashCode()` identifies the bucket. `equals()` identifies the exact key within that bucket. Multiple keys can share a bucket, so `equals()` disambiguates.
+
+**Q20. Why must equals() and hashCode() be overridden together?**
+
+The contract:
+
+```
+a.equals(b) == true  →  a.hashCode() == b.hashCode()  (MUST)
+a.hashCode() == b.hashCode()  →  a.equals(b)           (NOT required, just a collision)
+```
+
+If you override `equals()` without `hashCode()`, two logically equal objects may hash to different buckets, making lookup fail silently.
+
+---
+
+### Bucket Calculation
+
+**Q21. How is the bucket index calculated?**
+
+```java
+index = hash & (capacity - 1)
+```
+
+**Q22. Why not use `%` (modulo)?**
+
+Modulo requires integer division — expensive. Bitwise AND is a single CPU instruction. `hash & (capacity - 1)` is equivalent to `hash % capacity` when capacity is a power of two.
+
+**Q23. Why is capacity always a power of two?**
+
+Because `hash & (capacity - 1)` only produces correct uniform distribution when capacity is a power of two:
+
+```
+capacity   = 16  = 10000 (binary)
+capacity-1 = 15  = 01111 (binary)
+
+hash & 01111  →  extracts lower 4 bits  →  index 0-15
+```
+
+---
+
+### Hash Spreading
+
+**Q24. Why does HashMap do `hash ^ (hash >>> 16)`?**
+
+To mix the upper 16 bits into the lower 16 bits. Since bucket index uses only the lower bits (`hash & (capacity-1)`), without spreading, the upper bits are wasted. This reduces collisions when keys have poor hash functions.
+
+**Q25. Why not use hashCode() directly?**
+
+Some classes produce hash codes where all variation is in the upper bits. Direct use would cause many keys to collide in the same few buckets. Hash spreading distributes entries more evenly.
+
+---
+
+### Collision Handling
+
+**Q26. What is a collision?**
+
+Two different keys map to the same bucket index.
+
+**Q27. How are collisions handled?**
+
+By chaining: nodes in the same bucket form a linked list. Each `put()` appends to the chain; each `get()` traverses it.
+
+**Q28. What happens when the chain exceeds 8 nodes?**
+
+If table capacity >= 64, the linked list is converted to a **Red-Black Tree**. Lookup improves from O(n) to O(log n) for that bucket.
+
+**Q29. Why does treeification require capacity >= 64?**
+
+If the table is small, collisions are likely due to insufficient capacity, not bad hashing. Java prefers resizing the table first. Only when the table is already large and collisions persist does it build the more expensive tree structure.
+
+---
+
+### Resize
+
+**Q30. When does resize happen?**
+
+When `size > capacity * loadFactor`. Default: `size > 16 * 0.75 = 12`.
+
+**Q31. What is the default capacity?**
+
+16.
+
+**Q32. What is the default load factor?**
+
+0.75.
+
+**Q33. Why 0.75?**
+
+Empirically optimal balance:
+
+```
+Lower (0.5): fewer collisions, more memory, faster
+Higher (1.0): more collisions, less memory, slower
+0.75: best tradeoff — Poisson distribution gives ~0.00000006% chance of 8+ collisions per bucket
+```
+
+**Q34. What is the complexity of resize?**
+
+O(n). Every entry is repositioned. But Java optimizes: it reuses the stored hash and checks a single bit (`hash & oldCapacity`) to decide if a node stays or moves to `oldIndex + oldCapacity`. No `hashCode()` recalculation.
+
+---
+
+### Complexity
+
+**Q35. put() complexity?**
+
+Average O(1). Worst O(n), or O(log n) after treeification.
+
+**Q36. get() complexity?**
+
+Average O(1). Worst O(n), or O(log n) after treeification.
+
+**Q37. remove() complexity?**
+
+Average O(1). Worst O(n), or O(log n) after treeification.
+
+---
+
+### Chain and Treeification Details
+
+**Q38. What is chain length?**
+
+Number of nodes in one bucket's linked list.
+
+**Q39. Is threshold the same as chain length limit?**
+
+No. `threshold` controls resize (total entries). Chain length of 8 controls treeification (per-bucket).
+
+**Q40. Is there a maximum chain length?**
+
+No hard limit. Even after treeification, thousands of nodes can exist in one bucket — they're stored as a balanced Red-Black Tree with O(log n) operations.
+
+---
+
+### Advanced
+
+**Q41. Why store hash in Node instead of recomputing?**
+
+Avoids calling `hashCode()` repeatedly. During `get()`, `put()`, and resize, the cached hash is reused for fast integer comparison before the more expensive `equals()`.
+
+**Q42. What happens if hashCode() always returns 1?**
+
+Every key goes to the same bucket. HashMap degrades to a linked list (or tree after 8 entries). Worst-case lookup becomes O(n) or O(log n).
+
+**Q43. Why is HashMap average O(1) even though it traverses the chain?**
+
+Because the average chain length stays near the load factor (0.75). HashMap resizes before chains grow long. With good hash distribution, most buckets have 0 or 1 entries.
+
+**Q44. Why treeify at 8 but untreeify at 6?**
+
+Hysteresis. If both thresholds were 8, a bucket at exactly 8 entries would flip between list and tree on every add/remove. The gap of 2 prevents this thrashing.
+
+**Q45. Difference between HashMap and Hashtable?**
+
+| | HashMap | Hashtable |
+|---|---|---|
+| Synchronized | No | Yes (every method) |
+| Null key | Allowed (one) | NullPointerException |
+| Null value | Allowed | NullPointerException |
+| Performance | Faster | Slower |
+| Usage | Modern code | Legacy — never use |
+
+**Q46. Difference between HashMap and ConcurrentHashMap?**
+
+| | HashMap | ConcurrentHashMap |
+|---|---|---|
+| Thread-safe | No | Yes |
+| Null key/value | Allowed | NullPointerException |
+| Locking | None | Per-node CAS + synchronized (Java 8+) |
+| Read performance | Fast | Fast (lock-free reads) |
+| Write performance | Fast | Slightly slower (synchronization overhead) |
+| Use case | Single-threaded | Multi-threaded |
+
+ConcurrentHashMap rejects null because in concurrent code, `get()` returning `null` is ambiguous — does the key not exist, or is the value null?

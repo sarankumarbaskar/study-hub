@@ -610,12 +610,8 @@ kbd {
     <div class="sync-bar" id="syncBar">
       <div class="sync-status" id="syncStatus">
         <span class="sync-dot" id="syncDot"></span>
-        <span id="syncText">Local</span>
+        <span id="syncText">Cloud</span>
       </div>
-      <button class="sync-btn" id="syncBtn" onclick="manualSync()" title="Sync to GitHub">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-        Sync
-      </button>
     </div>
     <div class="keyboard-hints">
       <span><kbd>/</kbd> search</span>
@@ -645,18 +641,6 @@ kbd {
       <button class="search-results-close" onclick="closeSearch()">Close <kbd>Esc</kbd></button>
     </div>
     <div id="searchResultsList"></div>
-  </div>
-</div>
-
-<div class="pat-overlay" id="patOverlay">
-  <div class="pat-modal">
-    <h3>Connect to GitHub</h3>
-    <p>Enter a Personal Access Token with <strong>repo</strong> scope to sync your progress. Generate one at <a href="https://github.com/settings/tokens/new?scopes=repo&description=StudyHub+Tracker" target="_blank" style="color:var(--accent)">github.com/settings/tokens</a>.</p>
-    <input type="password" id="patInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-    <div class="pat-modal-actions">
-      <button class="pat-cancel" onclick="closePatModal()">Cancel</button>
-      <button class="pat-save" onclick="savePatAndSync()">Connect & Sync</button>
-    </div>
   </div>
 </div>
 
@@ -785,17 +769,16 @@ const TOPICS = [
 let docContents = {};                // { 'java::00': '...', 'system-design::01': '...' }
 let currentTopic = null;             // TOPICS[i]
 let currentDocId = null;             // 'roadmap', '00', ...
-let sectionStates = JSON.parse(localStorage.getItem('studyhub-progress') || '{}');
+let sectionStates = {};
 
 function storeKey(topicId, docId) { return topicId + '::' + docId; }
-function sectionKey(topicId, docId, section) { return topicId + '::' + docId + '§' + section; }
+function sectionKey(topicId, docId, section) { return topicId + '::' + docId + '::section:' + encodeURIComponent(section) + '::done'; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    PROGRESS
    ═══════════════════════════════════════════════════════════════════════════ */
 
 function saveProgress() {
-  localStorage.setItem('studyhub-progress', JSON.stringify(sectionStates));
   updateProgress();
 }
 
@@ -992,6 +975,7 @@ function injectCheckboxes(html, topicId, docId) {
 function toggleSection(key, checked) {
   if (checked) sectionStates[key] = true; else delete sectionStates[key];
   saveProgress();
+  syncTrackerChange(key, checked ? true : null);
 }
 
 function buildTOC(html) {
@@ -1250,85 +1234,88 @@ document.getElementById('searchInput').addEventListener('input', e => {
    INTERACTIVE TRACKERS
    ═══════════════════════════════════════════════════════════════════════════ */
 
-let trackerData = JSON.parse(localStorage.getItem('studyhub-tracker') || '{}');
-let syncTimer = null;
-const REPO_OWNER = 'sarankumarbaskar';
-const REPO_NAME = 'study-hub';
-const TRACKER_FILE = 'tracker-data.json';
-
-function saveTracker() {
-  localStorage.setItem('studyhub-tracker', JSON.stringify(trackerData));
-  scheduleSyncToGitHub();
-}
+let trackerData = {};
+const SUPABASE_REST_URL = 'https://ovsejyetwmropnmmcbxs.supabase.co/rest/v1';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_PgToIEkNz4bUp56JyWL3XQ_JLTs2-HO';
+const SUPABASE_PROGRESS_TABLE = 'study_progress';
+const STUDY_USER_ID = 'sbaskar';
 
 function setSyncUI(state, text) {
   const dot = document.getElementById('syncDot');
   const txt = document.getElementById('syncText');
-  const btn = document.getElementById('syncBtn');
   dot.className = 'sync-dot ' + state;
   txt.textContent = text;
-  if (state === 'syncing') { btn.classList.add('syncing'); btn.disabled = true; }
-  else { btn.classList.remove('syncing'); btn.disabled = false; }
 }
 
-function getGitHubPAT() { return localStorage.getItem('studyhub-github-pat') || ''; }
-
-function showPatModal() { document.getElementById('patOverlay').classList.add('visible'); document.getElementById('patInput').focus(); }
-function closePatModal() { document.getElementById('patOverlay').classList.remove('visible'); }
-function savePatAndSync() {
-  const pat = document.getElementById('patInput').value.trim();
-  if (!pat) return;
-  localStorage.setItem('studyhub-github-pat', pat);
-  closePatModal();
-  pushToGitHub();
+function supabaseHeaders(extra = {}) {
+  return {
+    apikey: SUPABASE_PUBLISHABLE_KEY,
+    Authorization: 'Bearer ' + SUPABASE_PUBLISHABLE_KEY,
+    'Content-Type': 'application/json',
+    ...extra,
+  };
 }
 
-function scheduleSyncToGitHub() {
-  setSyncUI('local', 'Unsaved');
-  if (syncTimer) clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => {
-    if (getGitHubPAT()) pushToGitHub();
-  }, 4000);
+function encodeFilterValue(value) {
+  return encodeURIComponent(String(value).replace(/"/g, '\\"'));
 }
 
-async function pullFromGitHub() {
+function parseTrackerKey(key) {
+  const [topicId, docId, rowId, ...fieldParts] = key.split('::');
+  return {
+    id: STUDY_USER_ID + '::' + key,
+    user_id: STUDY_USER_ID,
+    topic_id: topicId,
+    doc_id: docId,
+    row_id: rowId,
+    field: fieldParts.join('::'),
+  };
+}
+
+async function pullFromSupabase() {
   try {
-    const resp = await fetch(`https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/main/${TRACKER_FILE}?t=${Date.now()}`);
+    const url = `${SUPABASE_REST_URL}/${SUPABASE_PROGRESS_TABLE}?user_id=eq.${encodeFilterValue(STUDY_USER_ID)}&select=id,value`;
+    const resp = await fetch(url, { headers: supabaseHeaders() });
     if (!resp.ok) return;
-    const remote = await resp.json();
-    if (remote && typeof remote === 'object') {
-      const local = JSON.parse(localStorage.getItem('studyhub-tracker') || '{}');
-      const merged = { ...remote, ...local };
-      trackerData = merged;
-      localStorage.setItem('studyhub-tracker', JSON.stringify(merged));
-      setSyncUI('synced', 'Synced');
+    const rows = await resp.json();
+    if (Array.isArray(rows)) {
+      const remote = {};
+      rows.forEach(row => {
+        const key = row.id.replace(STUDY_USER_ID + '::', '');
+        remote[key] = row.value;
+      });
+      trackerData = remote;
+      sectionStates = {};
+      Object.entries(remote).forEach(([key, value]) => {
+        if (key.endsWith('::done') && key.includes('::section:') && value === true) {
+          sectionStates[key] = true;
+        }
+      });
+      setSyncUI('synced', 'Cloud');
     }
   } catch (e) {
-    setSyncUI('local', 'Local only');
+    setSyncUI('error', 'Offline');
   }
 }
 
-async function pushToGitHub() {
-  const pat = getGitHubPAT();
-  if (!pat) { showPatModal(); return; }
+async function syncTrackerChange(key, val) {
   setSyncUI('syncing', 'Syncing...');
+  const row = parseTrackerKey(key);
   try {
-    const apiBase = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${TRACKER_FILE}`;
-    const headers = { Authorization: 'Bearer ' + pat, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
-    let sha = '';
-    try {
-      const existing = await fetch(apiBase, { headers });
-      if (existing.ok) { const data = await existing.json(); sha = data.sha; }
-    } catch (e) {}
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify(trackerData, null, 2))));
-    const body = { message: 'Update tracker progress', content, ...(sha ? { sha } : {}) };
-    const resp = await fetch(apiBase, { method: 'PUT', headers, body: JSON.stringify(body) });
+    const url = `${SUPABASE_REST_URL}/${SUPABASE_PROGRESS_TABLE}`;
+    const resp = val === null
+      ? await fetch(`${url}?id=eq.${encodeFilterValue(row.id)}`, {
+          method: 'DELETE',
+          headers: supabaseHeaders({ Prefer: 'return=minimal' }),
+        })
+      : await fetch(`${url}?on_conflict=id`, {
+          method: 'POST',
+          headers: supabaseHeaders({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+          body: JSON.stringify({ ...row, value: val, updated_at: new Date().toISOString() }),
+        });
+
     if (resp.ok) {
-      setSyncUI('synced', 'Synced');
-    } else if (resp.status === 401) {
-      localStorage.removeItem('studyhub-github-pat');
-      setSyncUI('error', 'Auth failed');
-      showPatModal();
+      setSyncUI('synced', 'Cloud');
     } else {
       setSyncUI('error', 'Sync failed');
     }
@@ -1337,19 +1324,15 @@ async function pushToGitHub() {
   }
 }
 
-function manualSync() {
-  if (!getGitHubPAT()) { showPatModal(); return; }
-  pushToGitHub();
-}
-
 function trackerKey(topicId, docId, problemId, field) {
   return topicId + '::' + docId + '::' + problemId + '::' + field;
 }
 
 function getTrackerVal(key) { return trackerData[key] || ''; }
 function setTrackerVal(key, val) {
-  if (val === '' || val === false) delete trackerData[key]; else trackerData[key] = val;
-  saveTracker();
+  const shouldDelete = val === '' || val === false;
+  if (shouldDelete) delete trackerData[key]; else trackerData[key] = val;
+  syncTrackerChange(key, shouldDelete ? null : val);
 }
 
 function makeTrackersInteractive() {
@@ -1475,8 +1458,8 @@ function makeTrackersInteractive() {
   }
 
   showWelcome();
-  setSyncUI(getGitHubPAT() ? 'syncing' : 'local', getGitHubPAT() ? 'Loading...' : 'Local only');
-  await pullFromGitHub();
+  setSyncUI('syncing', 'Loading...');
+  await pullFromSupabase();
 
   await Promise.all(TOPICS.map(t => loadAllDocsForTopic(t)));
 

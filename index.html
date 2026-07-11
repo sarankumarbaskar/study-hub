@@ -765,6 +765,9 @@ const TOPICS = [
     basePath: 'mentor-notes/',
     documents: [
       { id: '01', title: 'HashMap Internals',   icon: '1', file: '01-hashmap-internals.md' },
+      { id: 'lc-001', title: 'LC #1 — Two Sum',                   icon: '1', file: 'lc-001-two-sum.md' },
+      { id: 'lc-049', title: 'LC #49 — Group Anagrams',           icon: '49', file: 'lc-049-group-anagrams.md' },
+      { id: 'lc-238', title: 'LC #238 — Product Except Self',     icon: '238', file: 'lc-238-product-except-self.md' },
     ],
   },
 
@@ -1252,6 +1255,19 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_PgToIEkNz4bUp56JyWL3XQ_JLTs2-HO
 const SUPABASE_PROGRESS_TABLE = 'study_progress';
 const STUDY_USER_ID = 'sbaskar';
 
+const DSA_SOLUTION_MAP = {
+  '1': 'lc-001',
+  '49': 'lc-049',
+  '238': 'lc-238',
+};
+
+function goToSolution(lcNum) {
+  const docId = DSA_SOLUTION_MAP[lcNum];
+  if (!docId) return;
+  switchTopic('mentor-notes');
+  setTimeout(() => loadDoc(docId), 200);
+}
+
 function setSyncUI(state, text) {
   const dot = document.getElementById('syncDot');
   const txt = document.getElementById('syncText');
@@ -1375,6 +1391,7 @@ function makeTrackersInteractive() {
 
     const idCol = hTexts.indexOf('#');
     const nameCol = hTexts.indexOf('problem') !== -1 ? hTexts.indexOf('problem') : hTexts.indexOf('question');
+    const lcCol = hTexts.indexOf('lc#');
 
     const rows = table.querySelectorAll('tbody tr, tr:not(:first-child)');
     rows.forEach(row => {
@@ -1386,6 +1403,19 @@ function makeTrackersInteractive() {
       else if (nameCol >= 0 && cells[nameCol]) rowId = cells[nameCol].textContent.trim().substring(0, 30);
       else rowId = row.rowIndex + '';
       if (!rowId) return;
+
+      const lcNum = lcCol >= 0 && cells[lcCol] ? cells[lcCol].textContent.trim() : '';
+      if (lcNum && DSA_SOLUTION_MAP[lcNum] && nameCol >= 0 && cells[nameCol]) {
+        const nameCell = cells[nameCol];
+        const btn = document.createElement('span');
+        btn.textContent = ' 📝';
+        btn.title = 'View solution notes';
+        btn.style.cssText = 'cursor:pointer;font-size:14px;opacity:0.7;transition:opacity 0.2s;';
+        btn.onmouseenter = function() { this.style.opacity = '1'; };
+        btn.onmouseleave = function() { this.style.opacity = '0.7'; };
+        btn.onclick = function(e) { e.preventDefault(); goToSolution(lcNum); };
+        nameCell.appendChild(btn);
+      }
 
       Object.entries(colMap).forEach(([colIdx, type]) => {
         const ci = parseInt(colIdx);

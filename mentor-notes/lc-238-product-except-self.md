@@ -25,7 +25,20 @@ product of everything LEFT of i  ×  product of everything RIGHT of i
 
 ## Approach 1: Brute Force
 
-For every index, multiply everything else.
+For every index, loop through the whole array and multiply everything except itself.
+
+### Pseudocode
+
+```
+for i = 0 to n-1:
+    product = 1
+    for j = 0 to n-1:
+        if j != i:
+            product = product × nums[j]
+    answer[i] = product
+```
+
+### Java
 
 ```java
 for (int i = 0; i < n; i++) {
@@ -48,9 +61,22 @@ Why not enough: recomputes products redundantly for each index.
 
 ## Approach 2: Better — Prefix + Suffix Arrays
 
-Precompute:
-- `prefix[i]` = product of all elements before `i`
-- `suffix[i]` = product of all elements after `i`
+Precompute product of everything to the left (prefix) and everything to the right (suffix) for each index. Answer is prefix × suffix.
+
+### Pseudocode
+
+```
+prefix[0] = 1
+for i = 1 to n-1:
+    prefix[i] = prefix[i-1] × nums[i-1]
+
+suffix[n-1] = 1
+for i = n-2 down to 0:
+    suffix[i] = suffix[i+1] × nums[i+1]
+
+for i = 0 to n-1:
+    result[i] = prefix[i] × suffix[i]
+```
 
 ### Trace
 
@@ -106,7 +132,21 @@ Space: O(n)
 
 ## Approach 3: Optimal — Output Array + Running Suffix
 
-Use the output array itself for prefix, then sweep right-to-left with a running variable.
+Use the output array itself to store prefix products. Then sweep right-to-left with a single running variable and multiply into the output. No extra arrays needed.
+
+### Pseudocode
+
+```
+left = 1
+for i = 0 to n-1:
+    result[i] = left          ← store product of everything BEFORE i
+    left = left × nums[i]     ← include current for future indices
+
+right = 1
+for i = n-1 down to 0:
+    result[i] = result[i] × right   ← multiply by product of everything AFTER i
+    right = right × nums[i]          ← include current for future leftward indices
+```
 
 ### Trace
 

@@ -23,7 +23,25 @@ Anagrams have the same characters with the same frequencies.
 
 ## Approach 1: Brute Force
 
-Compare every string with every other string to check if they're anagrams.
+For each string, compare it with every other string to check if they're anagrams. Group matches together.
+
+### Pseudocode
+
+```
+create visited array of size n
+
+for i = 0 to n-1:
+    if visited[i]: skip
+
+    create new group with strs[i]
+
+    for j = i+1 to n-1:
+        if not visited[j] and isAnagram(strs[i], strs[j]):
+            add strs[j] to group
+            mark visited[j]
+
+    add group to result
+```
 
 ```
 Time:  O(n² × k)    where k = average string length
@@ -36,18 +54,32 @@ Why not enough: pairwise comparison is redundant. We keep rediscovering the same
 
 ## Approach 2: Better — Sorted String Key
 
-If two strings are anagrams, their sorted form is identical.
+If two strings are anagrams, their sorted form is identical. Use that sorted form as a HashMap key.
+
+### Pseudocode
 
 ```
-eat → aet
-tea → aet
-ate → aet
-tan → ant
-nat → ant
-bat → abt
+create empty map: key=string, value=list of strings
+
+for each word in strs:
+    sorted_word = sort characters of word
+    add word to map[sorted_word]
+
+return all values from map
 ```
 
-Use sorted string as HashMap key.
+### Trace
+
+```
+eat → sort → "aet"    → map["aet"] = ["eat"]
+tea → sort → "aet"    → map["aet"] = ["eat", "tea"]
+tan → sort → "ant"    → map["ant"] = ["tan"]
+ate → sort → "aet"    → map["aet"] = ["eat", "tea", "ate"]
+nat → sort → "ant"    → map["ant"] = ["tan", "nat"]
+bat → sort → "abt"    → map["abt"] = ["bat"]
+```
+
+### Java
 
 ```java
 class Solution {
@@ -76,12 +108,35 @@ Space: O(n × k)
 
 ## Approach 3: Optimal — Frequency Count Key
 
-Instead of sorting, count character frequencies and build a key.
+Instead of sorting, count character frequencies and convert to a delimited string key. Anagrams produce the same frequency signature.
+
+### Pseudocode
 
 ```
-eat → a:1, e:1, t:1 → "#1#0#0#0#1#0...#1..."
-tea → a:1, e:1, t:1 → "#1#0#0#0#1#0...#1..."   ← same key!
+create empty map: key=string, value=list of strings
+
+for each word in strs:
+    create count array of size 26 (all zeros)
+
+    for each character c in word:
+        count[c - 'a']++
+
+    build key from count: "#1#0#0#0#1#0...#1..."
+
+    add word to map[key]
+
+return all values from map
 ```
+
+### Trace
+
+```
+eat → count = [1,0,0,0,1,0,...,1,...] → key = "#1#0#0#0#1#0...#1..."
+tea → count = [1,0,0,0,1,0,...,1,...] → key = "#1#0#0#0#1#0...#1..."  ← SAME!
+tan → count = [1,0,0,0,0,...,1,...,1] → key = "#1#0#0#0#0...#1...#1"  ← different
+```
+
+### Java
 
 ```java
 class Solution {

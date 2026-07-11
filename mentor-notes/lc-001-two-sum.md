@@ -21,7 +21,18 @@ Output: [0, 1]     // because nums[0] + nums[1] = 2 + 7 = 9
 
 ## Approach 1: Brute Force
 
-Check every pair.
+For each number, check every other number to see if they add up to target.
+
+### Pseudocode
+
+```
+for i = 0 to n-1:
+    for j = i+1 to n-1:
+        if nums[i] + nums[j] == target:
+            return [i, j]
+```
+
+### Java
 
 ```java
 for (int i = 0; i < n; i++) {
@@ -36,13 +47,27 @@ Time:  O(n²)
 Space: O(1)
 ```
 
-Why not enough: redundant comparisons. For each number, we're scanning the entire array again.
+Why not enough: for each number, we scan the entire remaining array. Redundant work.
 
 ---
 
 ## Approach 2: Optimal — Single-Pass HashMap
 
-Key insight: for each `nums[i]`, the complement is `target - nums[i]`. If that complement is already in the map, we found our pair.
+For each number, compute what we need: `complement = target - current`. If that complement is already in the map, we found our pair. Otherwise, store the current number for future lookups.
+
+### Pseudocode
+
+```
+create empty map
+
+for i = 0 to n-1:
+    complement = target - nums[i]
+
+    if complement exists in map:
+        return [map[complement], i]
+
+    store nums[i] -> i in map
+```
 
 ### Trace
 
@@ -54,7 +79,7 @@ i=0: num=2, complement=9-2=7, map has 7? No  → map={2:0}
 i=1: num=7, complement=9-7=2, map has 2? YES → return [0, 1]
 ```
 
-### Code
+### Java
 
 ```java
 class Solution {

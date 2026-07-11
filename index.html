@@ -757,17 +757,28 @@ const TOPICS = [
   },
 
   {
-    id: 'mentor-notes',
-    title: 'Mentor Notes',
-    subtitle: 'Visual explanations, traces, and interview answers',
-    icon: 'M',
+    id: 'java-notes',
+    title: 'Java Notes',
+    subtitle: 'Mentor-style Java internals with visuals, traces, Q&A',
+    icon: 'J',
     color: '#f59e0b',
-    basePath: 'mentor-notes/',
+    basePath: 'java-notes/',
     documents: [
-      { id: '01', title: 'HashMap Internals',   icon: '1', file: '01-hashmap-internals.md' },
-      { id: 'lc-001', title: 'LC #1 — Two Sum',                   icon: '1', file: 'lc-001-two-sum.md' },
-      { id: 'lc-049', title: 'LC #49 — Group Anagrams',           icon: '49', file: 'lc-049-group-anagrams.md' },
-      { id: 'lc-238', title: 'LC #238 — Product Except Self',     icon: '238', file: 'lc-238-product-except-self.md' },
+      { id: '01', title: 'HashMap Internals', icon: '1', file: '01-hashmap-internals.md' },
+    ],
+  },
+
+  {
+    id: 'dsa-solutions',
+    title: 'DSA Solutions',
+    subtitle: 'BF → Better → Optimal with pseudocode, Java, and internals',
+    icon: 'L',
+    color: '#ec4899',
+    basePath: 'dsa-solutions/',
+    documents: [
+      { id: 'lc-001', title: 'LC #1 — Two Sum',               icon: '1',   file: 'lc-001-two-sum.md' },
+      { id: 'lc-049', title: 'LC #49 — Group Anagrams',        icon: '49',  file: 'lc-049-group-anagrams.md' },
+      { id: 'lc-238', title: 'LC #238 — Product Except Self',  icon: '238', file: 'lc-238-product-except-self.md' },
     ],
   },
 
@@ -1264,7 +1275,7 @@ const DSA_SOLUTION_MAP = {
 function goToSolution(lcNum) {
   const docId = DSA_SOLUTION_MAP[lcNum];
   if (!docId) return;
-  switchTopic('mentor-notes');
+  switchTopic('dsa-solutions');
   setTimeout(() => loadDoc(docId), 200);
 }
 

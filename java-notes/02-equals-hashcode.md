@@ -1090,6 +1090,764 @@ public class EqualsHashCodeDemo {
 
 ---
 
+## Why hashCode() Returns int, Not Bucket Index
+
+`hashCode()` returns a 32-bit `int`.
+
+It does **not** return the bucket index.
+
+Example:
+
+```java
+int hash = employee.hashCode();
+```
+
+This hash can be any `int` value:
+
+```text
+-2,147,483,648 to 2,147,483,647
+```
+
+But a `HashMap` table may have only:
+
+```text
+16 buckets
+32 buckets
+64 buckets
+```
+
+So Java must convert the 32-bit hash into a valid bucket index.
+
+HashMap does this:
+
+```java
+index = (n - 1) & hash;
+```
+
+where:
+
+```text
+n = table capacity
+```
+
+Example:
+
+```text
+n = 16
+n - 1 = 15
+
+index = hash & 15
+```
+
+This produces an index from:
+
+```text
+0 to 15
+```
+
+So the flow is:
+
+```text
+object fields
+   ↓
+hashCode() returns 32-bit int
+   ↓
+HashMap spreads hash bits
+   ↓
+HashMap converts hash to bucket index
+```
+
+Interview sentence:
+
+> `hashCode()` does not directly decide the bucket. It returns a 32-bit integer, and HashMap maps that integer into the table range using `(n - 1) & hash`.
+
+---
+
+## Simplified HashMap get() Algorithm
+
+This is the clearest way to connect `hashCode()` and `equals()`.
+
+Simplified logic:
+
+```java
+V get(Object key) {
+    int h = key.hashCode();
+    int hash = h ^ (h >>> 16);
+    int index = (table.length - 1) & hash;
+
+    Node<K,V> current = table[index];
+
+    while (current != null) {
+        if (current.hash == hash && key.equals(current.key)) {
+            return current.value;
+        }
+
+        current = current.next;
+    }
+
+    return null;
+}
+```
+
+Important order:
+
+```text
+1. hashCode() decides candidate bucket
+2. stored hash is compared first
+3. equals() confirms exact key
+```
+
+Why compare hash before `equals()`?
+
+Because integer comparison is cheap:
+
+```java
+current.hash == hash
+```
+
+Calling `equals()` may be expensive, especially if it compares many fields.
+
+So HashMap first asks:
+
+```text
+Could this be the same key based on hash?
+```
+
+Only then:
+
+```text
+Is this logically the same key based on equals?
+```
+
+---
+
+## Hash Spreading
+
+HashMap does not use `hashCode()` directly.
+
+It spreads the hash:
+
+```java
+static final int hash(Object key) {
+    int h;
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+}
+```
+
+Why?
+
+HashMap bucket index uses lower bits:
+
+```java
+index = (n - 1) & hash;
+```
+
+If `n = 16`, only the lower 4 bits are used:
+
+```text
+n - 1 = 15 = 0000 1111
+```
+
+Problem:
+
+Some `hashCode()` implementations have useful variation in upper bits but poor variation in lower bits.
+
+Without spreading:
+
+```text
+upper bits may be ignored
+lower bits decide bucket
+many keys collide
+```
+
+With spreading:
+
+```text
+h ^ (h >>> 16)
+```
+
+mixes high bits into low bits.
+
+This improves bucket distribution.
+
+Interview sentence:
+
+> HashMap spreads the hash because table indexing uses lower bits. Mixing upper bits into lower bits reduces collisions when hashCode implementations have poor lower-bit distribution.
+
+---
+
+## Why 31 Is Common in hashCode()
+
+Manual hash code often looks like:
+
+```java
+int result = Integer.hashCode(id);
+result = 31 * result + Objects.hashCode(email);
+return result;
+```
+
+Why `31`?
+
+### 1. It is an odd prime
+
+Prime numbers tend to distribute combinations better than many composite numbers.
+
+### 2. It reduces simple collision patterns
+
+If you combine fields with a small or even multiplier, different field combinations can collide more easily.
+
+### 3. It is efficient
+
+The JVM can optimize:
+
+```java
+31 * x
+```
+
+as:
+
+```text
+(x << 5) - x
+```
+
+because:
+
+```text
+32x - x = 31x
+```
+
+### 4. It is a Java convention
+
+Many JDK classes historically used `31`, especially `String.hashCode()`.
+
+You do not need to worship `31`.
+
+The important idea is:
+
+```text
+combine all fields used in equals()
+use stable deterministic logic
+avoid terrible distribution
+```
+
+---
+
+## Objects.hash() vs Manual hashCode()
+
+Convenient version:
+
+```java
+@Override
+public int hashCode() {
+    return Objects.hash(id, email);
+}
+```
+
+This is readable and fine for normal business classes.
+
+But internally it uses varargs:
+
+```java
+Object... values
+```
+
+That means an array is created.
+
+For most backend domain objects:
+
+```text
+Objects.hash() is fine.
+```
+
+For performance-critical classes used millions of times:
+
+```text
+manual hashCode() is better.
+```
+
+Manual version:
+
+```java
+@Override
+public int hashCode() {
+    int result = Integer.hashCode(id);
+    result = 31 * result + Objects.hashCode(email);
+    return result;
+}
+```
+
+Rule:
+
+```text
+Business code:          Objects.hash() is okay
+Performance hot path:   write manual hashCode()
+```
+
+---
+
+## HashSet Example
+
+`HashSet` uses `HashMap` internally.
+
+Conceptually:
+
+```java
+set.add(employee)
+```
+
+behaves like:
+
+```java
+map.put(employee, PRESENT)
+```
+
+where `PRESENT` is a dummy object.
+
+Correct example:
+
+```java
+Set<Employee> set = new HashSet<>();
+
+set.add(new Employee(1, "Alice"));
+set.add(new Employee(1, "Alice Clone"));
+
+System.out.println(set.size()); // 1
+```
+
+Why `1`?
+
+Because:
+
+```text
+first Employee goes into bucket based on id hash
+second Employee has same hash
+equals() returns true
+HashSet treats it as duplicate
+```
+
+Broken example: `equals()` without `hashCode()`.
+
+```java
+Set<BrokenEmployee> set = new HashSet<>();
+
+set.add(new BrokenEmployee(1, "Alice"));
+set.add(new BrokenEmployee(1, "Alice Clone"));
+
+System.out.println(set.size()); // 2
+```
+
+Why `2`?
+
+Because both objects may land in different buckets, so the set never discovers they are logically equal.
+
+Interview sentence:
+
+> HashSet uniqueness depends on the same equals/hashCode contract as HashMap keys, because HashSet is backed by HashMap.
+
+---
+
+## IdentityHashMap
+
+`IdentityHashMap` is different from `HashMap`.
+
+```text
+HashMap:
+    uses equals()
+    uses hashCode()
+
+IdentityHashMap:
+    uses ==
+    uses System.identityHashCode()
+```
+
+Example:
+
+```java
+Map<Employee, String> map = new IdentityHashMap<>();
+
+Employee e1 = new Employee(1, "Alice");
+Employee e2 = new Employee(1, "Alice");
+
+map.put(e1, "first");
+map.put(e2, "second");
+
+System.out.println(map.size()); // 2
+```
+
+Even if:
+
+```java
+e1.equals(e2) == true
+```
+
+`IdentityHashMap` treats them as different because:
+
+```java
+e1 == e2
+```
+
+is false.
+
+Use cases:
+
+```text
+object graph traversal
+serialization frameworks
+proxy tracking
+cycle detection by object identity
+```
+
+Do not use it for normal business key lookup.
+
+---
+
+## System.identityHashCode()
+
+Normally:
+
+```java
+obj.hashCode()
+```
+
+may call your overridden `hashCode()`.
+
+But:
+
+```java
+System.identityHashCode(obj)
+```
+
+returns an identity-based hash code, ignoring overrides.
+
+Example:
+
+```java
+Employee e1 = new Employee(1, "Alice");
+Employee e2 = new Employee(1, "Alice");
+
+System.out.println(e1.hashCode());                 // 1, if overridden by id
+System.out.println(e2.hashCode());                 // 1
+
+System.out.println(System.identityHashCode(e1));   // different identity hash
+System.out.println(System.identityHashCode(e2));   // different identity hash
+```
+
+This helps when debugging object identity vs logical equality.
+
+---
+
+## Lombok @EqualsAndHashCode
+
+Modern Java projects often use Lombok:
+
+```java
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
+class Employee {
+    private int id;
+    private String name;
+    private String department;
+}
+```
+
+This generates `equals()` and `hashCode()` automatically.
+
+But be careful.
+
+By default, Lombok may include all non-static fields.
+
+That may be wrong.
+
+Example:
+
+```text
+Employee identity should be id
+but Lombok includes name and department
+```
+
+Then changing department can change equality and hash code.
+
+Better:
+
+```java
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+class Employee {
+    @EqualsAndHashCode.Include
+    private final int id;
+
+    private String name;
+    private String department;
+}
+```
+
+Rule:
+
+```text
+Lombok saves typing, not thinking.
+You still decide identity fields.
+```
+
+---
+
+## IDE Generation
+
+Most developers do not manually write these methods every time.
+
+In IntelliJ:
+
+```text
+Right click
+Generate
+equals() and hashCode()
+Choose fields
+```
+
+This is useful.
+
+But the IDE cannot decide business identity for you.
+
+You must decide:
+
+```text
+Should equality use id?
+email?
+all fields?
+```
+
+Generated code is only as correct as your field selection.
+
+---
+
+## Object Documentation Contract
+
+These rules are not style preferences.
+
+They come from Java's `Object.equals()` and `Object.hashCode()` specifications.
+
+`equals()` must be:
+
+```text
+reflexive
+symmetric
+transitive
+consistent
+false for null
+```
+
+`hashCode()` must be:
+
+```text
+consistent during execution if equality fields do not change
+same for equal objects
+not necessarily different for unequal objects
+```
+
+This is a language-level contract.
+
+Collections like `HashMap`, `HashSet`, and `Hashtable` rely on it.
+
+---
+
+## Deep Equality for Arrays
+
+For one-dimensional arrays:
+
+```java
+int[] a = {1, 2};
+int[] b = {1, 2};
+
+Arrays.equals(a, b);    // true
+Arrays.hashCode(a);     // content-based hash
+```
+
+For nested arrays:
+
+```java
+String[][] a = {
+    {"A", "B"},
+    {"C", "D"}
+};
+
+String[][] b = {
+    {"A", "B"},
+    {"C", "D"}
+};
+```
+
+Use:
+
+```java
+Arrays.deepEquals(a, b);
+Arrays.deepHashCode(a);
+```
+
+Why?
+
+For object arrays, normal `Arrays.equals()` compares elements using `equals()`.
+
+But if those elements are arrays, their `equals()` is still reference equality.
+
+So nested arrays need `deepEquals()`.
+
+---
+
+## Mutability Best Practice
+
+Only immutable fields should participate in `equals()` and `hashCode()`.
+
+Good:
+
+```java
+class Employee {
+    private final int id;
+    private String name;
+    private String address;
+
+    // equals/hashCode use only id
+}
+```
+
+Risky:
+
+```java
+class Employee {
+    private int id;
+    private String name;
+    private String address;
+
+    // equals/hashCode use name and address
+}
+```
+
+Why risky?
+
+Names and addresses can change.
+
+If the object is inside a `HashSet` or used as a `HashMap` key, changing those fields can make the object unreachable.
+
+Rule:
+
+```text
+Mutable fields should usually not be part of equality/hash.
+```
+
+---
+
+## Business Identity vs Database Identity
+
+This is a senior-level design question.
+
+Example:
+
+```java
+class Employee {
+    Long id;        // database id
+    String email;   // business identifier
+    String name;
+    BigDecimal salary;
+}
+```
+
+What should equality use?
+
+Options:
+
+```text
+id?
+email?
+all fields?
+```
+
+Answer:
+
+```text
+Equality should reflect business identity.
+```
+
+If `email` uniquely identifies an employee before persistence, use email.
+
+If database `id` is assigned only after saving, using `id` can be tricky for transient objects.
+
+If you use all fields, changing `name` or `salary` changes equality, which is usually wrong.
+
+Typical guidance:
+
+```text
+Entities: choose stable business key carefully, or use DB id only after persistence with caution.
+Value Objects: compare all meaningful fields.
+DTOs/Records: all-field equality is often fine.
+```
+
+Example:
+
+```text
+Money(amount=10, currency=USD)
+```
+
+is a value object. Equality should use all fields.
+
+```text
+Employee(id=123, name=Alice, salary=100000)
+```
+
+is an entity. Equality should usually not depend on salary.
+
+---
+
+## Poor Hash Function Impact
+
+Bad hash function:
+
+```java
+@Override
+public int hashCode() {
+    return 1;
+}
+```
+
+Now every object goes to the same bucket.
+
+Visual:
+
+```text
+bucket[1] → A → B → C → D → E → F → G → H → I
+```
+
+Lookup becomes:
+
+```text
+O(n)
+```
+
+because HashMap must traverse the chain.
+
+Since Java 8, heavily-collided buckets can treeify:
+
+```text
+linked list → red-black tree
+```
+
+Then worst-case lookup improves to:
+
+```text
+O(log n)
+```
+
+But good hashing is still important because:
+
+```text
+tree nodes use more memory
+tree operations are slower than normal O(1) bucket lookup
+collisions hurt cache locality
+```
+
+Interview sentence:
+
+> A poor hash function increases collisions, which increases bucket traversal and degrades expected O(1) lookup toward O(n), or O(log n) after Java 8 treeification.
+
+---
+
 ## Interview Q&A
 
 ### Q1. What is the difference between `==` and `equals()`?

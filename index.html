@@ -757,6 +757,18 @@ const TOPICS = [
   },
 
   {
+    id: 'today-tracker',
+    title: 'Today Tracker',
+    subtitle: 'Daily plan, progress, and carry-forward tasks',
+    icon: 'T',
+    color: '#22d3ee',
+    basePath: '',
+    documents: [
+      { id: 'today', title: 'Today', icon: 'T', file: '' },
+    ],
+  },
+
+  {
     id: 'java-notes',
     title: 'Java Notes',
     subtitle: 'Mentor-style Java internals with visuals, traces, Q&A',
@@ -1031,6 +1043,23 @@ function scrollToTop() {
   document.getElementById('mainContent').scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+function formatLocalDate(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function formatDisplayDate(isoDate) {
+  const date = new Date(`${isoDate}T00:00:00`);
+  return date.toLocaleDateString(undefined, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 function getReadingTime(topicId, docId) {
   const c = docContents[storeKey(topicId, docId)];
   if (!c) return 0;
@@ -1096,6 +1125,12 @@ function renderDoc(docId) {
 async function loadDoc(docId) {
   if (!currentTopic) return;
   closeSidebar();
+
+  if (currentTopic.id === 'today-tracker') {
+    await renderTodayTracker();
+    return;
+  }
+
   const key = storeKey(currentTopic.id, docId);
   if (docContents[key]) { renderDoc(docId); return; }
 
@@ -1117,6 +1152,7 @@ async function loadAllDocsForTopic(topic) {
   const promises = topic.documents.map(async doc => {
     const key = storeKey(topic.id, doc.id);
     if (docContents[key]) return;
+    if (!doc.file) return;
     try {
       const resp = await fetch(topic.basePath + doc.file);
       if (resp.ok) docContents[key] = await resp.text();
@@ -1314,6 +1350,136 @@ function parseTrackerKey(key) {
     row_id: rowId,
     field: fieldParts.join('::'),
   };
+}
+
+async function fetchDailyTasks(planDate = formatLocalDate()) {
+  const url = `${SUPABASE_REST_URL}/${SUPABASE_PROGRESS_TABLE}?user_id=eq.${encodeFilterValue(STUDY_USER_ID)}&topic_id=eq.daily-plan&doc_id=eq.${encodeFilterValue(planDate)}&field=eq.task&select=id,row_id,value`;
+  const resp = await fetch(url, { headers: supabaseHeaders() });
+  if (!resp.ok) return [];
+  const rows = await resp.json();
+  if (!Array.isArray(rows)) return [];
+  return rows
+    .map(row => ({ id: row.row_id, dbId: row.id, ...row.value }))
+    .sort((a, b) => {
+      const priority = { high: 0, medium: 1, low: 2 };
+      const pa = priority[a.priority] ?? 9;
+      const pb = priority[b.priority] ?? 9;
+      if (pa !== pb) return pa - pb;
+      return String(a.id).localeCompare(String(b.id));
+    });
+}
+
+function renderTaskGroup(track, tasks) {
+  const items = tasks.map(task => {
+    const checked = task.status === 'done' ? 'checked' : '';
+    const carried = task.source_date && task.source_date !== task.plan_date
+      ? `<span style="color:var(--yellow);font-size:11px;margin-left:8px">carried from ${task.source_date}</span>`
+      : '';
+    const resource = task.resource_link
+      ? `<a href="${task.resource_link}" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">Resource</a>`
+      : '';
+    const meta = [
+      task.estimated_min ? `${task.estimated_min} min` : '',
+      task.priority ? `${task.priority} priority` : '',
+      resource,
+    ].filter(Boolean).join(' · ');
+
+    return `<div class="daily-task" style="display:flex;gap:12px;padding:14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);margin-bottom:10px">
+      <input type="checkbox" class="tracker-check" ${checked} onchange="toggleDailyTask('${task.plan_date}', '${task.id}', this.checked)" style="margin-top:4px">
+      <div style="flex:1">
+        <div style="font-weight:700;color:var(--text)">${task.title}${carried}</div>
+        ${task.description ? `<div style="color:var(--text-muted);font-size:13px;margin-top:4px">${task.description}</div>` : ''}
+        ${meta ? `<div style="color:var(--text-muted);font-size:12px;margin-top:6px">${meta}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<section style="margin:28px 0">
+    <h2>${track}</h2>
+    ${items}
+  </section>`;
+}
+
+async function renderTodayTracker() {
+  currentDocId = 'today';
+  const planDate = formatLocalDate();
+  const contentEl = document.getElementById('contentArea');
+  contentEl.classList.add('loading');
+  showSkeleton();
+
+  const tasks = await fetchDailyTasks(planDate);
+  const done = tasks.filter(task => task.status === 'done').length;
+  const pct = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
+  const grouped = tasks.reduce((acc, task) => {
+    const track = task.track || 'Other';
+    if (!acc[track]) acc[track] = [];
+    acc[track].push(task);
+    return acc;
+  }, {});
+  const trackOrder = ['DSA Revision', 'DSA', 'Java', 'System Design', 'Reading', 'Review', 'Career', 'Other'];
+  const sections = trackOrder
+    .filter(track => grouped[track])
+    .map(track => renderTaskGroup(track, grouped[track]))
+    .join('');
+
+  const html = `<div class="doc-header">
+    <span class="doc-header-badge" style="background:rgba(34,211,238,0.12);color:#22d3ee">
+      Today Tracker
+    </span>
+    <span class="doc-header-sep">&middot;</span>
+    <span class="doc-reading-time">${done}/${tasks.length} done · ${pct}%</span>
+  </div>
+  <h1>${formatDisplayDate(planDate)}</h1>
+  <blockquote><p><strong>Mission:</strong> Finish Arrays & Hashing, consolidate Java equality/hash concepts, and close DDIA Chapter 1.</p></blockquote>
+  ${tasks.length ? sections : `<div class="file-warning visible"><h2>No plan for today yet</h2><p>Ask the mentor for <code>Today</code> to generate tasks.</p></div>`}`;
+
+  contentEl.innerHTML = html;
+  buildTOC(html);
+  document.getElementById('mainContent').scrollTop = 0;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.doc === 'today');
+  });
+  updateProgress();
+  requestAnimationFrame(() => contentEl.classList.remove('loading'));
+}
+
+async function toggleDailyTask(planDate, taskId, checked) {
+  const tasks = await fetchDailyTasks(planDate);
+  const task = tasks.find(item => item.id === taskId);
+  if (!task) return;
+
+  const updated = {
+    track: task.track,
+    title: task.title,
+    description: task.description || '',
+    resource_link: task.resource_link || '',
+    estimated_min: task.estimated_min || null,
+    status: checked ? 'done' : 'pending',
+    priority: task.priority || 'medium',
+    plan_date: planDate,
+    source_date: task.source_date || planDate,
+  };
+
+  const id = `${STUDY_USER_ID}::daily-plan::${planDate}::${taskId}::task`;
+  const row = {
+    id,
+    user_id: STUDY_USER_ID,
+    topic_id: 'daily-plan',
+    doc_id: planDate,
+    row_id: taskId,
+    field: 'task',
+    value: updated,
+    updated_at: new Date().toISOString(),
+  };
+
+  setSyncUI('syncing', 'Syncing...');
+  const resp = await fetch(`${SUPABASE_REST_URL}/${SUPABASE_PROGRESS_TABLE}?on_conflict=id`, {
+    method: 'POST',
+    headers: supabaseHeaders({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+    body: JSON.stringify(row),
+  });
+  setSyncUI(resp.ok ? 'synced' : 'error', resp.ok ? 'Cloud' : 'Sync failed');
+  await renderTodayTracker();
 }
 
 async function pullFromSupabase() {

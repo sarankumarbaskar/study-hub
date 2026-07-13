@@ -1288,6 +1288,7 @@ document.getElementById('searchInput').addEventListener('input', e => {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 let trackerData = {};
+let selectedDailyPlanDate = formatLocalDate();
 const SUPABASE_REST_URL = 'https://ovsejyetwmropnmmcbxs.supabase.co/rest/v1';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_PgToIEkNz4bUp56JyWL3XQ_JLTs2-HO';
 const SUPABASE_PROGRESS_TABLE = 'study_progress';
@@ -1359,6 +1360,18 @@ async function fetchDailyTasks(planDate = formatLocalDate()) {
     });
 }
 
+async function fetchDailyPlanDates() {
+  const url = `${SUPABASE_REST_URL}/${SUPABASE_PROGRESS_TABLE}?user_id=eq.${encodeFilterValue(STUDY_USER_ID)}&topic_id=eq.daily-plan&field=eq.task&select=doc_id`;
+  const resp = await fetch(url, { headers: supabaseHeaders() });
+  if (!resp.ok) return [];
+  const rows = await resp.json();
+  if (!Array.isArray(rows)) return [];
+  return [...new Set(rows.map(row => row.doc_id))]
+    .filter(Boolean)
+    .sort()
+    .reverse();
+}
+
 function renderTaskGroup(track, tasks) {
   const items = tasks.map(task => {
     const checked = task.status === 'done' ? 'checked' : '';
@@ -1390,14 +1403,18 @@ function renderTaskGroup(track, tasks) {
   </section>`;
 }
 
-async function renderTodayTracker() {
+async function renderTodayTracker(planDate = selectedDailyPlanDate || formatLocalDate()) {
   currentDocId = 'today';
-  const planDate = formatLocalDate();
+  selectedDailyPlanDate = planDate;
   const contentEl = document.getElementById('contentArea');
   contentEl.classList.add('loading');
   showSkeleton();
 
-  const tasks = await fetchDailyTasks(planDate);
+  const [tasks, planDates] = await Promise.all([
+    fetchDailyTasks(planDate),
+    fetchDailyPlanDates(),
+  ]);
+  if (!planDates.includes(planDate)) planDates.unshift(planDate);
   const done = tasks.filter(task => task.status === 'done').length;
   const pct = tasks.length ? Math.round((done / tasks.length) * 100) : 0;
   const grouped = tasks.reduce((acc, task) => {
@@ -1420,6 +1437,13 @@ async function renderTodayTracker() {
     <span class="doc-reading-time">${done}/${tasks.length} done · ${pct}%</span>
   </div>
   <h1>${formatDisplayDate(planDate)}</h1>
+  <div style="display:flex;align-items:center;gap:10px;margin:14px 0 22px;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary)">
+    <label for="dailyPlanDate" style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px">Plan Date</label>
+    <input id="dailyPlanDate" type="date" value="${planDate}" onchange="renderTodayTracker(this.value)" class="tracker-date" style="max-width:160px">
+    <select onchange="renderTodayTracker(this.value)" class="tracker-select" style="max-width:220px">
+      ${planDates.map(date => `<option value="${date}" ${date === planDate ? 'selected' : ''}>${date}</option>`).join('')}
+    </select>
+  </div>
   <blockquote><p><strong>Mission:</strong> Finish Arrays & Hashing, consolidate Java equality/hash concepts, and close DDIA Chapter 1.</p></blockquote>
   ${tasks.length ? sections : `<div class="file-warning visible"><h2>No plan for today yet</h2><p>Ask the mentor for <code>Today</code> to generate tasks.</p></div>`}`;
 
@@ -1469,7 +1493,7 @@ async function toggleDailyTask(planDate, taskId, checked) {
     body: JSON.stringify(row),
   });
   setSyncUI(resp.ok ? 'synced' : 'error', resp.ok ? 'Cloud' : 'Sync failed');
-  await renderTodayTracker();
+  await renderTodayTracker(planDate);
 }
 
 async function pullFromSupabase() {

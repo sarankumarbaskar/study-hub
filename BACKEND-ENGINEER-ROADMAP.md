@@ -677,52 +677,65 @@ Every Sunday, review and plan:
 | Track | Focus | Why It Connects |
 |-------|-------|-----------------|
 | **DSA** | Two Pointers finish (3 remaining) + Sliding Window start (8 problems) — target 3/day | Two Pointers + Sliding Window both use pointer manipulation on arrays/strings |
-| **Java** | equals/hashCode coding practice (close it) + String internals (pool, immutability, compact strings, `StringBuilder`) | Sliding window on strings requires understanding `char[]` and String internals |
+| **Java** | equals/hashCode coding practice (close it) + String internals (pool, immutability, compact strings, `StringBuilder`, Java 9–15 features) | Sliding window on strings requires understanding `char[]` and String internals |
 | **System Design** | DDIA Ch 1 (close it) + DDIA Ch 2 start | Reliability, scalability, data models |
 | **Kafka/Redis** | Kafka fundamentals: topics, partitions, brokers | Kafka partition key = hashing |
 | **Career** | Update resume with Red Hat projects using STAR format | |
 | **Blog** | Stripe API design blog | |
 
+### Week 2 (Jul 25–31) — Sliding Window Finish + Binary Search Start
+
 | Track | Focus | Why It Connects |
 |-------|-------|-----------------|
 | **DSA** | Sliding Window finish (3 remaining) + Binary Search start (6 problems) — target 3/day | Binary search on answer space needs overflow awareness |
-| **Java** | Autoboxing, `Integer` caching (-128 to 127), `Comparable`/`Comparator`, `int` overflow | Binary search `(lo + hi) / 2` overflow trap. Comparator contract for sorting. |
+| **Java** | Autoboxing, `Integer` caching (-128 to 127), `Comparable`/`Comparator`, `int` overflow, `var` (Java 10) | Binary search `(lo + hi) / 2` overflow trap. Comparator contract for sorting. |
 | **System Design** | DDIA Ch 2 finish + DDIA Ch 3 start | Data models, storage and retrieval |
 | **Kafka/Redis** | Kafka consumers: consumer groups, rebalancing, offset management | Consumer group = sliding window over event stream |
 | **Career** | LinkedIn headline + summary optimized for EU/international | |
 | **Blog** | Netflix resilience engineering blog | |
 
+### Week 3 (Aug 1–7) — Binary Search Finish + Bit Manipulation + Stack Start
+
 | Track | Focus | Why It Connects |
 |-------|-------|-----------------|
 | **DSA** | Binary Search finish (4 remaining) + Bit Manipulation (4) + Stack start (4 problems) — target 3/day | Bit manipulation requires understanding Java's signed integers |
-| **Java** | Primitives vs wrappers, `PriorityQueue` internals (binary heap), `ArrayDeque` vs `Stack` | Stack problems use `Deque`. Heap problems use `PriorityQueue`. |
+| **Java** | Primitives vs wrappers, `PriorityQueue` internals (binary heap), `ArrayDeque` vs `Stack`, `List.of()` / `Set.of()` (Java 9) | Stack problems use `Deque`. Heap problems use `PriorityQueue`. |
 | **System Design** | DDIA Ch 3 finish + **URL Shortener HLD** | LSM-trees, B-trees, base62 encoding |
 | **Kafka/Redis** | Kafka reliability: idempotency, acks, exactly-once semantics | |
 | **Career** | Identify 10 target companies + research interview formats | |
 | **Blog** | Uber engineering: real-time systems at scale | |
 
+### Week 4 (Aug 8–14) — Stack Finish + Heap + Linked List Start
+
 | Track | Focus | Why It Connects |
 |-------|-------|-----------------|
 | **DSA** | Stack finish (4) + Heap (7) + Linked List start (3) — target 3/day | Data structure-heavy problems |
-| **Java** | Collections deep dive: `Comparator` contract (transitivity), `TreeMap`, Generics type erasure, PECS | Heap problems use `PriorityQueue`. Interval problems sort `List<int[]>`. |
+| **Java** | Collections deep dive: `Comparator` contract (transitivity), `TreeMap`, Generics type erasure, PECS, Sequenced collections (Java 21) | Heap problems use `PriorityQueue`. Interval problems sort `List<int[]>`. |
+| **Spring** | **DI Internals:** constructor vs field vs setter injection, `@Qualifier`, `@Primary`, component scanning, auto configuration | DI is #1 asked Spring topic |
 | **System Design** | DDIA Ch 4 — Encoding & Evolution + **Rate Limiter HLD** | Rate limiter = token bucket. Schema evolution = backward/forward compatibility. |
 | **Kafka/Redis** | Redis fundamentals: data types, TTL, cache-aside pattern | Rate limiter commonly implemented with Redis |
 | **Career** | Send first 3 applications | |
 | **Blog** | Cloudflare: edge computing and rate limiting | |
 
+### Week 5 (Aug 15–21) — Linked List Finish + Intervals + Trees Start
+
 | Track | Focus | Why It Connects |
 |-------|-------|-----------------|
 | **DSA** | Linked List finish (4) + Intervals (4) + Trees start (6) — target 3/day | Pointer manipulation, sorting-based patterns, recursion begins |
-| **Java** | `ArrayList` vs `LinkedList` internals, recursion internals, stack frames, `Queue`/`Deque` for BFS | Tree DFS = call stack. Tree BFS = Queue. |
+| **Java** | `ArrayList` vs `LinkedList` internals, recursion internals, stack frames, `Queue`/`Deque` for BFS, Optional (Java 8), Records (Java 16), Sealed classes (Java 17), Pattern matching `instanceof` (Java 16) | Tree DFS = call stack. Tree BFS = Queue. |
+| **Spring** | **Bean Lifecycle:** scopes, `@PostConstruct`, `@PreDestroy`, proxy creation (JDK vs CGLIB), why `@Transactional` self-call fails | Proxy mechanism connects to AOP |
 | **System Design** | DDIA Ch 5 — Replication + **Notification System HLD** | Leader-follower replication. Notification fanout = pub-sub. |
 | **Kafka/Redis** | Redis distributed locking: Redlock, SETNX + TTL, fencing tokens | Distributed lock = DDIA replication consistency |
 | **Career** | Mock behavioral interview: prepare 5 STAR stories | |
 | **Blog** | LinkedIn engineering: distributed systems at scale | |
 
+### Week 6 (Aug 22–28) — Trees Finish + Graphs Start
+
 | Track | Focus | Why It Connects |
 |-------|-------|-----------------|
 | **DSA** | Trees finish (9) + Graphs start (5) — target 3/day | DFS, BFS, BST properties, LCA, topological sort begins |
-| **Java** | `StackOverflowError`, immutability patterns, `Map<K, List<V>>` for adjacency lists | Graph algorithms use maps, sets, and queues |
+| **Java** | `StackOverflowError`, immutability patterns, `Map<K, List<V>>` for adjacency lists, default methods in interfaces (Java 8) | Graph algorithms use maps, sets, and queues |
+| **Spring** | **@Transactional Deep Dive:** propagation, isolation levels, rollback rules, proxy-based AOP, `readOnly` optimization | Transactions connect to DDIA Ch 7 |
 | **System Design** | DDIA Ch 6 — Partitioning + **Inventory Service HLD** | Hash vs range partitioning. Inventory = consistency under partition. |
 | **Kafka/Redis** | Kafka partitioning strategy: key-based routing, partition count tradeoffs | Kafka partitioning = DDIA Ch 6 partitioning |
 | **Career** | Send 5 more applications. Follow up on Week 4 applications. | |
@@ -733,16 +746,20 @@ Every Sunday, review and plan:
 | Track | Focus | Why It Connects |
 |-------|-------|-----------------|
 | **DSA** | Graphs finish (15) — BFS, DFS, topological sort, Union-Find, Dijkstra — target 3/day | Adjacency list = `Map<Integer, List<Integer>>`. Union-Find = array-backed. Dijkstra = PriorityQueue. |
-| **Java** | `HashSet` internals, `ConcurrentHashMap` basics, thread safety overview | `ConcurrentHashMap` is #1 asked concurrent collection |
+| **Java** | `HashSet` internals, `ConcurrentHashMap` (Java 7 vs 8), `CompletableFuture` (Java 8), thread safety overview, Virtual threads (Java 21) | `ConcurrentHashMap` is #1 asked concurrent collection. Virtual threads is the modern Java concurrency story. |
+| **Spring** | **JPA/Hibernate:** entity mapping, N+1 problem, lazy vs eager loading, `@Query`, HikariCP connection pooling | JPA connects to DDIA transactions + storage |
 | **System Design** | DDIA Ch 7 — Transactions + **Payment System HLD** | ACID, isolation levels, 2PC. Payment = exactly-once. |
 | **Kafka/Redis** | Kafka transactions: transactional producer, EOS guarantees | Kafka EOS = DDIA transactions applied to event streaming |
 | **Career** | Mock coding interview (timed, 2 problems, 45 min) | |
 | **Blog** | Stripe: payment system reliability | |
 
+### Week 8 (Sep 5–11) — DP + Greedy
+
 | Track | Focus | Why It Connects |
 |-------|-------|-----------------|
 | **DSA** | DP (22) + Greedy (5) — target 3/day | DP = arrays + memoization. Greedy = sorting + comparator. |
-| **Java** | `int[]` vs `Integer[]` memory, 2D array allocation, `Comparator` sorting, Streams + lambdas | DP arrays need memory awareness. Greedy needs custom sorting. |
+| **Java** | `int[]` vs `Integer[]` memory, 2D array allocation, Streams + lambdas (Java 8): pipeline, collectors, `Stream.toList()` (Java 16), method references, parallel streams danger | DP arrays need memory awareness. Greedy needs custom sorting. |
+| **Spring** | **Security:** filter chain, `SecurityFilterChain`, JWT validation, `@PreAuthorize`, OAuth2 authorization code flow | Security is asked in every Spring-heavy interview |
 | **System Design** | DDIA Ch 8 — Distributed Systems Trouble + **Distributed Cache HLD** | Partial failures, unreliable clocks |
 | **Kafka/Redis** | End-to-end: design Kafka-backed event-driven system with Redis caching | Integration of all Kafka + Redis knowledge |
 | **Career** | Mock coding interview (timed, 2 problems, 45 min) | |
@@ -753,7 +770,8 @@ Every Sunday, review and plan:
 | Track | Focus | Why It Connects |
 |-------|-------|-----------------|
 | **DSA** | Backtracking (6) + Design (11) + full revision of weak patterns | Design problems ARE Java internals questions. LRU = `LinkedHashMap`. |
-| **Java** | `LinkedHashMap` (LRU), Trie implementation, OOP design patterns, concurrency: `synchronized`, `volatile`, `ExecutorService` basics | LRU Cache is a Java internals question. Concurrency basics appear in Senior Backend rounds. |
+| **Java** | `LinkedHashMap` (LRU), Trie implementation, OOP design patterns (Strategy, Factory, Observer), concurrency: `synchronized`, `volatile`, `ExecutorService`, switch expressions (Java 14), pattern matching for switch (Java 21), record patterns (Java 21) | LRU Cache is a Java internals question. Concurrency basics appear in Senior Backend rounds. |
+| **Spring** | **Full review:** DI + lifecycle + transactions + JPA + security. Mock Java backend interview covering Spring internals. | Final consolidation |
 | **System Design** | DDIA Ch 9 — Consensus + review all previous HLD designs | Linearizability, Raft/Paxos, total order broadcast |
 | **Kafka/Redis** | Review all Kafka + Redis topics | |
 | **Career** | Mock system design interview (45 min). Mock Java backend interview (30 min). Final resume review. | |

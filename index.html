@@ -1392,13 +1392,19 @@ function renderTaskGroup(track, tasks) {
     const carried = task.source_date && task.source_date !== task.plan_date
       ? `<span style="color:var(--yellow);font-size:11px;margin-left:8px">carried from ${task.source_date}</span>`
       : '';
-    const resource = task.resource_link
-      ? `<a href="${task.resource_link}" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">LeetCode</a>`
-      : '';
     const lcMatch = task.id ? task.id.match(/lc-(\d+)/) : null;
     const lcNum = lcMatch ? lcMatch[1] : null;
-    const solutionLink = lcNum && DSA_SOLUTION_MAP[lcNum]
-      ? `<a href="#" onclick="goToSolution('${lcNum}');return false;" style="color:var(--green);cursor:pointer">📝 Solution Note</a>`
+    const resource = task.resource_link
+      ? `<a href="${task.resource_link}" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">LeetCode</a>`
+      : lcNum
+        ? `<a href="https://leetcode.com/problems/" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">LeetCode</a>`
+        : '';
+    const solutionDocId = lcNum ? DSA_SOLUTION_MAP[lcNum] : null;
+    const solutionDoc = solutionDocId
+      ? (TOPICS.find(t => t.id === 'dsa-solutions') || {documents:[]}).documents.find(d => d.id === solutionDocId)
+      : null;
+    const solutionLink = solutionDoc
+      ? `<a href="${'dsa-solutions/' + solutionDoc.file}" target="_blank" rel="noopener noreferrer" style="color:var(--green)">📝 Solution Note</a>`
       : '';
     const meta = [
       task.estimated_min ? `${task.estimated_min} min` : '',

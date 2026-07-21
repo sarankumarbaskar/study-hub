@@ -1548,11 +1548,8 @@ function renderTaskGroup(track, tasks) {
       ? `<a href="https://neetcode.io/solutions/${neetcodeSlug}" target="_blank" rel="noopener noreferrer" style="color:var(--orange)">NeetCode</a>`
       : '';
     const solutionDocId = lcNum ? DSA_SOLUTION_MAP[lcNum] : null;
-    const solutionDoc = solutionDocId
-      ? (TOPICS.find(t => t.id === 'dsa-solutions') || {documents:[]}).documents.find(d => d.id === solutionDocId)
-      : null;
-    const solutionLink = solutionDoc
-      ? `<a href="${'dsa-solutions/' + solutionDoc.file}" target="_blank" rel="noopener noreferrer" style="color:var(--green)">📝 Solution Note</a>`
+    const solutionLink = solutionDocId
+      ? `<a href="#" onclick="goToSolution('${lcNum}');return false;" style="color:var(--green);cursor:pointer">📝 Solution Note</a>`
       : '';
     const meta = [
       task.estimated_min ? `${task.estimated_min} min` : '',
@@ -1776,16 +1773,30 @@ function makeTrackersInteractive() {
       if (!rowId) return;
 
       const lcNum = lcCol >= 0 && cells[lcCol] ? cells[lcCol].textContent.trim() : '';
-      if (lcNum && DSA_SOLUTION_MAP[lcNum] && nameCol >= 0 && cells[nameCol]) {
+      if (lcNum && nameCol >= 0 && cells[nameCol]) {
         const nameCell = cells[nameCol];
-        const btn = document.createElement('span');
-        btn.textContent = ' 📝';
-        btn.title = 'View solution notes';
-        btn.style.cssText = 'cursor:pointer;font-size:14px;opacity:0.7;transition:opacity 0.2s;';
-        btn.onmouseenter = function() { this.style.opacity = '1'; };
-        btn.onmouseleave = function() { this.style.opacity = '0.7'; };
-        btn.onclick = function(e) { e.preventDefault(); goToSolution(lcNum); };
-        nameCell.appendChild(btn);
+        if (NEETCODE_SLUG_MAP[lcNum]) {
+          const nc = document.createElement('a');
+          nc.href = 'https://neetcode.io/solutions/' + NEETCODE_SLUG_MAP[lcNum];
+          nc.target = '_blank';
+          nc.rel = 'noopener noreferrer';
+          nc.textContent = ' NC';
+          nc.title = 'NeetCode solution';
+          nc.style.cssText = 'cursor:pointer;font-size:11px;font-weight:700;color:var(--orange);margin-left:6px;text-decoration:none;opacity:0.8;';
+          nc.onmouseenter = function() { this.style.opacity = '1'; };
+          nc.onmouseleave = function() { this.style.opacity = '0.8'; };
+          nameCell.appendChild(nc);
+        }
+        if (DSA_SOLUTION_MAP[lcNum]) {
+          const btn = document.createElement('span');
+          btn.textContent = ' 📝';
+          btn.title = 'View solution notes';
+          btn.style.cssText = 'cursor:pointer;font-size:14px;opacity:0.7;transition:opacity 0.2s;margin-left:2px;';
+          btn.onmouseenter = function() { this.style.opacity = '1'; };
+          btn.onmouseleave = function() { this.style.opacity = '0.7'; };
+          btn.onclick = function(e) { e.preventDefault(); goToSolution(lcNum); };
+          nameCell.appendChild(btn);
+        }
       }
 
       Object.entries(colMap).forEach(([colIdx, type]) => {

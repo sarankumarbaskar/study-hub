@@ -907,6 +907,7 @@ function switchTopic(topicId) {
   if (!topic) return;
   currentTopic = topic;
   applyTopicColor(topic.color);
+  localStorage.setItem('studyhub-last-topic', topicId);
 
   const select = document.getElementById('topicSelect');
   if (select) select.value = topicId;
@@ -1730,7 +1731,9 @@ function makeTrackersInteractive() {
   updateProgress();
   setupScrollListeners();
 
-  switchTopic(TOPICS[0].id);
+  const lastTopic = localStorage.getItem('studyhub-last-topic');
+  const restoreTopic = TOPICS.find(t => t.id === lastTopic) ? lastTopic : TOPICS[0].id;
+  switchTopic(restoreTopic);
 })();
 
 </script>

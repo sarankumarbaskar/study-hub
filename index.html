@@ -1393,12 +1393,18 @@ function renderTaskGroup(track, tasks) {
       ? `<span style="color:var(--yellow);font-size:11px;margin-left:8px">carried from ${task.source_date}</span>`
       : '';
     const resource = task.resource_link
-      ? `<a href="${task.resource_link}" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">Resource</a>`
+      ? `<a href="${task.resource_link}" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">LeetCode</a>`
+      : '';
+    const lcMatch = task.id ? task.id.match(/lc-(\d+)/) : null;
+    const lcNum = lcMatch ? lcMatch[1] : null;
+    const solutionLink = lcNum && DSA_SOLUTION_MAP[lcNum]
+      ? `<a href="#" onclick="goToSolution('${lcNum}');return false;" style="color:var(--green);cursor:pointer">📝 Solution Note</a>`
       : '';
     const meta = [
       task.estimated_min ? `${task.estimated_min} min` : '',
       task.priority ? `${task.priority} priority` : '',
       resource,
+      solutionLink,
     ].filter(Boolean).join(' · ');
 
     return `<div class="daily-task" style="display:flex;gap:12px;padding:14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-secondary);margin-bottom:10px">

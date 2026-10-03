@@ -1,9 +1,9 @@
 {
-  "updated_at": "2026-09-01T04:20:27.770057+00:00",
+  "updated_at": "2026-09-06T05:45:48.402474+00:00",
   "source": "scripts/pull_study_state.py",
   "user_id": "sbaskar",
   "dsa": {
-    "solved_count": 32,
+    "solved_count": 38,
     "total": 142,
     "solved_row_ids": [
       "1",
@@ -35,6 +35,12 @@
       "27",
       "28",
       "30",
+      "31",
+      "32",
+      "33",
+      "34",
+      "35",
+      "37",
       "135",
       "136",
       "137"
@@ -69,6 +75,12 @@
       "LC #410 Split Array Largest Sum",
       "LC #34 First Last Position",
       "LC #378 Kth Smallest Matrix",
+      "row 31",
+      "row 32",
+      "row 33",
+      "row 34",
+      "row 35",
+      "row 37",
       "LC #48 Rotate Image",
       "LC #54 Spiral Matrix",
       "LC #121 Best Time Buy Sell Stock"
@@ -96,9 +108,9 @@
         "complete": false
       },
       "Bit Manipulation": {
-        "solved": 0,
+        "solved": 4,
         "total": 4,
-        "complete": false
+        "complete": true
       }
     },
     "next_problems": [
@@ -109,103 +121,115 @@
     ]
   },
   "daily_plan": {
-    "latest_date": "2026-09-01",
+    "latest_date": "2026-09-06",
     "tasks": [
       {
-        "title": "HttpClient syntax drill (15 min)",
-        "track": "Stripe MC",
-        "status": "pending",
-        "priority": "high",
-        "plan_date": "2026-09-01",
-        "description": "Write POST with Idempotency-Key from memory. Integration round prep.",
-        "source_date": "2026-09-01",
-        "estimated_min": 15,
-        "resource_link": "",
-        "task_id": "httpclient-drill"
-      },
-      {
-        "title": "Email Ingrid \u2014 confirm Sep 29 loop format",
+        "title": "Plan Week 2 (Sep 8\u201314)",
         "track": "Career",
         "status": "pending",
         "priority": "high",
-        "plan_date": "2026-09-01",
-        "description": "5 questions from STRIPE-MASTER-PREP.md Section 9. AI round? Full onsite? Java?",
-        "source_date": "2026-09-01",
-        "estimated_min": 15,
+        "plan_date": "2026-09-06",
+        "description": "Stack 4 more, Spring, SD ledger, mocks.",
+        "source_date": "2026-09-06",
+        "estimated_min": 30,
         "resource_link": "",
-        "task_id": "stripe-ingrid"
+        "task_id": "week2-plan"
       },
       {
-        "title": "Spring: DI + bean lifecycle (60 min)",
+        "title": "Ingrid + Mollie + Week 1 scorecard",
+        "track": "Career",
+        "status": "pending",
+        "priority": "high",
+        "plan_date": "2026-09-06",
+        "description": "Sep 29 = 30min call. Log APPLICATION-TRACKER.md.",
+        "source_date": "2026-09-06",
+        "estimated_min": 45,
+        "resource_link": "",
+        "task_id": "career-block"
+      },
+      {
+        "title": "Spring DI (CARRIED)",
         "track": "Java",
         "status": "pending",
         "priority": "high",
-        "plan_date": "2026-09-01",
-        "description": "JAVA-SPRING-REVISION.md. @Component vs @Bean, singleton, constructor injection. Carried from Aug 28.",
+        "plan_date": "2026-09-06",
+        "description": "JAVA-SPRING-REVISION.md \u00a75\u20136.",
         "source_date": "2026-09-01",
         "estimated_min": 60,
         "resource_link": "",
         "task_id": "spring-di"
       },
       {
-        "title": "Payment API + idempotency sketch (30 min)",
+        "title": "Payment idempotency sketch (CARRIED)",
         "track": "Stripe SD",
         "status": "pending",
         "priority": "high",
-        "plan_date": "2026-09-01",
-        "description": "Draw: POST /charges + Idempotency-Key header + 24h cache. Read stripe.com/docs/api/idempotent_requests",
-        "source_date": "2026-09-01",
-        "estimated_min": 30,
-        "resource_link": "https://stripe.com/docs/api/idempotent_requests",
+        "plan_date": "2026-09-06",
+        "description": "60m whiteboard \u2014 Idempotency-Key, 24h store.",
+        "source_date": "2026-09-03",
+        "estimated_min": 60,
+        "resource_link": "",
         "task_id": "stripe-sd-idempotency"
       },
       {
-        "title": "Proximity router cold rebuild (45 min timer)",
+        "title": "45 min timed mock (CARRIED)",
         "track": "Stripe MC",
         "status": "pending",
         "priority": "high",
-        "plan_date": "2026-09-01",
-        "description": "STRIPE-MASTER-PREP.md. REGISTER/DISTANCE/ROUTE from blank. NO AI. 45m hard stop.",
-        "source_date": "2026-09-01",
+        "plan_date": "2026-09-06",
+        "description": "Wallet or router from blank. NO AI.",
+        "source_date": "2026-09-05",
         "estimated_min": 45,
         "resource_link": "",
-        "task_id": "stripe-router-cold"
-      },
-      {
-        "title": "LC #136 Single Number",
-        "track": "DSA",
-        "status": "pending",
-        "priority": "high",
-        "plan_date": "2026-09-01",
-        "description": "Bit Manipulation #1 \u2014 XOR study block done. Template: ans ^= x.",
-        "source_date": "2026-09-01",
-        "estimated_min": 25,
-        "resource_link": "https://leetcode.com/problems/single-number/",
-        "task_id": "lc-136"
+        "task_id": "stripe-mock-45"
       },
       {
         "title": "LC #4 Median of Two Sorted Arrays",
         "track": "DSA",
         "status": "pending",
         "priority": "high",
-        "plan_date": "2026-09-01",
-        "description": "BS capstone \u2014 closes Binary Search 10/10. Hard; budget 50m morning.",
-        "source_date": "2026-09-01",
-        "estimated_min": 50,
+        "plan_date": "2026-09-06",
+        "description": "BS capstone \u2014 CLOSES Phase 1. Binary search on partition.",
+        "source_date": "2026-09-06",
+        "estimated_min": 90,
         "resource_link": "https://leetcode.com/problems/median-of-two-sorted-arrays/",
         "task_id": "lc-4"
       },
       {
-        "title": "Revision: #378 + answer-space trio (20 min)",
+        "title": "LC #503 \u2014 confirm submitted (index vs value fix)",
+        "track": "DSA",
+        "status": "pending",
+        "priority": "high",
+        "plan_date": "2026-09-06",
+        "description": "If pass on LC, say Done to sync row 36.",
+        "source_date": "2026-09-06",
+        "estimated_min": 5,
+        "resource_link": "https://leetcode.com/problems/next-greater-element-ii/",
+        "task_id": "lc-503-sync"
+      },
+      {
+        "title": "Week 1 revision quiz (45m)",
         "track": "DSA Revision",
         "status": "pending",
         "priority": "high",
-        "plan_date": "2026-09-01",
-        "description": "Day 1: #378 countLessOrEqual + j pointer. Day 3: #875,#1011,#1482,#410 pseudocode.",
-        "source_date": "2026-09-01",
-        "estimated_min": 20,
-        "resource_link": "high",
-        "task_id": "revision-carry"
+        "plan_date": "2026-09-06",
+        "description": "Bit Manip #136,#191,#338,#371 + Stack #739,#394,#503. Out loud, no IDE.",
+        "source_date": "2026-09-06",
+        "estimated_min": 45,
+        "resource_link": "",
+        "task_id": "week1-revision-quiz"
+      },
+      {
+        "title": "LC #735 Asteroid Collision \u2014 if #4 done / break",
+        "track": "DSA",
+        "status": "pending",
+        "priority": "medium",
+        "plan_date": "2026-09-06",
+        "description": "Stack #3. Simulation stack.",
+        "source_date": "2026-09-06",
+        "estimated_min": 45,
+        "resource_link": "https://leetcode.com/problems/asteroid-collision/",
+        "task_id": "lc-735"
       }
     ]
   },
@@ -213,33 +237,38 @@
     "machine_coding_daily": {
       "started": "2026-08-26",
       "daily_minutes": 60,
-      "current_week": 1,
-      "current_problem": "Rate Limiter",
-      "current_problem_id": "001",
-      "current_day": 4,
+      "current_week": 2,
+      "current_problem": "Parking Lot",
+      "current_problem_id": "004",
+      "current_day": 1,
       "parts_completed": [
         "001-part1-fixed-window",
         "001-part2a-sliding-window",
         "001-part2-configurable",
-        "001-part3-token-bucket"
+        "001-part3-token-bucket",
+        "003-cold-rebuild-proximity-router",
+        "002-wallet-part1-ledger-idempotency",
+        "002-wallet-part2-transfer"
       ],
       "parts_pending": [
         "001-part2b-per-user-cleanup",
         "001-q1-per-api-limits",
-        "timed-mock-60min"
+        "timed-mock-60min",
+        "002-approach-md"
       ],
-      "exercises_completed": 4,
-      "last_practice_date": "2026-08-28",
-      "coding_streak_days": 0,
+      "exercises_completed": 6,
+      "last_practice_date": "2026-09-03",
+      "coding_streak_days": 3,
       "guide_mode": true,
       "target_timed_mocks": 8,
       "timed_mocks_completed": 0,
       "weak_areas": [
-        "proximity-router-cold-rebuild",
+        "timed-mock-45min-no-hints",
         "bug-squash-unfamiliar-code",
         "api-integration-round",
-        "payment-ledger-sd",
-        "dsa-2-per-day"
+        "payment-ledger-sd-sketch",
+        "dsa-2-per-day",
+        "approach-md-habit"
       ],
       "stripe_priority": true
     },
@@ -260,8 +289,12 @@
       "hackerrank_submitted": "2026-08-25",
       "oa_problem": "proximity-request-router",
       "interview_date": "2026-09-29",
-      "days_until_interview": 29,
-      "status": "interview_scheduled_sep_29",
+      "interview_duration_minutes": 30,
+      "interview_format": "30min_call_scheduled",
+      "interview_stage_likely": "recruiter_screen_or_technical_phone",
+      "full_onsite_expected_after": true,
+      "days_until_interview": 26,
+      "status": "sep_29_30min_round_scheduled",
       "prep_doc": "career/STRIPE-MASTER-PREP.md",
       "prep_docs": [
         "career/STRIPE-MASTER-PREP.md",
@@ -269,7 +302,8 @@
         "career/SEPTEMBER-STRIPE-SPRINT.md"
       ],
       "cold_rebuild_target_min": 60,
-      "cold_rebuild_done": false,
+      "cold_rebuild_done": true,
+      "cold_rebuild_date": "2026-09-03",
       "expected_loop": [
         "recruiter_screen",
         "technical_phone_screen",
@@ -308,7 +342,50 @@
       "schedule_doc": "career/SEPTEMBER-STRIPE-SPRINT.md"
     },
     "applications": {
-      "youtrip_applied": "2026-08-27"
+      "youtrip_applied": "2026-08-27",
+      "last_application_date": "2026-08-27",
+      "last_tracker_update": "2026-08-24",
+      "stripe_interview_active": true,
+      "pause_mass_apply": false,
+      "daily_apply_target": 10,
+      "daily_apply_protocol": "career/DAILY-JOB-SEARCH.md"
+    },
+    "job_search_daily": {
+      "started": "2026-09-03",
+      "protocol_doc": "career/DAILY-JOB-SEARCH.md",
+      "weekday_minutes": 90,
+      "weekend_minutes": 120,
+      "daily_slot": "19:00-20:30",
+      "daily_target": {
+        "new_applications": 10,
+        "follow_ups_or_replies": 2,
+        "inbox_scan_minutes": 5,
+        "channel_mix": {
+          "linkedin": 4,
+          "official_portals": 3,
+          "naukri": 2,
+          "hirist_instahyre_other": 1
+        },
+        "min_match_score": 7
+      },
+      "weekly_target": {
+        "new_applications": 50,
+        "recruiter_connections": 5,
+        "referral_attempts": 2,
+        "follow_ups": 5
+      },
+      "tracker_doc": "career/APPLICATION-TRACKER.md",
+      "gmail_updates": "career/gmail_job_updates.md",
+      "priority_markets": [
+        "Singapore",
+        "Ireland",
+        "Netherlands",
+        "Germany"
+      ],
+      "streak_days": 0,
+      "last_activity_date": null,
+      "applications_today": 0,
+      "note": "Never pause outbound apply during Stripe prep \u2014 dual track"
     }
   },
   "agent_instructions": "Read this file at the start of every session and before launching subagents. After marking work done, run: python3 scripts/pull_study_state.py"

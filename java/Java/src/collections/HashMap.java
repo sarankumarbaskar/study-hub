@@ -83,5 +83,9 @@ public class HashMap<K, V> {
         return null;
     }
 
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
 
 }

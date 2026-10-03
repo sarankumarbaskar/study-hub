@@ -2,33 +2,38 @@
   "machine_coding_daily": {
     "started": "2026-08-26",
     "daily_minutes": 60,
-    "current_week": 1,
-    "current_problem": "Rate Limiter",
-    "current_problem_id": "001",
-    "current_day": 4,
+    "current_week": 2,
+    "current_problem": "Parking Lot",
+    "current_problem_id": "004",
+    "current_day": 1,
     "parts_completed": [
       "001-part1-fixed-window",
       "001-part2a-sliding-window",
       "001-part2-configurable",
-      "001-part3-token-bucket"
+      "001-part3-token-bucket",
+      "003-cold-rebuild-proximity-router",
+      "002-wallet-part1-ledger-idempotency",
+      "002-wallet-part2-transfer"
     ],
     "parts_pending": [
       "001-part2b-per-user-cleanup",
       "001-q1-per-api-limits",
-      "timed-mock-60min"
+      "timed-mock-60min",
+      "002-approach-md"
     ],
-    "exercises_completed": 4,
-    "last_practice_date": "2026-08-28",
-    "coding_streak_days": 0,
+    "exercises_completed": 6,
+    "last_practice_date": "2026-09-03",
+    "coding_streak_days": 3,
     "guide_mode": true,
     "target_timed_mocks": 8,
     "timed_mocks_completed": 0,
     "weak_areas": [
-      "proximity-router-cold-rebuild",
+      "timed-mock-45min-no-hints",
       "bug-squash-unfamiliar-code",
       "api-integration-round",
-      "payment-ledger-sd",
-      "dsa-2-per-day"
+      "payment-ledger-sd-sketch",
+      "dsa-2-per-day",
+      "approach-md-habit"
     ],
     "stripe_priority": true
   },
@@ -49,8 +54,12 @@
     "hackerrank_submitted": "2026-08-25",
     "oa_problem": "proximity-request-router",
     "interview_date": "2026-09-29",
-    "days_until_interview": 29,
-    "status": "interview_scheduled_sep_29",
+    "interview_duration_minutes": 30,
+    "interview_format": "30min_call_scheduled",
+    "interview_stage_likely": "recruiter_screen_or_technical_phone",
+    "full_onsite_expected_after": true,
+    "days_until_interview": 26,
+    "status": "sep_29_30min_round_scheduled",
     "prep_doc": "career/STRIPE-MASTER-PREP.md",
     "prep_docs": [
       "career/STRIPE-MASTER-PREP.md",
@@ -58,7 +67,8 @@
       "career/SEPTEMBER-STRIPE-SPRINT.md"
     ],
     "cold_rebuild_target_min": 60,
-    "cold_rebuild_done": false,
+    "cold_rebuild_done": true,
+    "cold_rebuild_date": "2026-09-03",
     "expected_loop": [
       "recruiter_screen",
       "technical_phone_screen",
@@ -97,6 +107,53 @@
     "schedule_doc": "career/SEPTEMBER-STRIPE-SPRINT.md"
   },
   "applications": {
-    "youtrip_applied": "2026-08-27"
+    "youtrip_applied": "2026-08-27",
+    "last_application_date": "2026-08-27",
+    "last_tracker_update": "2026-08-24",
+    "stripe_interview_active": true,
+    "pause_mass_apply": false,
+    "daily_apply_target": 10,
+    "daily_apply_protocol": "career/DAILY-JOB-SEARCH.md"
+  },
+  "job_search_daily": {
+    "started": "2026-09-03",
+    "protocol_doc": "career/DAILY-JOB-SEARCH.md",
+    "weekday_minutes": 90,
+    "weekend_minutes": 120,
+    "daily_slot": "19:00-20:30",
+    "daily_target": {
+      "new_applications": 10,
+      "follow_ups_or_replies": 2,
+      "inbox_scan_minutes": 5,
+      "channel_mix": {
+        "linkedin": 4,
+        "official_portals": 3,
+        "naukri": 2,
+        "hirist_instahyre_other": 1
+      },
+      "min_match_score": 7
+    },
+    "weekly_target": {
+      "new_applications": 50,
+      "recruiter_connections": 5,
+      "referral_attempts": 2,
+      "follow_ups": 5
+    },
+    "tracker_doc": "career/APPLICATION-TRACKER.md",
+    "referral_tracker": "career/referral-tracker.json",
+    "referral_server": "career/referral_server.py",
+    "referral_copilot": "career/referral_copilot.py",
+    "referral_doc": "career/REFERRAL-COPILOT.md",
+    "gmail_updates": "career/gmail_job_updates.md",
+    "priority_markets": [
+      "Singapore",
+      "Ireland",
+      "Netherlands",
+      "Germany"
+    ],
+    "streak_days": 0,
+    "last_activity_date": null,
+    "applications_today": 0,
+    "note": "Never pause outbound apply during Stripe prep — dual track"
   }
 }
